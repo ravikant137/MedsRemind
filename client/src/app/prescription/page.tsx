@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
+import { API_URL } from '@/config';
 import { useRouter } from 'next/navigation';
 
 export default function PrescriptionUpload() {
@@ -45,8 +46,8 @@ export default function PrescriptionUpload() {
   const handleSetReminders = async () => {
     setIsSettingReminders(true);
     try {
-      const token = localStorage.getItem('token');
-      await axios.post('http://localhost:5000/api/reminders/bulk', {
+      const token = localStorage.getItem('token`);
+      await axios.post(`${API_URL}/api/reminders/bulk`, {
         medicines: result.medicines
       }, {
         headers: { Authorization: `Bearer ${token}` }
@@ -54,18 +55,18 @@ export default function PrescriptionUpload() {
       
       setRemindersSet(true);
       setTimeout(() => {
-        router.push('/reminders');
+        router.push('/reminders`);
       }, 2000);
     } catch (err) {
-      alert('Failed to set reminders. Please login.');
-      router.push('/login');
+      alert('Failed to set reminders. Please login.`);
+      router.push('/login`);
     } finally {
       setIsSettingReminders(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 pt-24 px-6 pb-20 overflow-hidden relative">
+    <div className="min-h-screen bg-slate-50 pt-6 px-6 pb-20 overflow-hidden relative">
       {/* Background Decor */}
       <div className="absolute top-0 right-0 w-96 h-96 bg-green-100/50 rounded-full blur-[120px] -z-10"></div>
       

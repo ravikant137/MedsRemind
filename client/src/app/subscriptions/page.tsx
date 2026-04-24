@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { Package, RefreshCcw, Calendar, ArrowRight, Loader2, Pill } from 'lucide-react';
 import { motion } from 'framer-motion';
 import axios from 'axios';
+import { API_URL } from '@/config';
 import Link from 'next/link';
 
 export default function Subscriptions() {
@@ -15,8 +16,8 @@ export default function Subscriptions() {
 
   const fetchSubscriptions = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const res = await axios.get('http://localhost:5000/api/subscriptions', {
+      const token = localStorage.getItem('token`);
+      const res = await axios.get(`${API_URL}/api/subscriptions`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setSubs(res.data);
@@ -28,7 +29,7 @@ export default function Subscriptions() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 pt-32 px-6 pb-20">
+    <div className="min-h-screen bg-slate-50 pt-6 px-6 pb-20">
       <div className="max-w-5xl mx-auto">
         <header className="mb-16">
            <h1 className="text-4xl font-black text-slate-900 tracking-tight">Manage <span className="text-green-600">Subscriptions</span></h1>

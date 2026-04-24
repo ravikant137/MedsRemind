@@ -49,7 +49,7 @@ export default function Profile() {
   );
 
   return (
-    <div className="min-h-screen bg-slate-50 pt-32 px-6 pb-20">
+    <div className="min-h-screen bg-slate-50 pt-6 px-6 pb-20">
       <div className="max-w-4xl mx-auto">
         <header className="flex items-center justify-between mb-12">
           <button onClick={() => router.back()} className="flex items-center gap-2 text-slate-400 hover:text-slate-900 transition-colors font-black uppercase tracking-widest text-xs">

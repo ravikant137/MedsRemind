@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { Pill, Mail, Lock, User, Phone, MapPin, ArrowRight, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import axios from 'axios';
+import { API_URL } from '@/config';
 import { useRouter } from 'next/navigation';
 
 export default function Signup() {
@@ -17,12 +18,12 @@ export default function Signup() {
     setLoading(true);
     setError('');
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/signup', form);
+      const res = await axios.post(`${API_URL}/api/auth/signup', form);
       localStorage.setItem('token', res.data.token);
       localStorage.setItem('user', JSON.stringify(res.data.user));
-      router.push('/dashboard');
+      router.push('/dashboard`);
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Signup failed. Please try again.');
+      setError(err.response?.data?.error || 'Signup failed. Please try again.`);
     } finally {
       setLoading(false);
     }

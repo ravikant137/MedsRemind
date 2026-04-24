@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
+import { API_URL } from '@/config';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
@@ -18,9 +19,9 @@ export default function Dashboard() {
   const router = useRouter();
 
   useEffect(() => {
-    const userData = localStorage.getItem('user');
+    const userData = localStorage.getItem('user`);
     if (!userData) {
-      router.push('/login');
+      router.push('/login`);
       return;
     }
     setUser(JSON.parse(userData));
@@ -30,8 +31,8 @@ export default function Dashboard() {
 
   const fetchPoints = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const res = await axios.get('http://localhost:5000/api/user/points', {
+      const token = localStorage.getItem('token`);
+      const res = await axios.get(`${API_URL}/api/user/points`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setPoints(res.data.points);
@@ -42,8 +43,8 @@ export default function Dashboard() {
 
   const fetchData = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const res = await axios.get('http://localhost:5000/api/reminders', {
+      const token = localStorage.getItem('token`);
+      const res = await axios.get(`${API_URL}/api/reminders`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setReminders(res.data);
@@ -56,14 +57,14 @@ export default function Dashboard() {
 
   const completeReminder = async (id: number) => {
     try {
-      const token = localStorage.getItem('token');
-      const res = await axios.post(`http://localhost:5000/api/reminders/${id}/complete`, {}, {
+      const token = localStorage.getItem('token`);
+      const res = await axios.post(`${API_URL}/api/reminders/${id}/complete`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setPoints(prev => prev + res.data.pointsEarned);
-      alert('Dose taken! You earned 10 Rewards Points! 🏆');
+      alert('Dose taken! You earned 10 Rewards Points! 🏆`);
     } catch (err) {
-      alert('Failed to complete reminder');
+      alert('Failed to complete reminder`);
     }
   };
 
@@ -83,7 +84,7 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 pt-32 px-6 pb-24 overflow-x-hidden">
+    <div className="min-h-screen bg-slate-50 pt-6 px-6 pb-24 overflow-x-hidden">
       {/* Background Decor */}
       <div className="absolute top-0 right-0 w-[40rem] h-[40rem] bg-green-100/30 rounded-full blur-[120px] -z-10 animate-pulse"></div>
       <div className="absolute bottom-0 left-0 w-[30rem] h-[30rem] bg-blue-100/20 rounded-full blur-[100px] -z-10"></div>

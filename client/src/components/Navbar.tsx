@@ -34,33 +34,33 @@ export default function Navbar() {
 
   const navLinks = [
     { name: 'Shop', href: '/shop' },
-    { name: 'Scan RX', href: '/prescription' },
+    { name: 'ScanRX', href: '/prescription' },
     { name: 'Reminders', href: '/reminders' },
     { name: 'Track', href: '/track' },
     { name: 'Discounts', href: '/discounts' },
   ];
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 py-4">
-      <div className="max-w-7xl mx-auto px-6">
-          <div className={`relative flex items-center justify-between p-4 rounded-[2.5rem] glass-card bg-gradient-to-r from-primary to-secondary ${isScrolled ? 'bg-opacity-70' : 'bg-opacity-30'} backdrop-blur-lg shadow-xl`}>
+    <nav className="fixed top-0 left-0 right-0 z-50 py-2">
+      <div className="max-w-7xl mx-auto px-4">
+          <div className={`relative flex items-center justify-between px-5 py-2.5 rounded-2xl glass-card bg-gradient-to-r from-primary to-secondary ${isScrolled ? 'bg-opacity-70' : 'bg-opacity-30'} backdrop-blur-lg shadow-xl`}>
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-3 group px-2">
-              <div className="w-12 h-12 bg-gradient-to-r from-green-600 to-emerald-500 rounded-xl flex items-center justify-center shadow-2xl group-hover:rotate-12 transition-transform">
-                <Pill className="text-white w-7 h-7" />
+            <Link href="/" className="flex items-center gap-2.5 group">
+              <div className="w-10 h-10 bg-gradient-to-r from-green-600 to-emerald-500 rounded-lg flex items-center justify-center shadow-lg group-hover:rotate-12 transition-transform">
+                <Pill className="text-white w-5 h-5" />
               </div>
-              <span className={`text-2xl font-black tracking-tighter uppercase transition-colors ${isScrolled ? 'text-slate-900' : 'text-slate-900'}`}>
+              <span className="text-xl font-black tracking-tighter uppercase text-slate-900">
                 Meds<span className="text-green-600">Remind</span>
               </span>
             </Link>
 
           {/* Desktop Nav */}
-          <div className="hidden lg:flex items-center gap-8">
+          <div className="hidden lg:flex items-center gap-5">
             {navLinks.map((link) => (
                 <Link
                   key={link.name}
                   href={link.href}
-                  className={`text-sm font-black uppercase tracking-widest transition-colors border-b-2 ${pathname === link.href ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-primary'}`}
+                  className={`text-xs font-black uppercase tracking-widest transition-colors whitespace-nowrap border-b-2 ${pathname === link.href ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-primary'}`}
                 >
                   {link.name}
                 </Link>
@@ -76,27 +76,27 @@ export default function Navbar() {
           </div>
 
           {/* User Actions */}
-          <div className="flex items-center gap-4">
-            <Link href="/notifications" className="p-3 bg-slate-50 text-slate-400 hover:text-green-600 hover:bg-green-50 rounded-xl transition-all relative">
-               <Bell className="w-6 h-6" />
-               <span className="absolute top-2 right-2 w-3 h-3 bg-red-500 border-2 border-white rounded-full"></span>
+          <div className="flex items-center gap-2.5">
+            <Link href="/notifications" className="p-2 bg-slate-50 text-slate-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all relative">
+               <Bell className="w-5 h-5" />
+               <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 border-2 border-white rounded-full"></span>
             </Link>
             
-            <Link href="/emergency" className="hidden md:flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:from-red-600 hover:to-pink-600 transform hover:scale-105 transition-all shadow-xl shadow-red-100">
-               <ShieldAlert className="w-4 h-4" /> Emergency
+            <Link href="/emergency" className="hidden md:flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:from-red-600 hover:to-pink-600 transform hover:scale-105 transition-all shadow-lg">
+               <ShieldAlert className="w-3.5 h-3.5" /> Emergency
             </Link>
 
             {user ? (
               <div className="flex items-center gap-3">
-                <Link href="/dashboard" className="hidden md:flex items-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-green-600 transition-all shadow-xl shadow-slate-200">
-                  <LayoutDashboard className="w-4 h-4" /> Dashboard
+                <Link href="/dashboard" className="hidden md:flex items-center gap-1.5 px-4 py-2 bg-slate-900 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-green-600 transition-all shadow-lg">
+                  <LayoutDashboard className="w-3.5 h-3.5" /> Dashboard
                 </Link>
                 <div className="relative">
                    <button 
                      onClick={() => setIsProfileOpen(!isProfileOpen)}
-                     className={`w-12 h-12 rounded-xl flex items-center justify-center border transition-all ${isProfileOpen ? 'bg-green-600 text-white border-green-600' : 'bg-green-50 text-green-600 border-green-100 hover:bg-green-100'}`}
+                     className={`w-9 h-9 rounded-lg flex items-center justify-center border transition-all ${isProfileOpen ? 'bg-green-600 text-white border-green-600' : 'bg-green-50 text-green-600 border-green-100 hover:bg-green-100'}`}
                    >
-                      <User className="w-6 h-6" />
+                      <User className="w-4 h-4" />
                    </button>
                    
                    <AnimatePresence>
@@ -143,14 +143,14 @@ export default function Navbar() {
               </div>
             ) : (
               <div className="flex items-center gap-4">
-                <Link href="/login" className="text-sm font-black uppercase tracking-widest text-slate-500 hover:text-green-600">Login</Link>
-                <Link href="/signup" className="px-8 py-4 bg-green-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-green-700 transition-all shadow-xl shadow-green-200">Join Now</Link>
+                <Link href="/login" className="text-xs font-black uppercase tracking-widest text-slate-500 hover:text-green-600">Login</Link>
+                <Link href="/signup" className="px-5 py-2.5 bg-green-600 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-green-700 transition-all shadow-lg">Join Now</Link>
               </div>
             )}
             
             <button 
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="lg:hidden w-12 h-12 bg-slate-100 text-slate-900 rounded-xl flex items-center justify-center"
+              className="lg:hidden w-9 h-9 bg-slate-100 text-slate-900 rounded-lg flex items-center justify-center"
             >
               {isMenuOpen ? <X /> : <Menu />}
             </button>

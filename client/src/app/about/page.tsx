@@ -5,7 +5,7 @@ import Link from 'next/link';
 
 export default function About() {
   return (
-    <div className="min-h-screen bg-slate-50 pt-32 px-6 pb-20">
+    <div className="min-h-screen bg-slate-50 pt-6 px-6 pb-20">
       <div className="max-w-7xl mx-auto">
         <header className="text-center mb-32">
           <motion.div 

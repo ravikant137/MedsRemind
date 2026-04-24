@@ -50,7 +50,7 @@ export default function Notifications() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 pt-32 px-6 pb-20">
+    <div className="min-h-screen bg-slate-50 pt-6 px-6 pb-20">
       <div className="max-w-4xl mx-auto">
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
           <div className="flex items-center gap-4">

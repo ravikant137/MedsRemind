@@ -33,7 +33,7 @@ export default function OrderTracking() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 pt-32 px-6 pb-20 overflow-hidden relative">
+    <div className="min-h-screen bg-slate-50 pt-6 px-6 pb-20 overflow-hidden relative">
       {/* Decorative Elements */}
       <div className="absolute top-0 right-0 w-96 h-96 bg-green-200/40 rounded-full blur-[100px] -z-10"></div>
       

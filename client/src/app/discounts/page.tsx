@@ -4,6 +4,7 @@ import { Ticket, Percent, Zap, Gift, ArrowRight, Sparkles, ShoppingBag, Clock, R
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import axios from 'axios';
+import { API_URL } from '@/config';
 
 export default function Discounts() {
   const [points, setPoints] = useState(0);
@@ -15,8 +16,8 @@ export default function Discounts() {
 
   const fetchPoints = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const res = await axios.get('http://localhost:5000/api/user/points', {
+      const token = localStorage.getItem('token`);
+      const res = await axios.get(`${API_URL}/api/user/points`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setPoints(res.data.points);
@@ -77,7 +78,7 @@ export default function Discounts() {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 pt-32 px-6 pb-20 overflow-hidden relative">
+    <div className="min-h-screen bg-slate-50 pt-6 px-6 pb-20 overflow-hidden relative">
       {/* Decorative Blur */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-green-200/40 rounded-full blur-[150px] -z-10 animate-pulse"></div>
       

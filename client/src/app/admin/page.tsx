@@ -8,11 +8,12 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
+import { API_URL } from '@/config';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState('Dashboard');
+  const [activeTab, setActiveTab] = useState('Dashboard`);
   const [stats, setStats] = useState({ revenue: 0, orders: 0, users: 0, medicines: 0 });
   const [medicines, setMedicines] = useState([]);
   const [orders, setOrders] = useState([]);
@@ -30,25 +31,25 @@ export default function AdminDashboard() {
   useEffect(() => {
     setMounted(true);
     const checkAuth = async () => {
-      const userData = localStorage.getItem('user');
-      const token = localStorage.getItem('token');
+      const userData = localStorage.getItem('user`);
+      const token = localStorage.getItem('token`);
       
       if (!userData || !token) {
-        router.push('/login');
+        router.push('/login`);
         return;
       }
       
       try {
         const user = JSON.parse(userData);
         if (user.role !== 'ADMIN') {
-          router.push('/dashboard');
+          router.push('/dashboard`);
           return;
         }
         setAuthorized(true);
       } catch (e) {
-        localStorage.removeItem('user');
-        localStorage.removeItem('token');
-        router.push('/login');
+        localStorage.removeItem('user`);
+        localStorage.removeItem('token`);
+        router.push('/login`);
       }
     };
     
@@ -64,25 +65,25 @@ export default function AdminDashboard() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('token`);
       if (!token) return;
       const config = { headers: { Authorization: `Bearer ${token}` } };
       
       if (activeTab === 'Dashboard' || activeTab === 'Analytics') {
         const [statsRes, ordersRes] = await Promise.all([
-          axios.get('http://localhost:5000/api/admin/stats', config),
-          axios.get('http://localhost:5000/api/admin/orders', config)
+          axios.get(`${API_URL}/api/admin/stats', config),
+          axios.get(`${API_URL}/api/admin/orders', config)
         ]);
         setStats(statsRes.data || { revenue: 0, orders: 0, users: 0, medicines: 0 });
         setOrders(ordersRes.data || []);
       } else if (activeTab === 'Inventory') {
-        const res = await axios.get('http://localhost:5000/api/medicines');
+        const res = await axios.get(`${API_URL}/api/medicines`);
         setMedicines(res.data || []);
       } else if (activeTab === 'Orders') {
-        const res = await axios.get('http://localhost:5000/api/admin/orders', config);
+        const res = await axios.get(`${API_URL}/api/admin/orders', config);
         setOrders(res.data || []);
       } else if (activeTab === 'Customers') {
-        const res = await axios.get('http://localhost:5000/api/admin/users', config);
+        const res = await axios.get(`${API_URL}/api/admin/users', config);
         setCustomers(res.data || []);
       }
     } catch (err) {
@@ -96,10 +97,10 @@ export default function AdminDashboard() {
     if (!confirm('Are you sure you want to delete this medicine?')) return;
     try {
       const config = { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } };
-      await axios.delete(`http://localhost:5000/api/medicines/${id}`, config);
+      await axios.delete(`${API_URL}/api/medicines/${id}`, config);
       setMedicines(prev => prev.filter((m: any) => m.id !== id));
     } catch (err) {
-      alert('Failed to delete medicine');
+      alert('Failed to delete medicine`);
     }
   };
 
@@ -107,12 +108,12 @@ export default function AdminDashboard() {
     e.preventDefault();
     try {
       const config = { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } };
-      await axios.post('http://localhost:5000/api/medicines', newMed, config);
+      await axios.post(`${API_URL}/api/medicines', newMed, config);
       setShowAddModal(false);
       setNewMed({ name: '', composition: '', price: '', stock: '', category: 'Fever', description: '' });
       fetchData();
     } catch (err) {
-      alert('Failed to add medicine');
+      alert('Failed to add medicine`);
     }
   };
 
@@ -172,7 +173,7 @@ export default function AdminDashboard() {
               <div className="bg-slate-900 rounded-[3rem] p-10 text-white relative overflow-hidden">
                  <h3 className="text-xl font-black mb-6 relative z-10">Quick Actions</h3>
                  <div className="space-y-4 relative z-10">
-                    <button onClick={() => { setActiveTab('Inventory'); setShowAddModal(true); }} className="w-full p-4 bg-white/5 hover:bg-white/10 rounded-2xl flex items-center justify-between group transition-all">
+                    <button onClick={() => { setActiveTab('Inventory`); setShowAddModal(true); }} className="w-full p-4 bg-white/5 hover:bg-white/10 rounded-2xl flex items-center justify-between group transition-all">
                        <span className="font-bold">Add New Product</span>
                        <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform" />
                     </button>
@@ -421,7 +422,7 @@ export default function AdminDashboard() {
                                const f = e.target.files?.[0];
                                if (f) {
                                   // Mock AI Scan for product
-                                  const name = f.name.split('.')[0].replace(/_/g, ' ');
+                                  const name = f.name.split('.')[0].replace(/_/g, ' `);
                                   setNewMed({
                                      ...newMed,
                                      name: name.charAt(0).toUpperCase() + name.slice(1),
@@ -510,7 +511,7 @@ export default function AdminDashboard() {
              <ArrowLeft className="w-6 h-6" />
              <span className="font-black tracking-wide">Exit to Site</span>
           </Link>
-          <button onClick={() => { localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.href='/login'; }} className="w-full flex items-center gap-5 px-6 py-4 rounded-2xl text-red-400 hover:text-white hover:bg-red-600 transition-all">
+          <button onClick={() => { localStorage.removeItem('token`); localStorage.removeItem('user`); window.location.href='/login'; }} className="w-full flex items-center gap-5 px-6 py-4 rounded-2xl text-red-400 hover:text-white hover:bg-red-600 transition-all">
              <LogOut className="w-6 h-6" />
              <span className="font-black tracking-wide">Logout</span>
           </button>

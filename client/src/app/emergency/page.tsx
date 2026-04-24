@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 
 import axios from 'axios';
+import { API_URL } from '@/config';
 
 export default function Emergency() {
   const [sosActive, setSosActive] = useState(false);
@@ -20,8 +21,8 @@ export default function Emergency() {
 
   const activateSOS = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const res = await axios.post('http://localhost:5000/api/orders', {
+      const token = localStorage.getItem('token`);
+      const res = await axios.post(`${API_URL}/api/orders`, {
         items: [{ id: 1, name: 'Emergency Kit', quantity: 1, price: 199 }], // Mock item
         total_amount: 199,
         address: 'Current Location (GPS)',
@@ -30,15 +31,15 @@ export default function Emergency() {
         headers: { Authorization: `Bearer ${token}` }
       });
       setSosActive(true);
-      alert('EMERGENCY ORDER PLACED! Priority drone/bike dispatched. Arriving in 10 mins.');
+      alert('EMERGENCY ORDER PLACED! Priority drone/bike dispatched. Arriving in 10 mins.`);
     } catch (err) {
       console.error(err);
-      alert('Failed to place emergency order');
+      alert('Failed to place emergency order`);
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 pt-32 px-6 pb-20">
+    <div className="min-h-screen bg-slate-50 pt-6 px-6 pb-20">
       <div className="max-w-6xl mx-auto">
         <header className="text-center mb-16">
           <div className="inline-flex items-center gap-3 px-6 py-2 rounded-full bg-red-600 text-white text-sm font-black mb-6 animate-pulse">

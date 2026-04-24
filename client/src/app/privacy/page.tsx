@@ -7,7 +7,7 @@ export default function Privacy() {
   const router = useRouter();
 
   return (
-    <div className="min-h-screen bg-slate-50 pt-32 px-6 pb-20">
+    <div className="min-h-screen bg-slate-50 pt-6 px-6 pb-20">
       <div className="max-w-4xl mx-auto">
         <button onClick={() => router.back()} className="mb-12 flex items-center gap-2 text-slate-400 hover:text-slate-900 transition-colors font-black uppercase tracking-widest text-xs">
           <ArrowLeft className="w-4 h-4" /> Back

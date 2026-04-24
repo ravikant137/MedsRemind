@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { Search, Filter, ShoppingCart, Plus, Minus, Loader2, ArrowRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
+import { API_URL } from '@/config';
 import { useRouter } from 'next/navigation';
 
 export default function Shop() {
@@ -21,7 +22,7 @@ export default function Shop() {
     setLoading(true);
     try {
       const categoryQuery = selectedCategories.length > 0 ? `&category=${selectedCategories.join(',')}` : '';
-      const res = await axios.get(`http://localhost:5000/api/medicines?search=${searchTerm}${categoryQuery}`);
+      const res = await axios.get(`${API_URL}/api/medicines?search=${searchTerm}${categoryQuery}`);
       setMedicines(res.data);
     } catch (err) {
       console.error('Error fetching medicines:', err);
@@ -53,11 +54,11 @@ export default function Shop() {
       .map(m => ({ ...m, quantity: cart[m.id] }));
     
     localStorage.setItem('meds_cart', JSON.stringify(cartItems));
-    router.push('/checkout');
+    router.push('/checkout`);
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 pt-32 px-6 pb-20 overflow-x-hidden">
+    <div className="min-h-screen bg-slate-50 pt-6 px-6 pb-20 overflow-x-hidden">
       <div className="max-w-7xl mx-auto">
         <motion.header 
           initial={{ opacity: 0, y: -20 }}

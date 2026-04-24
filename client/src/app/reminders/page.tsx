@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { Bell, Clock, Pill, Plus, Trash2, CheckCircle, Calendar, AlertCircle, Loader2, ArrowRight, Volume2, Mic, Award } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
+import { API_URL } from '@/config';
 import { useRouter } from 'next/navigation';
 
 export default function Reminders() {
@@ -18,8 +19,8 @@ export default function Reminders() {
 
   const fetchPoints = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const res = await axios.get('http://localhost:5000/api/user/points', {
+      const token = localStorage.getItem('token`);
+      const res = await axios.get(`${API_URL}/api/user/points`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setPoints(res.data.points);
@@ -31,14 +32,14 @@ export default function Reminders() {
   const fetchReminders = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
-      const res = await axios.get('http://localhost:5000/api/reminders', {
+      const token = localStorage.getItem('token`);
+      const res = await axios.get(`${API_URL}/api/reminders`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setReminders(res.data);
     } catch (err) {
       console.error(err);
-      router.push('/login');
+      router.push('/login`);
     } finally {
       setLoading(false);
     }
@@ -46,14 +47,14 @@ export default function Reminders() {
 
   const completeReminder = async (id: number) => {
     try {
-      const token = localStorage.getItem('token');
-      const res = await axios.post(`http://localhost:5000/api/reminders/${id}/complete`, {}, {
+      const token = localStorage.getItem('token`);
+      const res = await axios.post(`${API_URL}/api/reminders/${id}/complete`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setPoints(prev => prev + res.data.pointsEarned);
-      alert('Amazing! You earned 10 Reward Points! 🏆');
+      alert('Amazing! You earned 10 Reward Points! 🏆`);
     } catch (err) {
-      alert('Failed to complete reminder');
+      alert('Failed to complete reminder`);
     }
   };
 
@@ -70,18 +71,18 @@ export default function Reminders() {
 
   const deleteReminder = async (id: number) => {
     try {
-      const token = localStorage.getItem('token');
-      await axios.delete(`http://localhost:5000/api/reminders/${id}`, {
+      const token = localStorage.getItem('token`);
+      await axios.delete(`${API_URL}/api/reminders/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setReminders(prev => prev.filter(r => r.id !== id));
     } catch (err) {
-      alert('Failed to delete reminder');
+      alert('Failed to delete reminder`);
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 pt-32 px-6 pb-20">
+    <div className="min-h-screen bg-slate-50 pt-6 px-6 pb-20">
       <div className="max-w-4xl mx-auto">
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-16">
           <div className="flex-1">

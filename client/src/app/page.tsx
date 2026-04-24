@@ -7,6 +7,7 @@ import {
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import Link from 'next/link';
 import axios from 'axios';
+import { API_URL } from '@/config';
 
 const FloatingIcon = ({ icon: Icon, delay, x, y, size = 24 }: any) => (
   <motion.div 
@@ -37,8 +38,8 @@ export default function Home() {
   useEffect(() => {
     const fetchMedicines = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/medicines');
-        setMedicines(res.data.slice(0, 3));
+        const res = await axios.get(`${API_URL}/api/medicines`);
+        setMedicines(res.data.slice(0, 8));
       } catch (err) {
         console.error(err);
       } finally {
@@ -61,7 +62,7 @@ export default function Home() {
       </div>
 
       {/* Hero Section */}
-      <section className="relative pt-20 pb-16 px-6">
+      <section className="relative pt-8 pb-12 px-6">
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="flex flex-col lg:flex-row items-center gap-8">
             <motion.div 
@@ -197,10 +198,10 @@ export default function Home() {
       {/* Dynamic Products Slider Section */}
       <section className="py-20 px-6">
         <div className="max-w-7xl mx-auto">
-          <header className="flex flex-col md:flex-row justify-between items-end mb-24 gap-8">
+          <header className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
             <div>
               <div className="text-green-600 font-black text-sm uppercase tracking-[0.3em] mb-4">Trending Now</div>
-              <h2 className="text-7xl font-black text-slate-900 tracking-tighter">Your Health <br/><span className="text-green-600 underline decoration-green-100 underline-offset-8">Essentials.</span></h2>
+              <h2 className="text-5xl font-black text-slate-900 tracking-tighter">Your Health <br/><span className="text-green-600 underline decoration-green-100 underline-offset-8">Essentials.</span></h2>
             </div>
             <Link href="/shop" className="px-10 py-5 bg-white border border-slate-100 rounded-full font-black flex items-center gap-4 hover:shadow-2xl transition-all shadow-xl shadow-slate-100/50">
               EXPLORE PHARMACY <ArrowRight className="w-5 h-5 text-green-600" />
@@ -225,10 +226,10 @@ export default function Home() {
                   </div>
                   <div className="space-y-4">
                     <span className="text-[10px] font-black uppercase tracking-widest text-green-600 bg-green-50 px-4 py-2 rounded-full">{med.category}</span>
-                    <h3 className="text-3xl font-black text-slate-900 leading-tight">{med.name}</h3>
+                    <h3 className="text-xl font-black text-slate-900 leading-tight">{med.name}</h3>
                     <div className="flex justify-between items-center pt-6">
-                      <span className="text-3xl font-black text-slate-900 tracking-tighter">₹{med.price.toFixed(2)}</span>
-                      <button className="w-16 h-16 bg-slate-900 text-white rounded-3xl flex items-center justify-center hover:bg-green-600 transition-all shadow-xl">
+                      <span className="text-xl font-black text-slate-900 tracking-tighter">₹{med.price.toFixed(2)}</span>
+                      <button className="w-12 h-12 bg-slate-900 text-white rounded-2xl flex items-center justify-center hover:bg-green-600 transition-all shadow-lg">
                         <Plus className="w-8 h-8" />
                       </button>
                     </div>

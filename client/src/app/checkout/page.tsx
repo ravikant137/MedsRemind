@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
+import { API_URL } from '@/config';
 import { useRouter } from 'next/navigation';
 
 export default function Checkout() {
@@ -17,14 +18,14 @@ export default function Checkout() {
   const router = useRouter();
 
   useEffect(() => {
-    const savedCart = localStorage.getItem('meds_cart');
+    const savedCart = localStorage.getItem('meds_cart`);
     if (savedCart) {
       setCart(JSON.parse(savedCart));
     } else {
-      router.push('/shop');
+      router.push('/shop`);
     }
     
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const user = JSON.parse(localStorage.getItem('user') || '{}`);
     if (user.address) setAddress(user.address);
   }, []);
 
@@ -34,8 +35,8 @@ export default function Checkout() {
     e.preventDefault();
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
-      const res = await axios.post('http://localhost:5000/api/orders', {
+      const token = localStorage.getItem('token`);
+      const res = await axios.post(`${API_URL}/api/orders`, {
         items: cart,
         total_amount: total,
         address: address
@@ -45,7 +46,7 @@ export default function Checkout() {
 
       setOrderId(res.data.id);
       setOrderSuccess(true);
-      localStorage.removeItem('meds_cart');
+      localStorage.removeItem('meds_cart`);
       
       // Auto redirect to track after 3 seconds
       setTimeout(() => {
@@ -53,8 +54,8 @@ export default function Checkout() {
       }, 3000);
     } catch (err) {
       console.error(err);
-      alert('Order failed. Please login first.');
-      router.push('/login');
+      alert('Order failed. Please login first.`);
+      router.push('/login`);
     } finally {
       setLoading(false);
     }
@@ -93,7 +94,7 @@ export default function Checkout() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 pt-32 px-6 pb-20 overflow-x-hidden">
+    <div className="min-h-screen bg-slate-50 pt-6 px-6 pb-20 overflow-x-hidden">
       <div className="max-w-6xl mx-auto">
         <header className="mb-16">
           <h1 className="text-5xl font-black text-slate-900 tracking-tight">Checkout</h1>
