@@ -11,6 +11,7 @@ async function init() {
       email TEXT UNIQUE NOT NULL,
       password TEXT NOT NULL,
       role TEXT DEFAULT 'USER',
+      points INTEGER DEFAULT 0,
       phone TEXT,
       address TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -137,6 +138,9 @@ async function init() {
     } catch (e) {}
     try {
       await db.query("ALTER TABLE orders ADD COLUMN deliveryLocation TEXT");
+    } catch (e) {}
+    try {
+      await db.query("ALTER TABLE users ADD COLUMN points INTEGER DEFAULT 0");
     } catch (e) {}
 
   } catch (err) {
