@@ -95,20 +95,26 @@ export default function Notifications() {
 
                  <div className="flex-1">
                     <div className="flex justify-between items-start mb-1">
-                       <h3 className="font-black text-slate-900">{notif.title}</h3>
+                       <h3 className="font-black text-slate-900 flex items-center gap-2">
+                         {notif.title}
+                         {notif.type === 'warning' && <span className="w-2 h-2 bg-orange-500 rounded-full animate-ping"></span>}
+                       </h3>
                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{notif.time}</span>
                     </div>
-                    <p className="text-sm font-medium text-slate-500 leading-relaxed max-w-xl">
+                    <p className="text-sm font-medium text-slate-500 leading-relaxed max-w-xl mb-4">
                        {notif.message}
                     </p>
+                    <div className="flex gap-3">
+                       {notif.type === 'warning' ? (
+                         <button className="px-5 py-2 bg-orange-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-lg shadow-orange-200">Order Refill</button>
+                       ) : notif.type === 'emergency' ? (
+                         <button className="px-5 py-2 bg-red-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-lg shadow-red-200">View Map</button>
+                       ) : (
+                         <button className="px-5 py-2 bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-lg">View Details</button>
+                       )}
+                       <button onClick={() => deleteNotif(notif.id)} className="px-5 py-2 bg-slate-100 text-slate-400 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-slate-200 transition-colors">Dismiss</button>
+                    </div>
                  </div>
-
-                 <button 
-                   onClick={() => deleteNotif(notif.id)}
-                   className="p-3 text-slate-200 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
-                 >
-                    <Trash2 className="w-5 h-5" />
-                 </button>
               </motion.div>
             ))}
           </AnimatePresence>

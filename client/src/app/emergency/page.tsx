@@ -4,6 +4,8 @@ import { ShieldAlert, Phone, MapPin, Zap, Clock, AlertCircle, ArrowRight, Ambula
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 
+import axios from 'axios';
+
 export default function Emergency() {
   const [sosActive, setSosActive] = useState(false);
   const router = useRouter();
@@ -15,6 +17,25 @@ export default function Emergency() {
     { name: 'Women Helpline', number: '1091', desc: 'Safety and medical assistance' },
     { name: 'MedsRemind Priority', number: '1800-MEDS-SOS', desc: 'Priority order support' }
   ];
+
+  const activateSOS = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.post('http://localhost:5000/api/orders', {
+        items: [{ id: 1, name: 'Emergency Kit', quantity: 1, price: 199 }], // Mock item
+        total_amount: 199,
+        address: 'Current Location (GPS)',
+        is_emergency: true
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setSosActive(true);
+      alert('EMERGENCY ORDER PLACED! Priority drone/bike dispatched. Arriving in 10 mins.');
+    } catch (err) {
+      console.error(err);
+      alert('Failed to place emergency order');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 pt-32 px-6 pb-20">
@@ -44,7 +65,7 @@ export default function Emergency() {
                 </p>
                 
                 <button 
-                  onClick={() => setSosActive(!sosActive)}
+                  onClick={() => sosActive ? setSosActive(false) : activateSOS()}
                   className={`w-full py-6 rounded-[2.5rem] font-black text-xl transition-all shadow-2xl flex items-center justify-center gap-4 ${sosActive ? 'bg-white text-red-600 hover:bg-slate-50' : 'bg-red-600 text-white hover:bg-red-700 shadow-red-200'}`}
                 >
                   {sosActive ? 'DEACTIVATE SOS' : 'ACTIVATE SOS NOW'}

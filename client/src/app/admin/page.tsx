@@ -4,7 +4,7 @@ import {
   LayoutDashboard, Package, ShoppingBag, Users, TrendingUp, 
   AlertTriangle, Search, Plus, ExternalLink, Trash2, 
   Edit3, CheckCircle, Clock, XCircle, ChevronRight, Loader2, X,
-  BarChart3, PieChart, Activity, DollarSign, Calendar, ArrowLeft, LogOut, Camera
+  BarChart3, PieChart, Activity, DollarSign, Calendar, ArrowLeft, LogOut, Camera, ShieldAlert
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
@@ -229,11 +229,18 @@ export default function AdminDashboard() {
                 <h3 className="text-2xl font-black mb-10">Order Registry</h3>
                 <div className="space-y-4">
                    {orders.map((order: any) => (
-                     <div key={order.id} className="p-6 border border-slate-50 rounded-[2rem] flex flex-wrap items-center justify-between gap-6 hover:shadow-md transition-all">
+                     <div key={order.id} className={`p-6 border rounded-[2rem] flex flex-wrap items-center justify-between gap-6 hover:shadow-md transition-all ${order.is_emergency ? 'bg-red-50 border-red-200' : 'bg-white border-slate-50'}`}>
                         <div className="flex items-center gap-5">
-                           <div className="w-14 h-14 bg-slate-900 text-white rounded-2xl flex items-center justify-center font-black">#{order.id}</div>
+                           <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-black ${order.is_emergency ? 'bg-red-600 text-white' : 'bg-slate-900 text-white'}`}>#{order.id}</div>
                            <div>
-                              <p className="font-black text-slate-900">{order.user_name}</p>
+                              <div className="flex items-center gap-2">
+                                <p className="font-black text-slate-900">{order.user_name}</p>
+                                {order.is_emergency === 1 && (
+                                  <span className="px-3 py-1 bg-red-600 text-white text-[10px] font-black uppercase tracking-widest rounded-full animate-pulse flex items-center gap-1">
+                                    <ShieldAlert className="w-3 h-3" /> PRIORITY 10M
+                                  </span>
+                                )}
+                              </div>
                               <p className="text-xs text-slate-400 font-medium">{order.address}</p>
                            </div>
                         </div>
@@ -244,8 +251,9 @@ export default function AdminDashboard() {
                            </div>
                            <div className="text-center">
                               <p className="text-xs text-slate-400 font-black uppercase tracking-widest">Status</p>
-                              <span className="inline-flex items-center gap-2 px-4 py-2 bg-green-50 text-green-600 rounded-full text-[10px] font-black uppercase tracking-widest">
-                                <CheckCircle className="w-3 h-3" /> Paid
+                              <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest ${order.is_emergency ? 'bg-red-100 text-red-600' : 'bg-green-50 text-green-600'}`}>
+                                {order.is_emergency ? <ShieldAlert className="w-3 h-3" /> : <CheckCircle className="w-3 h-3" />} 
+                                {order.is_emergency ? 'Emergency' : 'Paid'}
                               </span>
                            </div>
                            <button className="p-4 bg-slate-50 text-slate-400 rounded-2xl hover:bg-green-600 hover:text-white transition-all">

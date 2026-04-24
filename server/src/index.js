@@ -98,12 +98,12 @@ app.delete('/api/medicines/:id', auth, async (req, res) => {
 
 // --- ORDER ROUTES ---
 app.post('/api/orders', auth, async (req, res) => {
-  const { items, total_amount, address } = req.body;
+  const { items, total_amount, address, is_emergency } = req.body;
   const user_id = req.user.id;
   try {
     const orderResult = await db.query(
-      'INSERT INTO orders (user_id, total_amount, address, payment_status) VALUES (?, ?, ?, ?)',
-      [user_id, total_amount, address, 'PAID']
+      'INSERT INTO orders (user_id, total_amount, address, payment_status, is_emergency) VALUES (?, ?, ?, ?, ?)',
+      [user_id, total_amount, address, 'PAID', is_emergency ? 1 : 0]
     );
     const orderId = orderResult.lastID;
     
