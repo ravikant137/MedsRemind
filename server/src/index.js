@@ -116,6 +116,58 @@ app.post('/api/orders', auth, async (req, res) => {
     }
     
     res.status(201).json({ id: orderId, message: 'Order placed successfully' });
+
+    // Create Notification
+    await db.query(
+      'INSERT INTO notifications (user_id, type, title, message) VALUES (?, ?, ?, ?)',
+      [user_id, 'info', 'Order Placed', `Your order #ORD-${orderId} for ₹${total_amount} has been placed successfully.`]
+    );
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/orders', auth, async (req, res) => {
+  try {
+    const result = await db.query(
+      'SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC',
+      [req.user.id]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/orders/:id', auth, async (req, res) => {
+  try {
+    const orderId = req.params.id.replace(/[^0-9]/g, '');
+    if (!orderId) {
+      return res.status(400).json({ error: 'Invalid order ID' });
+    }
+    const orderResult = await db.query(
+      'SELECT o.*, u.name as user_name FROM orders o JOIN users u ON o.user_id = u.id WHERE o.id = ?',
+      [orderId]
+    );
+
+    if (orderResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+
+    const order = orderResult.rows[0];
+    
+    // Authorization check
+    if (Number(order.user_id) !== Number(req.user.id) && req.user.role !== 'ADMIN') {
+      return res.status(403).json({ error: 'Unauthorized access to this order' });
+    }
+
+    const itemsResult = await db.query(
+      'SELECT oi.*, m.name as medicine_name FROM order_items oi JOIN medicines m ON oi.medicine_id = m.id WHERE oi.order_id = ?',
+      [orderId]
+    );
+
+    order.items = itemsResult.rows;
+    res.json(order);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -271,11 +323,42 @@ app.post('/api/schedules', auth, async (req, res) => {
   }
 });
 
+// --- NOTIFICATION ROUTES ---
+app.get('/api/notifications', auth, async (req, res) => {
+  try {
+    const result = await db.query(
+      'SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC',
+      [req.user.id]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.put('/api/notifications/read-all', auth, async (req, res) => {
+  try {
+    await db.query('UPDATE notifications SET read = 1 WHERE user_id = ?', [req.user.id]);
+    res.json({ message: 'All notifications marked as read' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete('/api/notifications/:id', auth, async (req, res) => {
+  try {
+    await db.query('DELETE FROM notifications WHERE id = ? AND user_id = ?', [req.params.id, req.user.id]);
+    res.json({ message: 'Notification deleted' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // --- SUBSCRIPTION ROUTES ---
 app.get('/api/subscriptions', auth, async (req, res) => {
   try {
     const result = await db.query(
-      'SELECT s.*, m.name as medicine_name FROM subscriptions s JOIN medicines m ON s.medicine_id = m.id WHERE s.user_id = ?',
+      'SELECT * FROM subscriptions WHERE user_id = ?',
       [req.user.id]
     );
     res.json(result.rows);

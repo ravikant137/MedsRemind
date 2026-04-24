@@ -41,9 +41,9 @@ export default function Navbar() {
   ];
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 py-2">
+    <nav className="fixed top-0 left-0 right-0 z-50 py-1">
       <div className="max-w-7xl mx-auto px-4">
-          <div className={`relative flex items-center justify-between px-5 py-2.5 rounded-2xl glass-card bg-gradient-to-r from-primary to-secondary ${isScrolled ? 'bg-opacity-70' : 'bg-opacity-30'} backdrop-blur-lg shadow-xl`}>
+          <div className={`relative flex items-center justify-between px-5 py-1.5 rounded-2xl glass-card bg-gradient-to-r from-primary to-secondary ${isScrolled ? 'bg-opacity-70' : 'bg-opacity-30'} backdrop-blur-lg shadow-xl`}>
             {/* Logo */}
             <Link href="/" className="flex items-center gap-2.5 group">
               <div className="w-10 h-10 bg-gradient-to-r from-green-600 to-emerald-500 rounded-lg flex items-center justify-center shadow-lg group-hover:rotate-12 transition-transform">
@@ -55,12 +55,12 @@ export default function Navbar() {
             </Link>
 
           {/* Desktop Nav */}
-          <div className="hidden lg:flex items-center gap-5">
+          <div className="hidden lg:flex items-center gap-3">
             {navLinks.map((link) => (
                 <Link
                   key={link.name}
                   href={link.href}
-                  className={`text-xs font-black uppercase tracking-widest transition-colors whitespace-nowrap border-b-2 ${pathname === link.href ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-primary'}`}
+                  className={`text-[10px] font-black uppercase tracking-widest transition-colors whitespace-nowrap border-b-2 ${pathname === link.href ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-primary'}`}
                 >
                   {link.name}
                 </Link>

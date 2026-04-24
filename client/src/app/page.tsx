@@ -196,41 +196,40 @@ export default function Home() {
       </section>
 
       {/* Dynamic Products Slider Section */}
-      <section className="py-20 px-6">
+      <section className="py-12 px-6">
         <div className="max-w-7xl mx-auto">
-          <header className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
+          <header className="flex flex-col md:flex-row justify-between items-end mb-10 gap-6">
             <div>
-              <div className="text-green-600 font-black text-sm uppercase tracking-[0.3em] mb-4">Trending Now</div>
-              <h2 className="text-5xl font-black text-slate-900 tracking-tighter">Your Health <br/><span className="text-green-600 underline decoration-green-100 underline-offset-8">Essentials.</span></h2>
+              <div className="text-green-600 font-black text-xs uppercase tracking-[0.3em] mb-3">Trending Now</div>
+              <h2 className="text-4xl font-black text-slate-900 tracking-tighter">Health <span className="text-green-600">Essentials.</span></h2>
             </div>
-            <Link href="/shop" className="px-10 py-5 bg-white border border-slate-100 rounded-full font-black flex items-center gap-4 hover:shadow-2xl transition-all shadow-xl shadow-slate-100/50">
-              EXPLORE PHARMACY <ArrowRight className="w-5 h-5 text-green-600" />
+            <Link href="/shop" className="px-8 py-4 bg-white border border-slate-100 rounded-full font-black text-xs flex items-center gap-4 hover:shadow-2xl transition-all shadow-xl shadow-slate-100/50">
+              EXPLORE ALL <ArrowRight className="w-4 h-4 text-green-600" />
             </Link>
           </header>
 
-          <div className="grid md:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
             {loading ? (
-              [1, 2, 3].map(i => <div key={i} className="h-[500px] bg-slate-100 rounded-[4rem] animate-pulse"></div>)
+              [1, 2, 3, 4, 5].map(i => <div key={i} className="h-64 bg-slate-100 rounded-[2.5rem] animate-pulse"></div>)
             ) : (
-              medicines.map((med: any, i: number) => (
+              medicines.slice(0, 10).map((med: any, i: number) => (
                 <motion.div 
                   key={med.id}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  whileHover={{ y: -20 }}
-                  className="bg-white p-6 rounded-[3rem] border border-slate-100 shadow-xl shadow-slate-100/30 relative group"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  whileHover={{ y: -10 }}
+                  className="bg-white p-4 rounded-[2.5rem] border border-slate-100 shadow-lg shadow-slate-100/20 relative group"
                 >
-                  <div className="w-full aspect-square bg-slate-50 rounded-[2.5rem] mb-8 flex items-center justify-center text-6xl group-hover:scale-110 transition-transform duration-500 relative overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  <div className="w-full aspect-square bg-slate-50 rounded-[2rem] mb-6 flex items-center justify-center text-4xl group-hover:scale-105 transition-transform duration-500 relative overflow-hidden">
                     💊
                   </div>
-                  <div className="space-y-4">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-green-600 bg-green-50 px-4 py-2 rounded-full">{med.category}</span>
-                    <h3 className="text-xl font-black text-slate-900 leading-tight">{med.name}</h3>
-                    <div className="flex justify-between items-center pt-6">
-                      <span className="text-xl font-black text-slate-900 tracking-tighter">₹{med.price.toFixed(2)}</span>
-                      <button className="w-12 h-12 bg-slate-900 text-white rounded-2xl flex items-center justify-center hover:bg-green-600 transition-all shadow-lg">
-                        <Plus className="w-8 h-8" />
+                  <div className="space-y-3">
+                    <span className="text-[8px] font-black uppercase tracking-widest text-green-600 bg-green-50 px-3 py-1.5 rounded-full">{med.category}</span>
+                    <h3 className="text-sm font-black text-slate-900 leading-tight line-clamp-1">{med.name}</h3>
+                    <div className="flex justify-between items-center pt-4">
+                      <span className="text-sm font-black text-slate-900 tracking-tighter">₹{med.price.toFixed(2)}</span>
+                      <button className="w-10 h-10 bg-slate-900 text-white rounded-xl flex items-center justify-center hover:bg-green-600 transition-all shadow-lg">
+                        <Plus className="w-6 h-6" />
                       </button>
                     </div>
                   </div>

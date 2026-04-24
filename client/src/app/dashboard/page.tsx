@@ -14,6 +14,8 @@ import { useRouter } from 'next/navigation';
 export default function Dashboard() {
   const [user, setUser] = useState<any>(null);
   const [reminders, setReminders] = useState<any[]>([]);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [points, setPoints] = useState(0);
   const [language, setLanguage] = useState('en');
@@ -30,7 +32,33 @@ export default function Dashboard() {
     setUser(JSON.parse(userData));
     fetchData();
     fetchPoints();
+    fetchNotifications();
+    fetchOrders();
   }, []);
+
+  const fetchOrders = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.get(`${API_URL}/api/orders`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setOrders(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const fetchNotifications = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.get(`${API_URL}/api/notifications`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setNotifications(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const fetchPoints = async () => {
     try {
@@ -85,10 +113,20 @@ export default function Dashboard() {
     window.speechSynthesis.speak(utterance);
   };
 
+  const getTimeAgo = (dateStr: string) => {
+    const date = new Date(dateStr.includes(' ') && !dateStr.includes('T') ? dateStr + ' UTC' : dateStr);
+    const now = new Date();
+    const diff = Math.floor((now.getTime() - date.getTime()) / 60000);
+    if (diff < 1) return 'Just now';
+    if (diff < 60) return `${diff} mins ago`;
+    if (diff < 1440) return `${Math.floor(diff / 60)} hours ago`;
+    return `${Math.floor(diff / 1440)} days ago`;
+  };
+
   const stats = [
     { label: 'Health Points', value: points.toString(), unit: 'pts', icon: Award, color: 'text-orange-500 bg-orange-50' },
     { label: 'Adherence', value: '94', unit: '%', icon: Activity, color: 'text-green-500 bg-green-50' },
-    { label: 'Orders', value: '12', unit: 'total', icon: ShoppingBag, color: 'text-blue-500 bg-blue-50' },
+    { label: 'Orders', value: orders.length.toString(), unit: 'total', icon: ShoppingBag, color: 'text-blue-500 bg-blue-50' },
   ];
 
   return (
@@ -215,29 +253,28 @@ export default function Dashboard() {
                  )}
               </section>
 
-              {/* Recent Activity */}
-              <section className="bg-white p-10 rounded-[4rem] shadow-2xl shadow-slate-100/50 border border-slate-50">
-                 <h3 className="text-2xl font-black text-slate-900 mb-8 flex items-center gap-3">
-                    <History className="w-7 h-7 text-blue-600" /> Recent Activity
-                 </h3>
-                 <div className="space-y-8">
-                    {[
-                      { action: 'Prescription Uploaded', time: '2 hours ago', icon: ShieldCheck, color: 'text-green-600' },
-                      { action: 'Ordered Paracetamol', time: '1 day ago', icon: ShoppingBag, color: 'text-blue-600' },
-                      { action: 'Subscription Renewed', time: '3 days ago', icon: CheckCircle2, color: 'text-purple-600' },
-                    ].map((item, i) => (
-                      <div key={i} className="flex items-center gap-6">
-                         <div className="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center text-slate-400">
-                            <item.icon className={`w-6 h-6 ${item.color}`} />
+               <section className="bg-white p-10 rounded-[4rem] shadow-2xl shadow-slate-100/50 border border-slate-50">
+                  <h3 className="text-2xl font-black text-slate-900 mb-8 flex items-center gap-3">
+                     <History className="w-7 h-7 text-blue-600" /> Recent Activity
+                  </h3>
+                  <div className="space-y-8">
+                     {notifications.length === 0 ? (
+                       <p className="text-slate-400 font-bold">No recent activity.</p>
+                     ) : (
+                       notifications.slice(0, 3).map((item: any, i: number) => (
+                         <div key={i} className="flex items-center gap-6">
+                            <div className="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center text-slate-400">
+                               {item.type === 'emergency' ? <ShieldAlert className="w-6 h-6 text-red-600" /> : <ShieldCheck className={`w-6 h-6 ${item.type === 'order' ? 'text-blue-600' : 'text-green-600'}`} />}
+                            </div>
+                            <div>
+                               <p className="font-black text-slate-900">{item.title}</p>
+                               <p className="text-xs text-slate-400 font-bold">{getTimeAgo(item.created_at)}</p>
+                            </div>
                          </div>
-                         <div>
-                            <p className="font-black text-slate-900">{item.action}</p>
-                            <p className="text-xs text-slate-400 font-bold">{item.time}</p>
-                         </div>
-                      </div>
-                    ))}
-                 </div>
-              </section>
+                       ))
+                     )}
+                  </div>
+               </section>
            </div>
 
            {/* Sidebar Actions */}

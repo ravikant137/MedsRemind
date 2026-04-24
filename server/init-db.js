@@ -70,11 +70,24 @@ async function init() {
     `CREATE TABLE IF NOT EXISTS subscriptions (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       user_id INTEGER,
-      plan_name TEXT NOT NULL,
-      price REAL NOT NULL,
+      medicine_name TEXT,
+      frequency_days INTEGER,
+      next_refill_date DATETIME,
+      plan_name TEXT,
+      price REAL,
       status TEXT DEFAULT 'ACTIVE',
       start_date DATETIME DEFAULT CURRENT_TIMESTAMP,
       end_date DATETIME,
+      FOREIGN KEY (user_id) REFERENCES users(id)
+    )`,
+    `CREATE TABLE IF NOT EXISTS notifications (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER,
+      type TEXT DEFAULT 'info',
+      title TEXT NOT NULL,
+      message TEXT NOT NULL,
+      read BOOLEAN DEFAULT 0,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (user_id) REFERENCES users(id)
     )`
   ];
