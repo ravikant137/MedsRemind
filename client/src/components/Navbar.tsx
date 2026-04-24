@@ -13,8 +13,6 @@ export default function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
 
-  if (pathname.startsWith('/admin')) return null;
-
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
     window.addEventListener('scroll', handleScroll);
@@ -24,6 +22,12 @@ export default function Navbar() {
     
     return () => window.removeEventListener('scroll', handleScroll);
   }, [pathname]);
+
+  if (
+    pathname.startsWith('/admin') || 
+    pathname === '/login' || 
+    pathname === '/signup'
+  ) return null;
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -97,6 +101,7 @@ export default function Navbar() {
                          initial={{ opacity: 0, y: 10, scale: 0.95 }}
                          animate={{ opacity: 1, y: 0, scale: 1 }}
                          exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                         onClick={(e) => e.stopPropagation()}
                          className="absolute right-0 top-full mt-4 w-72 bg-white rounded-[2.5rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] border border-slate-100 p-8 z-50"
                        >
                           <div className="flex items-center gap-4 mb-6 pb-6 border-b border-slate-50">

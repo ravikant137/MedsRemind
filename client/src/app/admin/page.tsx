@@ -45,7 +45,6 @@ export default function AdminDashboard() {
           return;
         }
         setAuthorized(true);
-        await fetchData();
       } catch (e) {
         localStorage.removeItem('user');
         localStorage.removeItem('token');
@@ -54,29 +53,37 @@ export default function AdminDashboard() {
     };
     
     checkAuth();
-  }, [activeTab]);
+  }, [router]);
+
+  useEffect(() => {
+    if (authorized) {
+      fetchData();
+    }
+  }, [authorized, activeTab]);
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      const config = { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } };
+      const token = localStorage.getItem('token');
+      if (!token) return;
+      const config = { headers: { Authorization: `Bearer ${token}` } };
       
       if (activeTab === 'Dashboard' || activeTab === 'Analytics') {
         const [statsRes, ordersRes] = await Promise.all([
           axios.get('http://localhost:5000/api/admin/stats', config),
           axios.get('http://localhost:5000/api/admin/orders', config)
         ]);
-        setStats(statsRes.data);
-        setOrders(ordersRes.data);
+        setStats(statsRes.data || { revenue: 0, orders: 0, users: 0, medicines: 0 });
+        setOrders(ordersRes.data || []);
       } else if (activeTab === 'Inventory') {
         const res = await axios.get('http://localhost:5000/api/medicines');
-        setMedicines(res.data);
+        setMedicines(res.data || []);
       } else if (activeTab === 'Orders') {
         const res = await axios.get('http://localhost:5000/api/admin/orders', config);
-        setOrders(res.data);
+        setOrders(res.data || []);
       } else if (activeTab === 'Customers') {
         const res = await axios.get('http://localhost:5000/api/admin/users', config);
-        setCustomers(res.data);
+        setCustomers(res.data || []);
       }
     } catch (err) {
       console.error('Error fetching admin data:', err);
@@ -372,6 +379,12 @@ export default function AdminDashboard() {
         );
     }
   };
+
+  if (!mounted || !authorized) return (
+    <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+       <Loader2 className="w-12 h-12 animate-spin text-green-600" />
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-slate-50 flex">
