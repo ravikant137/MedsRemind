@@ -23,11 +23,7 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [pathname]);
 
-  if (
-    pathname.startsWith('/admin') || 
-    pathname === '/login' || 
-    pathname === '/signup'
-  ) return null;
+
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -47,28 +43,27 @@ export default function Navbar() {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 py-4">
       <div className="max-w-7xl mx-auto px-6">
-        <div className="relative flex items-center justify-between p-4 rounded-[2.5rem] bg-white shadow-xl shadow-slate-100 border border-slate-50">
-          
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-3 group px-2">
-            <div className="w-12 h-12 bg-green-600 rounded-xl flex items-center justify-center shadow-2xl shadow-green-200 group-hover:rotate-12 transition-transform">
-              <Pill className="text-white w-7 h-7" />
-            </div>
-            <span className={`text-2xl font-black tracking-tighter uppercase transition-colors ${isScrolled ? 'text-slate-900' : 'text-slate-900'}`}>
-              Meds<span className="text-green-600">Remind</span>
-            </span>
-          </Link>
+          <div className={`relative flex items-center justify-between p-4 rounded-[2.5rem] glass-card bg-gradient-to-r from-primary to-secondary ${isScrolled ? 'bg-opacity-70' : 'bg-opacity-30'} backdrop-blur-lg shadow-xl`}>
+            {/* Logo */}
+            <Link href="/" className="flex items-center gap-3 group px-2">
+              <div className="w-12 h-12 bg-gradient-to-r from-green-600 to-emerald-500 rounded-xl flex items-center justify-center shadow-2xl group-hover:rotate-12 transition-transform">
+                <Pill className="text-white w-7 h-7" />
+              </div>
+              <span className={`text-2xl font-black tracking-tighter uppercase transition-colors ${isScrolled ? 'text-slate-900' : 'text-slate-900'}`}>
+                Meds<span className="text-green-600">Remind</span>
+              </span>
+            </Link>
 
           {/* Desktop Nav */}
           <div className="hidden lg:flex items-center gap-8">
             {navLinks.map((link) => (
-              <Link 
-                key={link.name} 
-                href={link.href}
-                className={`text-sm font-black uppercase tracking-widest hover:text-green-600 transition-colors ${pathname === link.href ? 'text-green-600' : 'text-slate-500'}`}
-              >
-                {link.name}
-              </Link>
+                <Link
+                  key={link.name}
+                  href={link.href}
+                  className={`text-sm font-black uppercase tracking-widest transition-colors border-b-2 ${pathname === link.href ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-primary'}`}
+                >
+                  {link.name}
+                </Link>
             ))}
             {user?.role === 'ADMIN' && (
               <Link 
@@ -87,7 +82,7 @@ export default function Navbar() {
                <span className="absolute top-2 right-2 w-3 h-3 bg-red-500 border-2 border-white rounded-full"></span>
             </Link>
             
-            <Link href="/emergency" className="hidden md:flex items-center gap-2 px-6 py-3 bg-red-50 text-red-600 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all shadow-xl shadow-red-100">
+            <Link href="/emergency" className="hidden md:flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:from-red-600 hover:to-pink-600 transform hover:scale-105 transition-all shadow-xl shadow-red-100">
                <ShieldAlert className="w-4 h-4" /> Emergency
             </Link>
 

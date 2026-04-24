@@ -61,14 +61,15 @@ export default function Home() {
       </div>
 
       {/* Hero Section */}
-      <section className="relative pt-40 pb-32 px-6">
+      <section className="relative pt-20 pb-16 px-6">
         <div className="max-w-7xl mx-auto relative z-10">
-          <div className="flex flex-col lg:flex-row items-center gap-24">
+          <div className="flex flex-col lg:flex-row items-center gap-8">
             <motion.div 
               initial={{ opacity: 0, x: -100 }}
               animate={{ opacity: 1, x: 0 }}
-              className="flex-[1.2] space-y-10"
+              className="flex-[1.2] space-y-8"
             >
+
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -165,7 +166,7 @@ export default function Home() {
       </section>
 
       {/* Features with Scroll Parallax */}
-      <section className="py-40 px-6 relative z-10 bg-slate-900 rounded-[6rem] -mt-20 text-white overflow-hidden">
+      <section className="py-20 px-6 relative z-10 bg-slate-900 rounded-[6rem] -mt-20 text-white overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_-20%,#22c55e20,transparent)]"></div>
         <div className="max-w-7xl mx-auto">
           <div className="grid md:grid-cols-4 gap-12">
@@ -194,7 +195,7 @@ export default function Home() {
       </section>
 
       {/* Dynamic Products Slider Section */}
-      <section className="py-40 px-6">
+      <section className="py-20 px-6">
         <div className="max-w-7xl mx-auto">
           <header className="flex flex-col md:flex-row justify-between items-end mb-24 gap-8">
             <div>
@@ -206,7 +207,7 @@ export default function Home() {
             </Link>
           </header>
 
-          <div className="grid md:grid-cols-3 gap-12">
+          <div className="grid md:grid-cols-4 gap-8">
             {loading ? (
               [1, 2, 3].map(i => <div key={i} className="h-[500px] bg-slate-100 rounded-[4rem] animate-pulse"></div>)
             ) : (
@@ -216,9 +217,9 @@ export default function Home() {
                   initial={{ opacity: 0, scale: 0.9 }}
                   whileInView={{ opacity: 1, scale: 1 }}
                   whileHover={{ y: -20 }}
-                  className="bg-white p-10 rounded-[4rem] border border-slate-100 shadow-2xl shadow-slate-100/50 relative group"
+                  className="bg-white p-6 rounded-[3rem] border border-slate-100 shadow-xl shadow-slate-100/30 relative group"
                 >
-                  <div className="w-full aspect-square bg-slate-50 rounded-[3rem] mb-10 flex items-center justify-center text-8xl group-hover:scale-110 transition-transform duration-500 relative overflow-hidden">
+                  <div className="w-full aspect-square bg-slate-50 rounded-[2.5rem] mb-8 flex items-center justify-center text-6xl group-hover:scale-110 transition-transform duration-500 relative overflow-hidden">
                     <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     💊
                   </div>

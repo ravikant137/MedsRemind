@@ -65,7 +65,7 @@ export default function PrescriptionUpload() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 pt-32 px-6 pb-20 overflow-hidden relative">
+    <div className="min-h-screen bg-slate-50 pt-24 px-6 pb-20 overflow-hidden relative">
       {/* Background Decor */}
       <div className="absolute top-0 right-0 w-96 h-96 bg-green-100/50 rounded-full blur-[120px] -z-10"></div>
       
@@ -89,7 +89,7 @@ export default function PrescriptionUpload() {
              animate={{ opacity: 1, x: 0 }}
              className={`glass-card p-12 rounded-[3.5rem] border-2 border-dashed flex flex-col items-center justify-center transition-all min-h-[500px] ${file ? 'border-green-500 bg-green-50/20' : 'border-slate-200 hover:border-green-400 bg-white/40'}`}
            >
-              <div className="w-24 h-24 bg-green-600 rounded-[2rem] flex items-center justify-center mb-8 shadow-2xl shadow-green-200">
+              <div className="w-24 h-24 bg-gradient-to-r from-primary to-secondary rounded-[2rem] flex items-center justify-center mb-8 shadow-2xl group-hover:rotate-12 transition-transform">
                  <Upload className="w-10 h-10 text-white" />
               </div>
               <p className="text-slate-900 font-black text-xl mb-4 text-center">Drop your RX here</p>
@@ -102,7 +102,7 @@ export default function PrescriptionUpload() {
                 onChange={handleFileChange}
                 accept="image/*,application/pdf"
               />
-              <label htmlFor="file-upload" className="px-10 py-5 bg-slate-900 text-white rounded-[2rem] font-black cursor-pointer hover:bg-green-600 transition-all shadow-xl shadow-slate-200">
+              <label htmlFor="file-upload" className="px-10 py-5 bg-gradient-to-r from-primary to-secondary text-white rounded-[2rem] font-black cursor-pointer hover:from-primary-dark hover:to-secondary-dark transition-all shadow-xl shadow-slate-200">
                  {file ? 'Change Prescription' : 'Browse Files'}
               </label>
 
