@@ -16,7 +16,7 @@ export default function Discounts() {
 
   const fetchPoints = async () => {
     try {
-      const token = localStorage.getItem('token`);
+      const token = localStorage.getItem('token');
       const res = await axios.get(`${API_URL}/api/user/points`, {
         headers: { Authorization: `Bearer ${token}` }
       });

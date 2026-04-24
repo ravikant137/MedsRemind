@@ -46,7 +46,7 @@ export default function PrescriptionUpload() {
   const handleSetReminders = async () => {
     setIsSettingReminders(true);
     try {
-      const token = localStorage.getItem('token`);
+      const token = localStorage.getItem('token');
       await axios.post(`${API_URL}/api/reminders/bulk`, {
         medicines: result.medicines
       }, {
@@ -55,11 +55,11 @@ export default function PrescriptionUpload() {
       
       setRemindersSet(true);
       setTimeout(() => {
-        router.push('/reminders`);
+        router.push('/reminders');
       }, 2000);
     } catch (err) {
-      alert('Failed to set reminders. Please login.`);
-      router.push('/login`);
+      alert('Failed to set reminders. Please login.');
+      router.push('/login');
     } finally {
       setIsSettingReminders(false);
     }
@@ -71,25 +71,25 @@ export default function PrescriptionUpload() {
       <div className="absolute top-0 right-0 w-96 h-96 bg-green-100/50 rounded-full blur-[120px] -z-10"></div>
       
       <div className="max-w-5xl mx-auto">
-        <header className="text-center mb-16">
+        <header className="text-center mb-10">
           <motion.div 
-            initial={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-50 text-green-700 text-sm font-black mb-6"
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-50 text-green-700 text-[10px] font-black mb-4 uppercase tracking-widest"
           >
-            <Sparkles className="w-4 h-4" /> AI-POWERED EXTRACTION
+            <Sparkles className="w-3 h-3" /> AI-POWERED EXTRACTION
           </motion.div>
-          <h1 className="text-5xl font-black text-slate-900 tracking-tight">Upload <span className="text-green-600">Prescription</span></h1>
-          <p className="text-slate-500 mt-4 font-medium max-w-xl mx-auto">Our advanced neural network extracts medicine data automatically from your handwritten or digital RX.</p>
+          <h1 className="text-4xl font-black text-slate-900 tracking-tight">Upload <span className="text-green-600">Prescription</span></h1>
+          <p className="text-slate-500 mt-2 text-sm font-medium max-w-lg mx-auto">Extract medicine data automatically from your RX.</p>
         </header>
 
         <div className="grid md:grid-cols-2 gap-12">
            {/* Upload Zone */}
-           <motion.div 
-             initial={{ opacity: 0, x: -30 }}
-             animate={{ opacity: 1, x: 0 }}
-             className={`glass-card p-12 rounded-[3.5rem] border-2 border-dashed flex flex-col items-center justify-center transition-all min-h-[500px] ${file ? 'border-green-500 bg-green-50/20' : 'border-slate-200 hover:border-green-400 bg-white/40'}`}
-           >
+            <motion.div 
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              className={`glass-card p-10 rounded-[3rem] border-2 border-dashed flex flex-col items-center justify-center transition-all min-h-[450px] ${file ? 'border-green-500 bg-green-50/20' : 'border-slate-200 hover:border-green-400 bg-white/40'}`}
+            >
               <div className="w-24 h-24 bg-gradient-to-r from-primary to-secondary rounded-[2rem] flex items-center justify-center mb-8 shadow-2xl group-hover:rotate-12 transition-transform">
                  <Upload className="w-10 h-10 text-white" />
               </div>
@@ -126,11 +126,11 @@ export default function PrescriptionUpload() {
            </motion.div>
 
            {/* Results Zone */}
-           <motion.div 
-             initial={{ opacity: 0, x: 30 }}
-             animate={{ opacity: 1, x: 0 }}
-             className="glass-card p-10 rounded-[3.5rem] flex flex-col h-full min-h-[500px] border border-white shadow-2xl shadow-green-100/20"
-           >
+            <motion.div 
+              initial={{ opacity: 0, x: 30 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="glass-card p-8 rounded-[3rem] flex flex-col h-full min-h-[450px] border border-white shadow-2xl shadow-green-100/20"
+            >
               {!file && (
                 <div className="flex-1 flex flex-col items-center justify-center text-center opacity-40">
                    <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mb-6">

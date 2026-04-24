@@ -5,36 +5,82 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 
 export default function Notifications() {
+  const [language, setLanguage] = useState('en');
+  
+  const translations: any = {
+    en: {
+      title: 'Notifications',
+      subtitle: 'Stay updated with your medication and orders.',
+      markAll: 'Mark all as read',
+      orderTitle: 'Order Dispatched',
+      orderMsg: 'Your order #ORD-7721 has been dispatched and will arrive by 6 PM.',
+      lowStockTitle: 'Low Stock Alert',
+      lowStockMsg: 'Your Paracetamol supply is running low. Order now to avoid missing a dose.',
+      pointsTitle: 'Points Earned',
+      pointsMsg: 'Congratulations! You earned 10 reward points for taking your morning dose.',
+      emergencyTitle: 'Emergency Service Active',
+      emergencyMsg: 'Priority 10-minute delivery is now available in your area.'
+    },
+    hi: {
+      title: 'सूचनाएं',
+      subtitle: 'अपनी दवाओं और ऑर्डरों के साथ अपडेट रहें।',
+      markAll: 'सभी को पढ़ा हुआ मान लें',
+      orderTitle: 'ऑर्डर भेजा गया',
+      orderMsg: 'आपका ऑर्डर #ORD-7721 भेज दिया गया है और शाम 6 बजे तक पहुंच जाएगा।',
+      lowStockTitle: 'स्टॉक कम अलर्ट',
+      lowStockMsg: 'आपकी पैरासिटामोल की आपूर्ति कम हो रही है। खुराक छूटने से बचने के लिए अभी ऑर्डर करें।',
+      pointsTitle: 'अंक प्राप्त हुए',
+      pointsMsg: 'बधाई हो! आपने अपनी सुबह की खुराक लेने के लिए 10 रिवॉर्ड पॉइंट अर्जित किए हैं।',
+      emergencyTitle: 'आपातकालीन सेवा सक्रिय',
+      emergencyMsg: 'आपके क्षेत्र में अब प्राथमिकता 10-मिनट की डिलीवरी उपलब्ध है।'
+    },
+    kn: {
+      title: 'ಸೂಚನೆಗಳು',
+      subtitle: 'ನಿಮ್ಮ ಔಷಧಿ ಮತ್ತು ಆರ್ಡರ್‌ಗಳೊಂದಿಗೆ ಅಪ್‌ಡೇಟ್ ಆಗಿರಿ.',
+      markAll: 'ಎಲ್ಲವನ್ನೂ ಓದಿದಂತೆ ಗುರುತಿಸಿ',
+      orderTitle: 'ಆರ್ಡರ್ ಕಳುಹಿಸಲಾಗಿದೆ',
+      orderMsg: 'ನಿಮ್ಮ ಆರ್ಡರ್ #ORD-7721 ಅನ್ನು ಕಳುಹಿಸಲಾಗಿದೆ ಮತ್ತು ಸಂಜೆ 6 ಗಂಟೆಗೆ ತಲುಪಲಿದೆ.',
+      lowStockTitle: 'ಕಡಿಮೆ ಸ್ಟಾಕ್ ಅಲರ್ಟ್',
+      lowStockMsg: 'ನಿಮ್ಮ ಪ್ಯಾರಸಿಟಮಾಲ್ ಪೂರೈಕೆ ಕಡಿಮೆಯಾಗುತ್ತಿದೆ. ಡೋಸ್ ತಪ್ಪಿಸುವುದನ್ನು ತಡೆಯಲು ಈಗಲೇ ಆರ್ಡರ್ ಮಾಡಿ.',
+      pointsTitle: 'ಪಾಯಿಂಟ್ಸ್ ಗಳಿಸಲಾಗಿದೆ',
+      pointsMsg: 'ಅಭಿನಂದನೆಗಳು! ನಿಮ್ಮ ಬೆಳಗಿನ ಡೋಸ್ ತೆಗೆದುಕೊಂಡಿದ್ದಕ್ಕಾಗಿ ನೀವು 10 ರಿವಾರ್ಡ್ ಪಾಯಿಂಟ್ಸ್ ಗಳಿಸಿದ್ದೀರಿ.',
+      emergencyTitle: 'ತುರ್ತು ಸೇವೆ ಸಕ್ರಿಯವಾಗಿದೆ',
+      emergencyMsg: 'ನಿಮ್ಮ ಪ್ರದೇಶದಲ್ಲಿ ಈಗ ಆದ್ಯತೆಯ 10 ನಿಮಿಷಗಳ ವಿತರಣೆ ಲಭ್ಯವಿದೆ.'
+    }
+  };
+
+  const t = translations[language];
+
   const [notifications, setNotifications] = useState([
     { 
       id: 1, 
       type: 'info', 
-      title: 'Order Dispatched', 
-      message: 'Your order #ORD-7721 has been dispatched and will arrive by 6 PM.', 
+      titleKey: 'orderTitle', 
+      msgKey: 'orderMsg', 
       time: '10 mins ago',
       read: false
     },
     { 
       id: 2, 
       type: 'warning', 
-      title: 'Low Stock Alert', 
-      message: 'Your Paracetamol supply is running low. Order now to avoid missing a dose.', 
+      titleKey: 'lowStockTitle', 
+      msgKey: 'lowStockMsg', 
       time: '1 hour ago',
       read: false
     },
     { 
       id: 3, 
       type: 'success', 
-      title: 'Points Earned', 
-      message: 'Congratulations! You earned 10 reward points for taking your morning dose.', 
+      titleKey: 'pointsTitle', 
+      msgKey: 'pointsMsg', 
       time: '3 hours ago',
       read: true
     },
     { 
       id: 4, 
       type: 'emergency', 
-      title: 'Emergency Service Active', 
-      message: 'Priority 10-minute delivery is now available in your area.', 
+      titleKey: 'emergencyTitle', 
+      msgKey: 'emergencyMsg', 
       time: '5 hours ago',
       read: true
     }
@@ -52,19 +98,30 @@ export default function Notifications() {
   return (
     <div className="min-h-screen bg-slate-50 pt-6 px-6 pb-20">
       <div className="max-w-4xl mx-auto">
-        <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
+        <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
           <div className="flex items-center gap-4">
-            <button onClick={() => router.back()} className="p-3 bg-white rounded-2xl shadow-sm hover:bg-slate-50 transition-all border border-slate-100">
-               <ArrowLeft className="w-5 h-5 text-slate-400" />
+            <button onClick={() => router.back()} className="p-2.5 bg-white rounded-xl shadow-sm hover:bg-slate-50 transition-all border border-slate-100">
+               <ArrowLeft className="w-4 h-4 text-slate-400" />
             </button>
             <div>
-              <h1 className="text-4xl font-black text-slate-900 tracking-tight">Notifications</h1>
-              <p className="text-slate-500 font-medium">Stay updated with your medication and orders.</p>
+              <h1 className="text-3xl font-black text-slate-900 tracking-tight">{t.title}</h1>
+              <p className="text-slate-500 text-sm font-medium">{t.subtitle}</p>
             </div>
           </div>
-          <button onClick={markAllRead} className="text-xs font-black uppercase tracking-widest text-green-600 hover:text-green-700 transition-colors">
-            Mark all as read
-          </button>
+          <div className="flex items-center gap-6">
+            <select 
+              value={language} 
+              onChange={(e) => setLanguage(e.target.value)}
+              className="bg-white border border-slate-100 rounded-xl px-4 py-2 text-xs font-black uppercase tracking-widest text-slate-600 focus:outline-none focus:ring-2 focus:ring-green-500"
+            >
+              <option value="en">English</option>
+              <option value="hi">हिंदी (Hindi)</option>
+              <option value="kn">ಕನ್ನಡ (Kannada)</option>
+            </select>
+            <button onClick={markAllRead} className="text-[10px] font-black uppercase tracking-widest text-green-600 hover:text-green-700 transition-colors">
+              {t.markAll}
+            </button>
+          </div>
         </header>
 
         <div className="space-y-4">
@@ -96,13 +153,13 @@ export default function Notifications() {
                  <div className="flex-1">
                     <div className="flex justify-between items-start mb-1">
                        <h3 className="font-black text-slate-900 flex items-center gap-2">
-                         {notif.title}
+                         {t[notif.titleKey]}
                          {notif.type === 'warning' && <span className="w-2 h-2 bg-orange-500 rounded-full animate-ping"></span>}
                        </h3>
                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{notif.time}</span>
                     </div>
                     <p className="text-sm font-medium text-slate-500 leading-relaxed max-w-xl mb-4">
-                       {notif.message}
+                       {t[notif.msgKey]}
                     </p>
                     <div className="flex gap-3">
                        {notif.type === 'warning' ? (

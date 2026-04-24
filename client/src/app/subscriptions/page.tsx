@@ -16,7 +16,7 @@ export default function Subscriptions() {
 
   const fetchSubscriptions = async () => {
     try {
-      const token = localStorage.getItem('token`);
+      const token = localStorage.getItem('token');
       const res = await axios.get(`${API_URL}/api/subscriptions`, {
         headers: { Authorization: `Bearer ${token}` }
       });

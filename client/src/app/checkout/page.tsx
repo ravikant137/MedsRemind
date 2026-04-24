@@ -18,14 +18,14 @@ export default function Checkout() {
   const router = useRouter();
 
   useEffect(() => {
-    const savedCart = localStorage.getItem('meds_cart`);
+    const savedCart = localStorage.getItem('meds_cart');
     if (savedCart) {
       setCart(JSON.parse(savedCart));
     } else {
-      router.push('/shop`);
+      router.push('/shop');
     }
     
-    const user = JSON.parse(localStorage.getItem('user') || '{}`);
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
     if (user.address) setAddress(user.address);
   }, []);
 
@@ -35,7 +35,7 @@ export default function Checkout() {
     e.preventDefault();
     setLoading(true);
     try {
-      const token = localStorage.getItem('token`);
+      const token = localStorage.getItem('token');
       const res = await axios.post(`${API_URL}/api/orders`, {
         items: cart,
         total_amount: total,
@@ -46,7 +46,7 @@ export default function Checkout() {
 
       setOrderId(res.data.id);
       setOrderSuccess(true);
-      localStorage.removeItem('meds_cart`);
+      localStorage.removeItem('meds_cart');
       
       // Auto redirect to track after 3 seconds
       setTimeout(() => {
@@ -54,8 +54,8 @@ export default function Checkout() {
       }, 3000);
     } catch (err) {
       console.error(err);
-      alert('Order failed. Please login first.`);
-      router.push('/login`);
+      alert('Order failed. Please login first.');
+      router.push('/login');
     } finally {
       setLoading(false);
     }

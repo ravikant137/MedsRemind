@@ -21,7 +21,7 @@ export default function Emergency() {
 
   const activateSOS = async () => {
     try {
-      const token = localStorage.getItem('token`);
+      const token = localStorage.getItem('token');
       const res = await axios.post(`${API_URL}/api/orders`, {
         items: [{ id: 1, name: 'Emergency Kit', quantity: 1, price: 199 }], // Mock item
         total_amount: 199,
@@ -31,10 +31,10 @@ export default function Emergency() {
         headers: { Authorization: `Bearer ${token}` }
       });
       setSosActive(true);
-      alert('EMERGENCY ORDER PLACED! Priority drone/bike dispatched. Arriving in 10 mins.`);
+      alert('EMERGENCY ORDER PLACED! Priority drone/bike dispatched. Arriving in 10 mins.');
     } catch (err) {
       console.error(err);
-      alert('Failed to place emergency order`);
+      alert('Failed to place emergency order');
     }
   };
 

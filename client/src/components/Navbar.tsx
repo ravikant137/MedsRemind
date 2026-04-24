@@ -34,7 +34,7 @@ export default function Navbar() {
 
   const navLinks = [
     { name: 'Shop', href: '/shop' },
-    { name: 'ScanRX', href: '/prescription' },
+    { name: 'Scan RX', href: '/prescription' },
     { name: 'Reminders', href: '/reminders' },
     { name: 'Track', href: '/track' },
     { name: 'Discounts', href: '/discounts' },

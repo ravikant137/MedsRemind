@@ -24,12 +24,12 @@ export default function Login() {
       localStorage.setItem('user', JSON.stringify(res.data.user));
       
       if (res.data.user.role === 'ADMIN') {
-        router.push('/admin`);
+        router.push('/admin');
       } else {
-        router.push('/dashboard`);
+        router.push('/dashboard');
       }
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Login failed. Please try again.`);
+      setError(err.response?.data?.error || 'Login failed. Please try again.');
     } finally {
       setLoading(false);
     }

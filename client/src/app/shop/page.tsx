@@ -54,7 +54,7 @@ export default function Shop() {
       .map(m => ({ ...m, quantity: cart[m.id] }));
     
     localStorage.setItem('meds_cart', JSON.stringify(cartItems));
-    router.push('/checkout`);
+    router.push('/checkout');
   };
 
   return (
@@ -65,11 +65,11 @@ export default function Shop() {
           animate={{ opacity: 1, y: 0 }}
           className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12"
         >
-           <div>
-              <h1 className="text-5xl font-black text-slate-900 tracking-tight">
+            <div>
+              <h1 className="text-3xl font-black text-slate-900 tracking-tight">
                 Find <span className="text-green-600">Medicines</span>
               </h1>
-              <p className="text-slate-500 mt-2 font-medium">Order from over 10,000+ verified health products in INR</p>
+              <p className="text-slate-500 text-sm font-medium">Order verified health products.</p>
            </div>
            <div className="relative w-full md:w-96 group">
               <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-green-600 transition-colors w-6 h-6" />
@@ -132,9 +132,10 @@ export default function Shop() {
            {/* Product Grid */}
            <div className="flex-1">
               {loading ? (
-                <div className="flex flex-col items-center justify-center h-96 text-slate-400 gap-6">
-                  <Loader2 className="w-16 h-16 animate-spin text-green-600" />
-                  <p className="font-black uppercase tracking-widest text-xs">Scanning Inventory...</p>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                  {[1,2,3,4,5,6,7,8].map(i => (
+                    <div key={i} className="h-64 bg-slate-100 rounded-3xl animate-pulse"></div>
+                  ))}
                 </div>
               ) : medicines.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-96 text-center">
@@ -145,62 +146,48 @@ export default function Shop() {
                    <p className="text-slate-500 mt-2 font-medium">Try adjusting your filters or search terms</p>
                 </div>
               ) : (
-                <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-10">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                   <AnimatePresence mode="popLayout">
                     {medicines.map((med, idx) => (
                       <motion.div 
                         key={med.id}
                         layout
-                        initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                        transition={{ delay: idx * 0.05 }}
-                        whileHover={{ 
-                          rotateY: 8, 
-                          rotateX: -8,
-                          y: -10,
-                        }}
-                        className="glass-card p-8 rounded-[3rem] group hover:green-glow perspective-1000 preserve-3d cursor-pointer bg-white border border-white shadow-xl shadow-slate-100"
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        whileHover={{ y: -5 }}
+                        className="bg-white p-4 rounded-3xl border border-slate-100 shadow-md hover:shadow-xl transition-all group relative"
                       >
-                        <div className="relative w-full h-56 bg-gradient-to-br from-green-50 to-blue-50 rounded-[2.5rem] mb-6 flex items-center justify-center text-6xl transition-all duration-500 group-hover:scale-110 overflow-hidden shadow-inner">
-                           <div className="absolute inset-0 bg-green-500/5 opacity-0 group-hover:opacity-100 transition-opacity animate-pulse"></div>
-                           <motion.span 
-                             animate={{ y: [0, -8, 0] }}
-                             transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
-                             className="relative z-10 filter drop-shadow-2xl"
-                           >
+                         <div className="w-full aspect-square bg-slate-50 rounded-2xl mb-4 flex items-center justify-center text-4xl group-hover:scale-105 transition-transform overflow-hidden relative">
                             💊
-                           </motion.span>
-                        </div>
-                        <div className="flex justify-between items-start mb-4">
-                           <span className="text-[10px] uppercase tracking-widest font-black text-green-700 bg-green-50 px-4 py-2 rounded-full border border-green-100">{med.category}</span>
-                           <span className="text-xs font-bold text-slate-400">STOCK: {med.stock}</span>
-                        </div>
-                        <h3 className="text-2xl font-black text-slate-900 mb-2 group-hover:text-green-600 transition-colors leading-tight">{med.name}</h3>
-                        <p className="text-sm text-slate-500 mb-8 line-clamp-2 font-medium leading-relaxed">{med.description}</p>
-                        <div className="flex justify-between items-center">
-                           <div className="text-3xl font-black text-slate-900 tracking-tighter">₹{med.price.toFixed(2)}</div>
-                           
-                           {cart[med.id] ? (
-                             <motion.div 
-                               initial={{ scale: 0.8 }} 
-                               animate={{ scale: 1 }}
-                               className="flex items-center gap-4 bg-slate-900 text-white rounded-2xl px-4 py-3 shadow-2xl"
-                             >
-                                <button onClick={() => updateCart(med.id, -1)} className="p-1 hover:text-green-500 transition-colors"><Minus className="w-5 h-5" /></button>
-                                <span className="font-black min-w-[20px] text-center text-lg">{cart[med.id]}</span>
-                                <button onClick={() => updateCart(med.id, 1)} className="p-1 hover:text-green-500 transition-colors"><Plus className="w-5 h-5" /></button>
-                             </motion.div>
-                           ) : (
-                             <motion.button 
-                               whileTap={{ scale: 0.9 }}
-                               onClick={() => updateCart(med.id, 1)}
-                               className="bg-slate-900 text-white p-5 rounded-[1.5rem] hover:bg-green-600 transition-all shadow-xl hover:shadow-green-200"
-                             >
-                                <Plus className="w-7 h-7" />
-                             </motion.button>
-                           )}
-                        </div>
+                            {(!med.stock || med.stock < 1) && (
+                              <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center">
+                                <span className="text-[10px] font-black text-white uppercase tracking-widest">Out of Stock</span>
+                              </div>
+                            )}
+                         </div>
+                         <div className="space-y-2">
+                            <span className="text-[8px] font-black uppercase tracking-widest text-green-600 bg-green-50 px-2 py-1 rounded-full">{med.category}</span>
+                            <h3 className="text-sm font-black text-slate-900 leading-tight line-clamp-1">{med.name}</h3>
+                            <div className="flex justify-between items-center pt-2">
+                               <span className="text-lg font-black text-slate-900">₹{med.price.toFixed(2)}</span>
+                               <div className="flex items-center gap-2">
+                                  <button 
+                                    onClick={() => updateCart(med.id, -1)}
+                                    className="w-8 h-8 bg-slate-100 text-slate-400 rounded-lg flex items-center justify-center hover:bg-slate-200"
+                                  >
+                                     <Minus className="w-4 h-4" />
+                                  </button>
+                                  <span className="font-black text-sm w-4 text-center">{cart[med.id] || 0}</span>
+                                  <button 
+                                    onClick={() => updateCart(med.id, 1)}
+                                    disabled={med.stock < 1}
+                                    className="w-8 h-8 bg-slate-900 text-white rounded-lg flex items-center justify-center hover:bg-green-600 disabled:opacity-50"
+                                  >
+                                     <Plus className="w-4 h-4" />
+                                  </button>
+                               </div>
+                            </div>
+                         </div>
                       </motion.div>
                     ))}
                   </AnimatePresence>

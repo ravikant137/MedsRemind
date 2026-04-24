@@ -16,12 +16,15 @@ export default function Dashboard() {
   const [reminders, setReminders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [points, setPoints] = useState(0);
+  const [language, setLanguage] = useState('en');
   const router = useRouter();
 
   useEffect(() => {
-    const userData = localStorage.getItem('user`);
+    const savedLang = localStorage.getItem('meds_lang') || 'en';
+    setLanguage(savedLang);
+    const userData = localStorage.getItem('user');
     if (!userData) {
-      router.push('/login`);
+      router.push('/login');
       return;
     }
     setUser(JSON.parse(userData));
@@ -31,7 +34,7 @@ export default function Dashboard() {
 
   const fetchPoints = async () => {
     try {
-      const token = localStorage.getItem('token`);
+      const token = localStorage.getItem('token');
       const res = await axios.get(`${API_URL}/api/user/points`, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -43,7 +46,7 @@ export default function Dashboard() {
 
   const fetchData = async () => {
     try {
-      const token = localStorage.getItem('token`);
+      const token = localStorage.getItem('token');
       const res = await axios.get(`${API_URL}/api/reminders`, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -57,22 +60,27 @@ export default function Dashboard() {
 
   const completeReminder = async (id: number) => {
     try {
-      const token = localStorage.getItem('token`);
+      const token = localStorage.getItem('token');
       const res = await axios.post(`${API_URL}/api/reminders/${id}/complete`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setPoints(prev => prev + res.data.pointsEarned);
-      alert('Dose taken! You earned 10 Rewards Points! 🏆`);
+      alert('Dose taken! You earned 10 Rewards Points! 🏆');
     } catch (err) {
-      alert('Failed to complete reminder`);
+      alert('Failed to complete reminder');
     }
   };
 
   const playVoiceReminder = (reminder: any) => {
-    const text = `Time for ${reminder.medicine_name}. ${reminder.suggestion || ''}`;
+    const text = language === 'en' 
+      ? `Time for ${reminder.medicine_name}. ${reminder.suggestion || ''}`
+      : language === 'hi' 
+        ? `${reminder.medicine_name} लेने का समय हो गया है।` 
+        : `${reminder.medicine_name} ತೆಗೆದುಕೊಳ್ಳುವ ಸಮಯವಾಗಿದೆ.`;
+        
     const utterance = new SpeechSynthesisUtterance(text);
     const voices = window.speechSynthesis.getVoices();
-    const voice = voices.find(v => v.lang.includes('hi-IN') || v.lang.includes('en-IN')) || voices[0];
+    const voice = voices.find(v => v.lang.includes(language === 'hi' ? 'hi-IN' : language === 'kn' ? 'kn-IN' : 'en-IN')) || voices[0];
     if (voice) utterance.voice = voice;
     window.speechSynthesis.speak(utterance);
   };
@@ -94,7 +102,7 @@ export default function Dashboard() {
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white p-10 md:p-14 rounded-[4rem] shadow-2xl shadow-slate-200/50 mb-12 relative overflow-hidden group border border-white"
+          className="bg-white p-8 md:p-10 rounded-[3rem] shadow-xl shadow-slate-200/50 mb-8 relative overflow-hidden group border border-white"
         >
            <div className="absolute top-0 right-0 p-10 opacity-5 group-hover:scale-110 transition-transform duration-700">
               <Pill className="w-64 h-64 text-slate-900" />
@@ -109,23 +117,23 @@ export default function Dashboard() {
                  </div>
               </div>
               <div className="text-center md:text-left flex-1">
-                 <div className="flex flex-col md:flex-row md:items-center gap-4 mb-4">
-                    <h1 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight">
+                  <div className="flex flex-col md:flex-row md:items-center gap-4 mb-2">
+                    <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight">
                        Welcome, <span className="text-green-600">{user?.name}</span>
                     </h1>
-                    <span className="inline-flex items-center gap-2 px-4 py-2 bg-green-50 text-green-700 text-xs font-black uppercase tracking-widest rounded-full border border-green-100">
-                       <Award className="w-4 h-4" /> {points} Rewards Earned
+                    <span className="inline-flex items-center gap-2 px-3 py-1 bg-green-50 text-green-700 text-[10px] font-black uppercase tracking-widest rounded-full border border-green-100">
+                       <Award className="w-3.5 h-3.5" /> {points} Rewards
                     </span>
                  </div>
                  <p className="text-slate-500 font-medium text-lg mb-8 max-w-2xl leading-relaxed">
                     Track your dosage and earn points for being consistent. You have <span className="text-slate-900 font-black">{reminders.length} medications</span> scheduled for today.
                  </p>
-                 <div className="flex flex-wrap justify-center md:justify-start gap-4">
-                    <Link href="/reminders" className="px-8 py-4 bg-slate-900 text-white rounded-2xl font-black flex items-center gap-3 hover:bg-green-600 transition-all shadow-xl">
-                       <Calendar className="w-5 h-5" /> View Schedule
+                  <div className="flex flex-wrap justify-center md:justify-start gap-4">
+                    <Link href="/reminders" className="px-6 py-3 bg-slate-900 text-white rounded-xl font-black text-xs flex items-center gap-2 hover:bg-green-600 transition-all shadow-lg">
+                       <Calendar className="w-4 h-4" /> Schedule
                     </Link>
-                    <Link href="/discounts" className="px-8 py-4 bg-slate-50 text-slate-900 rounded-2xl font-black flex items-center gap-3 hover:bg-slate-100 transition-all border border-slate-100">
-                       <TrendingUp className="w-5 h-5 text-green-600" /> Reward Center
+                    <Link href="/discounts" className="px-6 py-3 bg-slate-50 text-slate-900 rounded-xl font-black text-xs flex items-center gap-2 hover:bg-slate-100 transition-all border border-slate-100">
+                       <TrendingUp className="w-4 h-4 text-green-600" /> Rewards
                     </Link>
                  </div>
               </div>
@@ -133,7 +141,7 @@ export default function Dashboard() {
         </motion.div>
 
         {/* Quick Stats Grid */}
-        <div className="grid md:grid-cols-3 gap-8 mb-12">
+        <div className="grid md:grid-cols-3 gap-6 mb-8">
            {stats.map((stat, i) => (
              <motion.div 
                key={i}

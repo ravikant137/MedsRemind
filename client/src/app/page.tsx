@@ -62,7 +62,7 @@ export default function Home() {
       </div>
 
       {/* Hero Section */}
-      <section className="relative pt-8 pb-12 px-6">
+      <section className="relative pt-4 pb-12 px-6">
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="flex flex-col lg:flex-row items-center gap-8">
             <motion.div 
