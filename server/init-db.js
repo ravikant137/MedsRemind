@@ -33,8 +33,18 @@ async function init() {
       status TEXT DEFAULT 'PENDING',
       payment_status TEXT DEFAULT 'UNPAID',
       address TEXT,
+      is_emergency BOOLEAN DEFAULT 0,
+      deliveryLocation TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (user_id) REFERENCES users(id)
+    )`,
+    `CREATE TABLE IF NOT EXISTS order_status_history (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      order_id INTEGER,
+      status TEXT NOT NULL,
+      notes TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (order_id) REFERENCES orders(id)
     )`,
     `CREATE TABLE IF NOT EXISTS order_items (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -120,6 +130,15 @@ async function init() {
     );
 
     console.log('Database initialized successfully.');
+
+    // Attempt to alter table if columns are missing (safe to fail if they exist)
+    try {
+      await db.query("ALTER TABLE orders ADD COLUMN is_emergency BOOLEAN DEFAULT 0");
+    } catch (e) {}
+    try {
+      await db.query("ALTER TABLE orders ADD COLUMN deliveryLocation TEXT");
+    } catch (e) {}
+
   } catch (err) {
     console.error('Error initializing database:', err);
   } finally {
