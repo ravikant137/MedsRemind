@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+:root {
+  --primary: #0ea5e9;
+  --primary-dark: #0284c7;
+  --secondary: #6366f1;
+  --background: #f8fafc;
+  --card: rgba(255, 255, 255, 0.7);
+  --glass: rgba(255, 255, 255, 0.4);
+  --text: #0f172a;
+}
+
+[data-theme='dark'] {
+  --background: #0f172a;
+  --card: rgba(30, 41, 59, 0.7);
+  --glass: rgba(30, 41, 59, 0.4);
+  --text: #f8fafc;
+}
+
+body {
+  background: var(--background);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+}
+
+.glass-card {
+  background: var(--card);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
