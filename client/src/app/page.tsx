@@ -9,6 +9,9 @@ import Link from 'next/link';
 import axios from 'axios';
 import { API_URL } from '@/config';
 
+// Bypass localtunnel anti-phishing screen for all API requests
+axios.defaults.headers.common['bypass-tunnel-reminder'] = 'true';
+
 const FloatingIcon = ({ icon: Icon, delay, x, y, size = 24 }: any) => (
   <motion.div 
     initial={{ opacity: 0 }}

@@ -4,6 +4,10 @@ import Link from 'next/link';
 import { Pill, User, ShoppingCart, LogOut, Menu, X, Bell, LayoutDashboard, ShieldCheck, ShieldAlert } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter, usePathname } from 'next/navigation';
+import axios from 'axios';
+
+// Bypass localtunnel anti-phishing screen for all API requests
+axios.defaults.headers.common['bypass-tunnel-reminder'] = 'true';
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
