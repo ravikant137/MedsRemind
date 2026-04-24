@@ -126,6 +126,9 @@ export default function Navbar() {
                             <Link href="/profile" onClick={() => setIsProfileOpen(false)} className="flex items-center gap-3 p-3 hover:bg-slate-50 rounded-xl transition-all font-bold text-slate-600 hover:text-green-600">
                                <User className="w-5 h-5" /> My Profile
                             </Link>
+                            <Link href="/orders" onClick={() => setIsProfileOpen(false)} className="flex items-center gap-3 p-3 hover:bg-slate-50 rounded-xl transition-all font-bold text-slate-600 hover:text-green-600">
+                               <ShoppingCart className="w-5 h-5" /> My Orders
+                            </Link>
                             <Link href="/dashboard" onClick={() => setIsProfileOpen(false)} className="flex items-center gap-3 p-3 hover:bg-slate-50 rounded-xl transition-all font-bold text-slate-600 hover:text-green-600">
                                <LayoutDashboard className="w-5 h-5" /> Dashboard
                             </Link>

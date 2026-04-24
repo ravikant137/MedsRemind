@@ -117,6 +117,16 @@ export default function AdminDashboard() {
     }
   };
 
+  const updateOrderStatus = async (id: number, status: string) => {
+    try {
+      const config = { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } };
+      await axios.patch(`${API_URL}/api/orders/${id}/status`, { status }, config);
+      fetchData();
+    } catch (err) {
+      alert('Failed to update order status');
+    }
+  };
+
   const renderContent = () => {
     if (loading) return (
       <div className="flex flex-col items-center justify-center h-96 gap-4 text-slate-400">
@@ -252,14 +262,22 @@ export default function AdminDashboard() {
                            </div>
                            <div className="text-center">
                               <p className="text-xs text-slate-400 font-black uppercase tracking-widest">Status</p>
-                              <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest ${order.is_emergency ? 'bg-red-100 text-red-600' : 'bg-green-50 text-green-600'}`}>
-                                {order.is_emergency ? <ShieldAlert className="w-3 h-3" /> : <CheckCircle className="w-3 h-3" />} 
-                                {order.is_emergency ? 'Emergency' : 'Paid'}
-                              </span>
+                              <select 
+                                value={order.status || 'ORDER_PLACED'} 
+                                onChange={(e) => updateOrderStatus(order.id, e.target.value)}
+                                className="mt-1 block w-full text-xs font-bold bg-slate-50 border-none rounded-lg focus:ring-green-500"
+                              >
+                                <option value="ORDER_PLACED">Order Placed</option>
+                                <option value="CONFIRMED">Confirmed</option>
+                                <option value="PACKED">Packed</option>
+                                <option value="OUT_FOR_DELIVERY">Out for Delivery</option>
+                                <option value="DELIVERED">Delivered</option>
+                                <option value="CANCELLED">Cancelled</option>
+                              </select>
                            </div>
-                           <button className="p-4 bg-slate-50 text-slate-400 rounded-2xl hover:bg-green-600 hover:text-white transition-all">
+                           <Link href={`/track?id=${order.id}`} target="_blank" className="p-4 bg-slate-50 text-slate-400 rounded-2xl hover:bg-green-600 hover:text-white transition-all">
                               <ExternalLink className="w-5 h-5" />
-                           </button>
+                           </Link>
                         </div>
                      </div>
                    ))}

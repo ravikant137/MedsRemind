@@ -25,20 +25,40 @@ export default function OrderTracking() {
       const estDelivery = new Date(createdAt);
       estDelivery.setHours(estDelivery.getHours() + 2);
 
+      const allSteps = ['ORDER_PLACED', 'CONFIRMED', 'PACKED', 'OUT_FOR_DELIVERY', 'DELIVERED'];
+      const historyMap: Record<string, Date> = {};
+      if (order.statusHistory) {
+         order.statusHistory.forEach((h: any) => {
+             historyMap[h.status] = new Date(h.timestamp.includes(' ') && !h.timestamp.includes('T') ? h.timestamp + ' UTC' : h.timestamp);
+         });
+      }
+
+      let currentStepIndex = allSteps.indexOf(order.status || 'ORDER_PLACED');
+      
+      let mappedSteps = [];
+      if (order.status === 'CANCELLED') {
+        mappedSteps = [
+          { status: 'ORDER PLACED', time: historyMap['ORDER_PLACED'] ? historyMap['ORDER_PLACED'].toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Done', completed: true },
+          { status: 'CANCELLED', time: historyMap['CANCELLED'] ? historyMap['CANCELLED'].toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Cancelled', completed: false }
+        ];
+      } else {
+        mappedSteps = allSteps.map((step, index) => {
+           const isCompleted = index <= currentStepIndex;
+           const time = historyMap[step] ? historyMap[step].toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : (isCompleted ? 'Done' : 'Pending');
+           const label = step.replace(/_/g, ' ');
+           return { status: label, time, completed: isCompleted };
+        });
+      }
+
       setTrackingData({
         id: `#ORD-${order.id}`,
-        status: order.status === 'PENDING' ? 'Processing' : 'In Transit',
+        status: order.status === 'PENDING' ? 'PROCESSING' : (order.status || 'ORDER_PLACED').replace(/_/g, ' '),
         customer: order.user_name,
         address: order.address,
         total_amount: order.total_amount,
         items: order.items,
         estimated_delivery: estDelivery.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        steps: [
-          { status: 'Order Placed', time: createdAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), completed: true },
-          { status: 'Processed', time: new Date(createdAt.getTime() + 15*60000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), completed: order.status !== 'PENDING' },
-          { status: 'Out for Delivery', time: 'Pending', completed: false },
-          { status: 'Delivered', time: 'Pending', completed: false }
-        ]
+        steps: mappedSteps
       });
     } catch (err: any) {
       alert(err.response?.data?.error || 'Order not found or unauthorized');

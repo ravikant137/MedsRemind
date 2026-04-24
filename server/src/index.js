@@ -102,10 +102,14 @@ app.post('/api/orders', auth, async (req, res) => {
   const user_id = req.user.id;
   try {
     const orderResult = await db.query(
-      'INSERT INTO orders (user_id, total_amount, address, payment_status, is_emergency) VALUES (?, ?, ?, ?, ?)',
-      [user_id, total_amount, address, 'PAID', is_emergency ? 1 : 0]
+      'INSERT INTO orders (user_id, total_amount, address, payment_status, is_emergency, status, deliveryLocation) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [user_id, total_amount, address, 'PAID', is_emergency ? 1 : 0, 'ORDER_PLACED', req.body.deliveryLocation || null]
     );
     const orderId = orderResult.lastID;
+
+    // Add status history
+    await db.query('INSERT INTO order_status_history (order_id, status) VALUES (?, ?)', [orderId, 'ORDER_PLACED']);
+
     
     for (const item of items) {
       await db.query(
@@ -166,8 +170,56 @@ app.get('/api/orders/:id', auth, async (req, res) => {
       [orderId]
     );
 
+    const historyResult = await db.query(
+      'SELECT status, timestamp FROM order_status_history WHERE order_id = ? ORDER BY timestamp ASC',
+      [orderId]
+    );
+
     order.items = itemsResult.rows;
+    order.statusHistory = historyResult.rows;
     res.json(order);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.patch('/api/orders/:id/status', auth, async (req, res) => {
+  try {
+    // Only ADMIN should be able to update status
+    if (req.user.role !== 'ADMIN') {
+      return res.status(403).json({ error: 'Unauthorized to update order status' });
+    }
+
+    const orderId = req.params.id;
+    const { status, deliveryLocation } = req.body;
+
+    if (!status) {
+      return res.status(400).json({ error: 'Status is required' });
+    }
+
+    // Verify order exists
+    const orderResult = await db.query('SELECT * FROM orders WHERE id = ?', [orderId]);
+    if (orderResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+
+    // Update order status
+    if (deliveryLocation) {
+       await db.query('UPDATE orders SET status = ?, deliveryLocation = ? WHERE id = ?', [status, deliveryLocation, orderId]);
+    } else {
+       await db.query('UPDATE orders SET status = ? WHERE id = ?', [status, orderId]);
+    }
+    
+    // Add to history
+    await db.query('INSERT INTO order_status_history (order_id, status) VALUES (?, ?)', [orderId, status]);
+
+    // Create Notification for the user
+    await db.query(
+      'INSERT INTO notifications (user_id, type, title, message) VALUES (?, ?, ?, ?)',
+      [orderResult.rows[0].user_id, 'info', 'Order Update', `Your order #ORD-${orderId} status has been updated to ${status}.`]
+    );
+
+    res.json({ message: 'Order status updated successfully', status });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
