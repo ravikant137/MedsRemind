@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Pill, User, ShoppingCart, LogOut, Menu, X, Bell, LayoutDashboard, ShieldCheck } from 'lucide-react';
+import { Pill, User, ShoppingCart, LogOut, Menu, X, Bell, LayoutDashboard, ShieldCheck, ShieldAlert } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter, usePathname } from 'next/navigation';
 
@@ -82,6 +82,15 @@ export default function Navbar() {
 
           {/* User Actions */}
           <div className="flex items-center gap-4">
+            <Link href="/notifications" className="p-3 bg-slate-50 text-slate-400 hover:text-green-600 hover:bg-green-50 rounded-xl transition-all relative">
+               <Bell className="w-6 h-6" />
+               <span className="absolute top-2 right-2 w-3 h-3 bg-red-500 border-2 border-white rounded-full"></span>
+            </Link>
+            
+            <Link href="/emergency" className="hidden md:flex items-center gap-2 px-6 py-3 bg-red-50 text-red-600 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all shadow-xl shadow-red-100">
+               <ShieldAlert className="w-4 h-4" /> Emergency
+            </Link>
+
             {user ? (
               <div className="flex items-center gap-3">
                 <Link href="/dashboard" className="hidden md:flex items-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-green-600 transition-all shadow-xl shadow-slate-200">
@@ -119,6 +128,9 @@ export default function Navbar() {
                                  <ShieldCheck className="w-5 h-5" /> Admin Panel
                               </Link>
                             )}
+                            <Link href="/profile" onClick={() => setIsProfileOpen(false)} className="flex items-center gap-3 p-3 hover:bg-slate-50 rounded-xl transition-all font-bold text-slate-600 hover:text-green-600">
+                               <User className="w-5 h-5" /> My Profile
+                            </Link>
                             <Link href="/dashboard" onClick={() => setIsProfileOpen(false)} className="flex items-center gap-3 p-3 hover:bg-slate-50 rounded-xl transition-all font-bold text-slate-600 hover:text-green-600">
                                <LayoutDashboard className="w-5 h-5" /> Dashboard
                             </Link>

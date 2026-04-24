@@ -62,6 +62,7 @@ async function init() {
       dosage TEXT,
       time TEXT NOT NULL,
       frequency TEXT,
+      suggestion TEXT,
       status TEXT DEFAULT 'ACTIVE',
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (user_id) REFERENCES users(id)

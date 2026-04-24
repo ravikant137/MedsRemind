@@ -4,7 +4,7 @@ import {
   LayoutDashboard, Package, ShoppingBag, Users, TrendingUp, 
   AlertTriangle, Search, Plus, ExternalLink, Trash2, 
   Edit3, CheckCircle, Clock, XCircle, ChevronRight, Loader2, X,
-  BarChart3, PieChart, Activity, DollarSign, Calendar, ArrowLeft, LogOut
+  BarChart3, PieChart, Activity, DollarSign, Calendar, ArrowLeft, LogOut, Camera
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
@@ -401,33 +401,67 @@ export default function AdminDashboard() {
              >
                 <button onClick={() => setShowAddModal(false)} className="absolute top-8 right-8 p-2 hover:bg-slate-100 rounded-full transition-colors"><X className="w-6 h-6" /></button>
                 <h3 className="text-3xl font-black mb-8">Add <span className="text-green-600">Medicine</span></h3>
-                <form onSubmit={handleAddMedicine} className="space-y-6">
-                   <div className="grid grid-cols-2 gap-6">
-                      <div className="space-y-2">
-                         <label className="text-xs font-black uppercase tracking-widest text-slate-400">Name</label>
-                         <input required type="text" value={newMed.name} onChange={e => setNewMed({...newMed, name: e.target.value})} className="w-full p-4 bg-slate-50 rounded-2xl border-none focus:ring-2 focus:ring-green-500/20 font-bold" />
-                      </div>
-                      <div className="space-y-2">
-                         <label className="text-xs font-black uppercase tracking-widest text-slate-400">Category</label>
-                         <select value={newMed.category} onChange={e => setNewMed({...newMed, category: e.target.value})} className="w-full p-4 bg-slate-50 rounded-2xl border-none focus:ring-2 focus:ring-green-500/20 font-bold">
-                            {['Fever', 'Antibiotic', 'Pain Relief', 'Allergy', 'Vitamins'].map(c => <option key={c} value={c}>{c}</option>)}
-                         </select>
-                      </div>
-                   </div>
-                   <div className="grid grid-cols-2 gap-6">
-                      <div className="space-y-2">
-                         <label className="text-xs font-black uppercase tracking-widest text-slate-400">Price (INR)</label>
-                         <input required type="number" value={newMed.price} onChange={e => setNewMed({...newMed, price: e.target.value})} className="w-full p-4 bg-slate-50 rounded-2xl border-none focus:ring-2 focus:ring-green-500/20 font-bold" />
-                      </div>
-                      <div className="space-y-2">
-                         <label className="text-xs font-black uppercase tracking-widest text-slate-400">Stock</label>
-                         <input required type="number" value={newMed.stock} onChange={e => setNewMed({...newMed, stock: e.target.value})} className="w-full p-4 bg-slate-50 rounded-2xl border-none focus:ring-2 focus:ring-green-500/20 font-bold" />
-                      </div>
-                   </div>
-                   <div className="space-y-2">
-                      <label className="text-xs font-black uppercase tracking-widest text-slate-400">Description</label>
-                      <textarea required value={newMed.description} onChange={e => setNewMed({...newMed, description: e.target.value})} className="w-full p-4 bg-slate-50 rounded-2xl border-none focus:ring-2 focus:ring-green-500/20 font-bold h-32" />
-                   </div>
+                 <div className="flex gap-6 mb-8">
+                    <div className="flex-1 space-y-4">
+                       <label className="text-xs font-black uppercase tracking-widest text-slate-400">AI Product Scan</label>
+                       <div className="relative group">
+                          <input 
+                            type="file" 
+                            id="prod-image" 
+                            className="hidden" 
+                            onChange={(e) => {
+                               const f = e.target.files?.[0];
+                               if (f) {
+                                  // Mock AI Scan for product
+                                  const name = f.name.split('.')[0].replace(/_/g, ' ');
+                                  setNewMed({
+                                     ...newMed,
+                                     name: name.charAt(0).toUpperCase() + name.slice(1),
+                                     category: 'Antibiotic',
+                                     price: '299',
+                                     stock: '50',
+                                     description: `Premium quality ${name} for medical use.`
+                                  });
+                               }
+                            }}
+                          />
+                          <label htmlFor="prod-image" className="w-full h-40 border-2 border-dashed border-slate-200 rounded-[2rem] flex flex-col items-center justify-center gap-3 cursor-pointer group-hover:border-green-500 group-hover:bg-green-50/50 transition-all">
+                             <div className="w-12 h-12 bg-slate-900 text-white rounded-xl flex items-center justify-center shadow-lg group-hover:bg-green-600 transition-colors">
+                                <Camera className="w-6 h-6" />
+                             </div>
+                             <p className="text-xs font-black text-slate-400 group-hover:text-green-600">Scan Product Label</p>
+                          </label>
+                       </div>
+                    </div>
+                 </div>
+
+                 <form onSubmit={handleAddMedicine} className="space-y-6">
+                    <div className="grid grid-cols-2 gap-6">
+                       <div className="space-y-2">
+                          <label className="text-xs font-black uppercase tracking-widest text-slate-400">Name</label>
+                          <input required type="text" value={newMed.name} onChange={e => setNewMed({...newMed, name: e.target.value})} className="w-full p-4 bg-slate-50 rounded-2xl border-none focus:ring-2 focus:ring-green-500/20 font-bold" />
+                       </div>
+                       <div className="space-y-2">
+                          <label className="text-xs font-black uppercase tracking-widest text-slate-400">Category</label>
+                          <select value={newMed.category} onChange={e => setNewMed({...newMed, category: e.target.value})} className="w-full p-4 bg-slate-50 rounded-2xl border-none focus:ring-2 focus:ring-green-500/20 font-bold">
+                             {['Fever', 'Antibiotic', 'Pain Relief', 'Allergy', 'Vitamins'].map(c => <option key={c} value={c}>{c}</option>)}
+                          </select>
+                       </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-6">
+                       <div className="space-y-2">
+                          <label className="text-xs font-black uppercase tracking-widest text-slate-400">Price (INR)</label>
+                          <input required type="number" value={newMed.price} onChange={e => setNewMed({...newMed, price: e.target.value})} className="w-full p-4 bg-slate-50 rounded-2xl border-none focus:ring-2 focus:ring-green-500/20 font-bold" />
+                       </div>
+                       <div className="space-y-2">
+                          <label className="text-xs font-black uppercase tracking-widest text-slate-400">Stock</label>
+                          <input required type="number" value={newMed.stock} onChange={e => setNewMed({...newMed, stock: e.target.value})} className="w-full p-4 bg-slate-50 rounded-2xl border-none focus:ring-2 focus:ring-green-500/20 font-bold" />
+                       </div>
+                    </div>
+                    <div className="space-y-2">
+                       <label className="text-xs font-black uppercase tracking-widest text-slate-400">Description</label>
+                       <textarea required value={newMed.description} onChange={e => setNewMed({...newMed, description: e.target.value})} className="w-full p-4 bg-slate-50 rounded-2xl border-none focus:ring-2 focus:ring-green-500/20 font-bold h-32" />
+                    </div>
                    <button type="submit" className="w-full py-5 bg-green-600 text-white rounded-[2rem] font-black text-lg hover:bg-green-700 transition-all shadow-xl shadow-green-200">
                       Save Medicine
                    </button>

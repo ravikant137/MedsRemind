@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { 
   Clock, CheckCircle2, XCircle, TrendingUp, Calendar, Pill, 
   Activity, ArrowRight, Loader2, User, ShieldCheck, 
-  Heart, ShoppingBag, Bell, History, Settings, HeartPulse
+  Heart, ShoppingBag, Bell, History, Settings, HeartPulse, Award, Volume2, ShieldAlert
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
@@ -14,6 +14,7 @@ export default function Dashboard() {
   const [user, setUser] = useState<any>(null);
   const [reminders, setReminders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [points, setPoints] = useState(0);
   const router = useRouter();
 
   useEffect(() => {
@@ -24,7 +25,20 @@ export default function Dashboard() {
     }
     setUser(JSON.parse(userData));
     fetchData();
+    fetchPoints();
   }, []);
+
+  const fetchPoints = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.get('http://localhost:5000/api/user/points', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setPoints(res.data.points);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const fetchData = async () => {
     try {
@@ -40,8 +54,30 @@ export default function Dashboard() {
     }
   };
 
+  const completeReminder = async (id: number) => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.post(`http://localhost:5000/api/reminders/${id}/complete`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setPoints(prev => prev + res.data.pointsEarned);
+      alert('Dose taken! You earned 10 Rewards Points! 🏆');
+    } catch (err) {
+      alert('Failed to complete reminder');
+    }
+  };
+
+  const playVoiceReminder = (reminder: any) => {
+    const text = `Time for ${reminder.medicine_name}. ${reminder.suggestion || ''}`;
+    const utterance = new SpeechSynthesisUtterance(text);
+    const voices = window.speechSynthesis.getVoices();
+    const voice = voices.find(v => v.lang.includes('hi-IN') || v.lang.includes('en-IN')) || voices[0];
+    if (voice) utterance.voice = voice;
+    window.speechSynthesis.speak(utterance);
+  };
+
   const stats = [
-    { label: 'Heart Rate', value: '72', unit: 'bpm', icon: Heart, color: 'text-red-500 bg-red-50' },
+    { label: 'Health Points', value: points.toString(), unit: 'pts', icon: Award, color: 'text-orange-500 bg-orange-50' },
     { label: 'Adherence', value: '94', unit: '%', icon: Activity, color: 'text-green-500 bg-green-50' },
     { label: 'Orders', value: '12', unit: 'total', icon: ShoppingBag, color: 'text-blue-500 bg-blue-50' },
   ];
@@ -77,18 +113,18 @@ export default function Dashboard() {
                        Welcome, <span className="text-green-600">{user?.name}</span>
                     </h1>
                     <span className="inline-flex items-center gap-2 px-4 py-2 bg-green-50 text-green-700 text-xs font-black uppercase tracking-widest rounded-full border border-green-100">
-                       <ShieldCheck className="w-4 h-4" /> Verified Profile
+                       <Award className="w-4 h-4" /> {points} Rewards Earned
                     </span>
                  </div>
                  <p className="text-slate-500 font-medium text-lg mb-8 max-w-2xl leading-relaxed">
-                    Manage your medical records, track your dosage, and ensure timely refills. You have <span className="text-slate-900 font-black">{reminders.length} active prescriptions</span> today.
+                    Track your dosage and earn points for being consistent. You have <span className="text-slate-900 font-black">{reminders.length} medications</span> scheduled for today.
                  </p>
                  <div className="flex flex-wrap justify-center md:justify-start gap-4">
                     <Link href="/reminders" className="px-8 py-4 bg-slate-900 text-white rounded-2xl font-black flex items-center gap-3 hover:bg-green-600 transition-all shadow-xl">
                        <Calendar className="w-5 h-5" /> View Schedule
                     </Link>
-                    <Link href="/prescription" className="px-8 py-4 bg-slate-50 text-slate-900 rounded-2xl font-black flex items-center gap-3 hover:bg-slate-100 transition-all border border-slate-100">
-                       <Bell className="w-5 h-5 text-green-600" /> Notifications
+                    <Link href="/discounts" className="px-8 py-4 bg-slate-50 text-slate-900 rounded-2xl font-black flex items-center gap-3 hover:bg-slate-100 transition-all border border-slate-100">
+                       <TrendingUp className="w-5 h-5 text-green-600" /> Reward Center
                     </Link>
                  </div>
               </div>
@@ -150,9 +186,20 @@ export default function Dashboard() {
                                <h4 className="text-xl font-black text-slate-900">{rem.medicine_name}</h4>
                                <p className="text-sm text-slate-400 font-bold">{rem.dosage} • {rem.frequency}</p>
                             </div>
-                            <button className="px-6 py-3 bg-slate-900 text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-green-600 transition-colors shadow-lg">
-                               Take Dose
-                            </button>
+                            <div className="flex items-center gap-3">
+                               <button 
+                                 onClick={() => playVoiceReminder(rem)}
+                                 className="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center hover:bg-blue-100"
+                               >
+                                  <Volume2 className="w-5 h-5" />
+                               </button>
+                               <button 
+                                 onClick={() => completeReminder(rem.id)}
+                                 className="px-6 py-3 bg-slate-900 text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-green-600 transition-colors shadow-lg"
+                               >
+                                  Take Dose
+                               </button>
+                            </div>
                          </div>
                        ))}
                     </div>
@@ -188,23 +235,20 @@ export default function Dashboard() {
            <div className="space-y-10">
               <div className="bg-slate-900 text-white p-10 rounded-[3.5rem] relative overflow-hidden shadow-2xl shadow-slate-300">
                  <div className="absolute -top-10 -right-10 w-48 h-48 bg-green-500/20 rounded-full blur-3xl"></div>
-                 <h4 className="text-xl font-black mb-6 relative z-10">Pro Features</h4>
-                 <ul className="space-y-4 mb-10 relative z-10">
-                    {['Unlimited Schedules', 'Priority 2H Delivery', 'Pharmacist Video Call', 'Family Health Tracking'].map((feat, i) => (
-                      <li key={i} className="flex items-center gap-3 text-sm font-bold text-slate-400">
-                         <CheckCircle2 className="w-4 h-4 text-green-500" /> {feat}
-                      </li>
-                    ))}
-                 </ul>
-                 <button className="w-full py-4 bg-green-600 text-white rounded-2xl font-black hover:bg-green-700 transition-all shadow-xl shadow-green-900/50">
-                    Upgrade to Premium
+                 <h4 className="text-xl font-black mb-6 relative z-10">Rewards Member</h4>
+                 <div className="mb-8 p-6 bg-white/5 rounded-2xl border border-white/10">
+                    <p className="text-xs font-black uppercase tracking-widest text-slate-400 mb-2">Available Points</p>
+                    <p className="text-4xl font-black text-green-500">{points} <span className="text-sm text-slate-400">pts</span></p>
+                 </div>
+                 <button onClick={() => router.push('/discounts')} className="w-full py-4 bg-green-600 text-white rounded-2xl font-black hover:bg-green-700 transition-all shadow-xl shadow-green-900/50">
+                    Redeem Points
                  </button>
               </div>
 
               <div className="bg-white p-10 rounded-[3.5rem] border border-slate-50 shadow-xl shadow-slate-100/50">
                  <h4 className="text-xl font-black text-slate-900 mb-8">Settings & Safety</h4>
                  <div className="space-y-4">
-                    <button onClick={() => router.push('/dashboard')} className="w-full flex items-center justify-between p-5 bg-slate-50 rounded-2xl group hover:bg-slate-100 transition-all">
+                    <button onClick={() => router.push('/profile')} className="w-full flex items-center justify-between p-5 bg-slate-50 rounded-2xl group hover:bg-slate-100 transition-all">
                        <span className="font-black text-slate-600 flex items-center gap-3"><User className="w-5 h-5" /> Profile Edit</span>
                        <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-slate-900" />
                     </button>
@@ -217,6 +261,15 @@ export default function Dashboard() {
                        <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-slate-900" />
                     </button>
                  </div>
+              </div>
+
+              <div className="p-10 bg-red-50 rounded-[3.5rem] border border-red-100 mb-10">
+                 <ShieldAlert className="w-10 h-10 text-red-600 mb-4 animate-pulse" />
+                 <h4 className="text-lg font-black text-slate-900 mb-2">Emergency Mode</h4>
+                 <p className="text-sm text-slate-500 font-medium mb-6">Need medicines in 10 minutes? Activate SOS mode.</p>
+                 <button onClick={() => router.push('/emergency')} className="w-full py-4 bg-red-600 text-white rounded-2xl font-black shadow-lg hover:bg-red-700 transition-all flex items-center justify-center gap-2">
+                    Open SOS Center
+                 </button>
               </div>
 
               <div className="p-10 bg-green-50 rounded-[3.5rem] border border-green-100">

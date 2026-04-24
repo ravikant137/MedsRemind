@@ -133,11 +133,49 @@ app.get('/api/reminders', auth, async (req, res) => {
 app.post('/api/reminders', auth, async (req, res) => {
   const { medicine_name, dosage, time, frequency } = req.body;
   try {
+    const suggestion = getSuggestion(medicine_name);
     const result = await db.query(
-      'INSERT INTO reminders (user_id, medicine_name, dosage, time, frequency, status) VALUES (?, ?, ?, ?, ?, ?)',
-      [req.user.id, medicine_name, dosage, time, frequency, 'ACTIVE']
+      'INSERT INTO reminders (user_id, medicine_name, dosage, time, frequency, suggestion) VALUES (?, ?, ?, ?, ?, ?)',
+      [req.user.id, medicine_name, dosage, time, frequency, suggestion]
     );
-    res.status(201).json({ id: result.lastID, message: 'Reminder set' });
+    res.status(201).json({ id: result.lastID, message: 'Reminder set', suggestion });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+const getSuggestion = (name) => {
+  const n = name.toLowerCase();
+  if (n.includes('paracetamol') || n.includes('ibuprofen') || n.includes('pain')) 
+    return 'Take after food to avoid stomach upset. Avoid alcohol.';
+  if (n.includes('amoxicillin') || n.includes('antibiotic') || n.includes('penicillin'))
+    return 'Complete the full course even if you feel better. Take with plenty of water.';
+  if (n.includes('cetirizine') || n.includes('allergy') || n.includes('loratadine'))
+    return 'May cause drowsiness. Avoid driving if affected.';
+  if (n.includes('vitamin') || n.includes('multivitamin'))
+    return 'Best taken with your largest meal of the day for better absorption.';
+  if (n.includes('metformin') || n.includes('diabetes'))
+    return 'Take with meals to reduce gastrointestinal side effects.';
+  if (n.includes('atorvastatin') || n.includes('cholesterol'))
+    return 'Avoid grapefruit juice. Contact doctor if you experience unusual muscle pain.';
+  return 'Follow your doctor\'s instructions. Maintain consistent timings.';
+};
+
+app.post('/api/reminders/:id/complete', auth, async (req, res) => {
+  try {
+    // Award 10 points for taking medicine
+    await db.query('UPDATE users SET points = points + 10 WHERE id = ?', [req.user.id]);
+    // Delete or mark as completed (here we just keep it but user gets points)
+    res.json({ message: 'Reminder completed! You earned 10 points.', pointsEarned: 10 });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/user/points', auth, async (req, res) => {
+  try {
+    const result = await db.query('SELECT points FROM users WHERE id = ?', [req.user.id]);
+    res.json({ points: result.rows[0]?.points || 0 });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -147,9 +185,10 @@ app.post('/api/reminders/bulk', auth, async (req, res) => {
   const { medicines } = req.body;
   try {
     for (const med of medicines) {
+      const suggestion = getSuggestion(med.name);
       await db.query(
-        'INSERT INTO reminders (user_id, medicine_name, dosage, time, frequency, status) VALUES (?, ?, ?, ?, ?, ?)',
-        [req.user.id, med.name, med.dosage, '09:00 AM', med.duration, 'ACTIVE']
+        'INSERT INTO reminders (user_id, medicine_name, dosage, time, frequency, suggestion, status) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        [req.user.id, med.name, med.dosage, '09:00 AM', med.duration, suggestion, 'ACTIVE']
       );
     }
     res.status(201).json({ message: 'All reminders set successfully' });
