@@ -243,14 +243,18 @@ app.get('/api/notifications', auth, async (req, res) => {
   }
 });
 
-app.put('/api/notifications/read-all', auth, async (req, res) => {
+// Unified Read Endpoint (Supports both old PUT /read-all and new POST /read)
+const markNotificationsAsRead = async (req, res) => {
   try {
-    await db.query('UPDATE notifications SET read = 1 WHERE user_id = ?', [req.user.id]);
-    res.json({ success: true });
+    await db.query('UPDATE notifications SET read = 1 WHERE user_id = ? AND read = 0', [req.user.id]);
+    res.json({ success: true, message: 'All notifications marked as read' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
-});
+};
+
+app.put('/api/notifications/read-all', auth, markNotificationsAsRead);
+app.post('/api/notifications/read', auth, markNotificationsAsRead);
 
 // --- USER ORDERS ---
 app.get('/api/orders', auth, async (req, res) => {
