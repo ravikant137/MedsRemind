@@ -5,6 +5,7 @@ import { Pill, Mail, Lock, ArrowRight, Loader2, ShieldCheck } from 'lucide-react
 import { motion } from 'framer-motion';
 import axios from 'axios';
 import { API_URL } from '@/config';
+import Logo from '@/components/Logo';
 import { useRouter } from 'next/navigation';
 
 export default function Login() {
@@ -47,14 +48,8 @@ export default function Login() {
         className="w-full max-w-md bg-white/80 backdrop-blur-2xl p-10 rounded-[3rem] shadow-2xl border border-white shadow-green-100 relative"
       >
         <div className="flex flex-col items-center mb-10">
-          <motion.div 
-            whileHover={{ rotate: 360 }}
-            transition={{ duration: 1 }}
-            className="w-16 h-16 bg-green-600 rounded-2xl flex items-center justify-center mb-6 shadow-xl shadow-green-200"
-          >
-            <Pill className="text-white w-8 h-8" />
-          </motion.div>
-          <h1 className="text-3xl font-black text-slate-900 tracking-tight">Welcome <span className="text-green-600">Back</span></h1>
+          <Logo className="w-24 h-24 mb-4" />
+          <h1 className="text-3xl font-black text-slate-900 tracking-tight">Anjaneya <span className="text-green-600">Pharmacy</span></h1>
           <p className="text-slate-500 font-medium mt-2">Continue your healthy journey</p>
         </div>
 

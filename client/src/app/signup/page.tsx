@@ -5,6 +5,7 @@ import { Pill, Mail, Lock, User, Phone, MapPin, ArrowRight, Loader2 } from 'luci
 import { motion } from 'framer-motion';
 import axios from 'axios';
 import { API_URL } from '@/config';
+import Logo from '@/components/Logo';
 import { useRouter } from 'next/navigation';
 
 export default function Signup() {
@@ -39,10 +40,8 @@ export default function Signup() {
         className="w-full max-w-xl bg-white/80 backdrop-blur-2xl p-10 rounded-[3rem] shadow-2xl border border-white"
       >
         <div className="flex flex-col items-center mb-8">
-          <div className="w-14 h-14 bg-green-600 rounded-2xl flex items-center justify-center mb-4 shadow-xl shadow-green-200">
-            <Pill className="text-white w-7 h-7" />
-          </div>
-          <h1 className="text-3xl font-black text-slate-900 tracking-tight">Create <span className="text-green-600">Account</span></h1>
+          <Logo className="w-20 h-20 mb-4" />
+          <h1 className="text-3xl font-black text-slate-900 tracking-tight">Anjaneya <span className="text-green-600">Pharmacy</span></h1>
           <p className="text-slate-500 font-medium">Join our healthy community today</p>
         </div>
 
