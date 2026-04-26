@@ -171,7 +171,7 @@ app.get('/api/orders/:id', auth, async (req, res) => {
     );
 
     const historyResult = await db.query(
-      'SELECT status, timestamp FROM order_status_history WHERE order_id = ? ORDER BY timestamp ASC',
+      'SELECT status, created_at AS timestamp FROM order_status_history WHERE order_id = ? ORDER BY created_at ASC',
       [orderId]
     );
 
@@ -207,7 +207,7 @@ app.get('/api/track/:id', async (req, res) => {
     );
 
     const historyResult = await db.query(
-      'SELECT status, timestamp FROM order_status_history WHERE order_id = ? ORDER BY timestamp ASC',
+      'SELECT status, created_at AS timestamp FROM order_status_history WHERE order_id = ? ORDER BY created_at ASC',
       [orderId]
     );
 
