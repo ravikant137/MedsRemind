@@ -19,7 +19,17 @@ function OrderTrackingContent() {
       const res = await axios.get(`${API_URL}/api/track/${id}`);
       const order = res.data;
       
-      const createdAt = new Date(order.created_at.includes(' ') && !order.created_at.includes('T') ? order.created_at + ' UTC' : order.created_at);
+      // Handle SQLite date format safely for local time display
+      const parseDate = (dateStr: string) => {
+        if (!dateStr) return new Date();
+        // If it lacks 'T', it's likely 'YYYY-MM-DD HH:MM:SS'
+        if (!dateStr.includes('T') && dateStr.includes(' ')) {
+          return new Date(dateStr.replace(' ', 'T') + 'Z'); // Assume UTC from server
+        }
+        return new Date(dateStr);
+      };
+
+      const createdAt = parseDate(order.created_at);
       const estDelivery = new Date(createdAt);
       estDelivery.setHours(estDelivery.getHours() + 2);
 
@@ -27,7 +37,7 @@ function OrderTrackingContent() {
       const historyMap: Record<string, Date> = {};
       if (order.statusHistory) {
          order.statusHistory.forEach((h: any) => {
-             historyMap[h.status] = new Date(h.timestamp.includes(' ') && !h.timestamp.includes('T') ? h.timestamp + ' UTC' : h.timestamp);
+             historyMap[h.status] = parseDate(h.timestamp);
          });
       }
 
@@ -43,7 +53,9 @@ function OrderTrackingContent() {
         mappedSteps = allSteps.map((step, index) => {
            const isCompleted = index <= currentStepIndex;
            const isCurrent = index === currentStepIndex && order.status !== 'DELIVERED';
-           const time = historyMap[step] ? historyMap[step].toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : (isCompleted ? 'Done' : 'Pending');
+           const time = historyMap[step] 
+              ? historyMap[step].toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
+              : (isCompleted ? 'Done' : 'Pending');
            const label = step.replace(/_/g, ' ');
            return { status: label, time, completed: isCompleted, isCurrent };
         });
@@ -56,14 +68,14 @@ function OrderTrackingContent() {
         customer: order.user_name,
         address: order.address,
         total_amount: order.total_amount,
-        items: order.items,
+        items: order.items || [],
         estimated_delivery: estDelivery.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         steps: mappedSteps,
         isDelivered: order.status === 'DELIVERED'
       });
       setIsLive(order.status !== 'DELIVERED' && order.status !== 'CANCELLED');
     } catch (err: any) {
-      if (!isSilent) alert(err.response?.data?.error || 'Order not found or unauthorized');
+      if (!isSilent) alert('Order not found or could not fetch details.');
       setIsLive(false);
     } finally {
       if (!isSilent) setLoading(false);
@@ -83,7 +95,7 @@ function OrderTrackingContent() {
     if (isLive && trackingData?.rawId) {
       interval = setInterval(() => {
         fetchTrackingInfo(trackingData.rawId, true);
-      }, 5000); // Poll every 5 seconds
+      }, 5000);
     }
     return () => clearInterval(interval);
   }, [isLive, trackingData?.rawId, fetchTrackingInfo]);
@@ -96,7 +108,6 @@ function OrderTrackingContent() {
 
   return (
     <div className="min-h-screen bg-slate-50 pt-6 px-6 pb-20 overflow-hidden relative">
-      {/* Decorative Elements */}
       <div className="absolute top-0 right-0 w-96 h-96 bg-green-200/40 rounded-full blur-[100px] -z-10"></div>
       <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-100/40 rounded-full blur-[100px] -z-10"></div>
       
@@ -134,15 +145,12 @@ function OrderTrackingContent() {
           animate={{ opacity: 1, y: 0 }}
           className="glass-card p-10 rounded-[3.5rem] border border-white shadow-2xl shadow-slate-200/50 mb-12 relative overflow-hidden"
         >
-          <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
-            <Radio className="w-32 h-32" />
-          </div>
           <form onSubmit={handleTrack} className="flex flex-col md:flex-row gap-6 relative z-10">
             <div className="flex-1 relative group">
               <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-green-600 w-6 h-6 transition-colors" />
               <input 
                 type="text" 
-                placeholder="Enter Order ID (e.g. #ORD-7721)" 
+                placeholder="Enter Order ID (e.g. #ORD-7)" 
                 value={orderId}
                 onChange={(e) => setOrderId(e.target.value)}
                 className="w-full pl-16 pr-8 py-6 rounded-[2.5rem] bg-slate-50 border-none focus:ring-4 focus:ring-green-500/10 font-bold text-lg transition-all"
@@ -168,7 +176,6 @@ function OrderTrackingContent() {
               exit={{ opacity: 0, scale: 0.95 }}
               className="space-y-10"
             >
-               {/* Summary Card */}
                <div className="grid md:grid-cols-3 gap-8">
                   {[
                     { label: 'Status', value: trackingData.status, icon: Package, color: 'text-green-600', bg: 'bg-green-50', live: isLive },
@@ -190,7 +197,6 @@ function OrderTrackingContent() {
                   ))}
                </div>
 
-               {/* Timeline and Items */}
                <div className="grid lg:grid-cols-2 gap-10">
                   <div className="bg-white p-12 rounded-[4rem] border border-slate-100 shadow-2xl relative overflow-hidden">
                      <div className="flex justify-between items-center mb-12">
@@ -208,7 +214,7 @@ function OrderTrackingContent() {
                              }}
                              className="text-[10px] font-black text-white bg-slate-900 px-4 py-2 rounded-xl hover:bg-green-600 transition-all shadow-lg"
                            >
-                              SIMULATE PROGRESS
+                              SIMULATE
                            </button>
                         </div>
                      </div>
@@ -236,30 +242,29 @@ function OrderTrackingContent() {
                   </div>
 
                   <div className="bg-white p-12 rounded-[4rem] border border-slate-100 shadow-2xl flex flex-col">
-                     <div className="flex justify-between items-center mb-12">
-                        <h3 className="text-2xl font-black text-slate-900">Order Summary</h3>
-                        <button 
-                           onClick={() => window.print()}
-                           className="p-3 bg-slate-50 text-slate-900 rounded-xl hover:bg-slate-900 hover:text-white transition-all shadow-sm flex items-center gap-2 text-xs font-black uppercase tracking-widest"
-                        >
-                           <Search className="w-4 h-4" /> Print
-                        </button>
+                     <h3 className="text-2xl font-black text-slate-900 mb-12">Order Summary</h3>
+                     <div className="space-y-6 mb-10 flex-1 overflow-y-auto max-h-[500px] pr-2 custom-scrollbar">
+                        {trackingData.items && trackingData.items.length > 0 ? (
+                          trackingData.items.map((item: any, i: number) => (
+                            <div key={i} className="flex justify-between items-center p-6 bg-slate-50 rounded-[2.5rem] border border-transparent">
+                               <div className="flex items-center gap-5">
+                                  <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-3xl shadow-sm">💊</div>
+                                  <div>
+                                     <p className="font-black text-slate-900">{item.medicine_name}</p>
+                                     <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Qty: {item.quantity} × ₹{item.price_at_time}</p>
+                                  </div>
+                               </div>
+                               <p className="font-black text-slate-900 text-lg">₹{(item.quantity * item.price_at_time).toFixed(2)}</p>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="flex flex-col items-center justify-center py-20 opacity-20">
+                             <Box className="w-16 h-16 mb-4 text-slate-900" />
+                             <p className="font-black text-slate-900 uppercase tracking-widest text-xs">No items found</p>
+                          </div>
+                        )}
                      </div>
-                     <div className="space-y-6 mb-10 flex-1 overflow-y-auto max-h-[400px] pr-2 custom-scrollbar">
-                        {trackingData.items?.map((item: any, i: number) => (
-                           <div key={i} className="flex justify-between items-center p-6 bg-slate-50 rounded-[2.5rem] group hover:bg-white hover:shadow-xl transition-all border border-transparent hover:border-green-100">
-                              <div className="flex items-center gap-5">
-                                 <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-3xl shadow-sm">💊</div>
-                                 <div>
-                                    <p className="font-black text-slate-900">{item.medicine_name}</p>
-                                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Qty: {item.quantity} × ₹{item.price_at_time}</p>
-                                 </div>
-                              </div>
-                              <p className="font-black text-slate-900 text-lg">₹{(item.quantity * item.price_at_time).toFixed(2)}</p>
-                           </div>
-                        ))}
-                     </div>
-                     <div className="p-8 bg-slate-900 text-white rounded-[3rem] shadow-2xl shadow-slate-300 mt-6">
+                     <div className="p-8 bg-slate-900 text-white rounded-[3rem] shadow-2xl mt-6">
                         <div className="flex justify-between items-end">
                            <div>
                               <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Grand Total</p>
@@ -269,20 +274,6 @@ function OrderTrackingContent() {
                         </div>
                      </div>
                   </div>
-               </div>
-
-               <div className="bg-slate-900 p-10 rounded-[4rem] text-white flex flex-col md:flex-row items-center justify-between gap-8 shadow-2xl relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-64 h-64 bg-green-500/10 rounded-full blur-3xl"></div>
-                  <div className="flex items-center gap-6 text-left relative z-10">
-                     <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center text-3xl">🙋‍♂️</div>
-                     <div>
-                        <h4 className="text-xl font-black text-white">Need assistance?</h4>
-                        <p className="text-slate-400 font-medium text-sm">Our support team is active 24/7 for you.</p>
-                     </div>
-                  </div>
-                  <button className="px-10 py-5 bg-green-600 text-white rounded-2xl font-black hover:bg-green-700 transition-all shadow-xl shadow-green-500/20 relative z-10">
-                     Contact Support
-                  </button>
                </div>
             </motion.div>
           )}
@@ -294,11 +285,7 @@ function OrderTrackingContent() {
 
 export default function OrderTracking() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="w-12 h-12 animate-spin text-green-600" />
-      </div>
-    }>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Loader2 className="w-12 h-12 animate-spin text-green-600" /></div>}>
       <OrderTrackingContent />
     </Suspense>
   );

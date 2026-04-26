@@ -1,0 +1,4 @@
+◇ injected env (2) from .env // tip: ⌘ enable debugging { debug: true }
+◇ injected env (0) from .env // tip: ⌘ override existing { override: true }
+Server running on port 5006
+Connected to the SQLite database at: D:\workspace\MedsRemind\server\database.sqlite

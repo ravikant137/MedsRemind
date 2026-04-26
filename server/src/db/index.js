@@ -2,23 +2,26 @@ const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 require('dotenv').config();
 
-const DB_PATH = path.resolve(__dirname, '../../database.sqlite');
+// Use an absolute path that is stable across WSL/Windows when possible
+// If running from server/ directory, this will point to server/database.sqlite
+const DB_PATH = path.resolve(process.cwd(), 'database.sqlite');
 
 const db = new sqlite3.Database(DB_PATH, (err) => {
   if (err) {
     console.error('Error opening database', err.message);
   } else {
-    console.log('Connected to the SQLite database.');
+    console.log(`Connected to the SQLite database at: ${DB_PATH}`);
   }
 });
 
 // Helper to run queries with promises
 const query = (sql, params = []) => {
   return new Promise((resolve, reject) => {
-    if (sql.trim().toLowerCase().startsWith('select')) {
+    // PRAGMA and SELECT use .all
+    if (sql.trim().toLowerCase().startsWith('select') || sql.trim().toLowerCase().startsWith('pragma')) {
       db.all(sql, params, (err, rows) => {
         if (err) reject(err);
-        else resolve({ rows });
+        else resolve({ rows: rows || [] });
       });
     } else {
       db.run(sql, params, function (err) {

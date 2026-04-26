@@ -1,0 +1,26 @@
+    const order = orderResult.rows[0];
+
+    console.log(`[DEBUG] Fetching items for Order ID: ${orderId}`);
+    const itemsResult = await db.query(
+      'SELECT * FROM order_items WHERE order_id = ?',
+      [orderId]
+    );
+    console.log(`[DEBUG] Items found for Order ${orderId}:`, itemsResult.rows);
+
+    const historyResult = await db.query(
+      'SELECT status, created_at AS timestamp FROM order_status_history WHERE order_id = ? ORDER BY created_at ASC',
+      [orderId]
+    );
+
+    order.items = itemsResult.rows.map(item => ({
+      ...item,
+      medicine_name: item.medicine_name || 'Medicine'
+    }));
+    order.statusHistory = historyResult.rows;
+
+    res.json(order);
+  } catch (err) {
+    console.error('Track error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});

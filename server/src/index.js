@@ -203,6 +203,7 @@ app.get('/api/track/:id', async (req, res) => {
     if (!orderId) {
       return res.status(400).json({ error: 'Invalid order ID' });
     }
+    
     const orderResult = await db.query(
       'SELECT o.id, o.status, o.created_at, o.total_amount, o.address, u.name as user_name FROM orders o JOIN users u ON o.user_id = u.id WHERE o.id = ?',
       [orderId]
@@ -215,7 +216,7 @@ app.get('/api/track/:id', async (req, res) => {
     const order = orderResult.rows[0];
 
     const itemsResult = await db.query(
-      'SELECT oi.quantity, oi.price_at_time, COALESCE(oi.medicine_name, m.name, "Medicine") as medicine_name FROM order_items oi LEFT JOIN medicines m ON oi.medicine_id = m.id WHERE oi.order_id = ?',
+      'SELECT oi.quantity, oi.price_at_time, COALESCE(oi.medicine_name, m.name, "Prescription Medicine") as medicine_name FROM order_items oi LEFT JOIN medicines m ON oi.medicine_id = m.id WHERE oi.order_id = ?',
       [orderId]
     );
 
@@ -226,6 +227,7 @@ app.get('/api/track/:id', async (req, res) => {
 
     order.items = itemsResult.rows;
     order.statusHistory = historyResult.rows;
+
     res.json(order);
   } catch (err) {
     res.status(500).json({ error: err.message });
