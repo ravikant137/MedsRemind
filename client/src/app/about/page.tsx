@@ -4,13 +4,13 @@ import Link from 'next/link';
 
 export default function About() {
   return (
-    <div className="min-h-screen bg-[#f5f7fa]">
+    <div className="min-h-screen" style={{ background: '#f5f7fa' }}>
       {/* Hero */}
-      <section className="section-blue py-16">
-        <div className="max-w-7xl mx-auto px-4 text-center">
-          <p className="text-green-400 font-semibold text-sm mb-3">About Us</p>
+      <section className="py-16" style={{ background: '#1a237e' }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center">
+          <p className="font-semibold text-sm mb-3" style={{ color: '#4caf50' }}>About Us</p>
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">Your Trusted Neighborhood Pharmacy</h1>
-          <p className="text-blue-200 max-w-2xl mx-auto">
+          <p className="max-w-2xl mx-auto" style={{ color: '#93a5cf' }}>
             We are committed to providing genuine medicines, expert advice and reliable delivery services since 2018. Your health is our priority.
           </p>
         </div>
@@ -94,15 +94,17 @@ export default function About() {
       </section>
 
       {/* CTA */}
-      <section className="section-green py-14">
-        <div className="max-w-4xl mx-auto px-4 text-center text-white">
+      <section className="py-14" style={{ background: '#2e7d32' }}>
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center text-white">
           <h2 className="text-3xl font-bold mb-4">Ready to experience our service?</h2>
-          <p className="text-green-100 mb-8">Join hundreds of satisfied customers who trust Anjaneya Pharmacy for their healthcare needs.</p>
+          <p className="mb-8" style={{ color: '#a5d6a7' }}>Join hundreds of satisfied customers who trust Anjaneya Pharmacy for their healthcare needs.</p>
           <div className="flex flex-wrap justify-center gap-4">
-            <Link href="/shop" className="px-8 py-4 bg-white text-green-700 font-bold rounded-lg hover:bg-green-50 transition-all shadow-lg flex items-center gap-2">
+            <Link href="/shop" className="px-8 py-4 bg-white font-bold rounded-lg hover:bg-gray-50 transition-all shadow-lg flex items-center gap-2 text-sm"
+                  style={{ color: '#2e7d32' }}>
               Browse Medicines <ArrowRight className="w-4 h-4" />
             </Link>
-            <Link href="/contact" className="px-8 py-4 bg-green-800 text-white font-bold rounded-lg hover:bg-green-900 transition-all shadow-lg">
+            <Link href="/contact" className="px-8 py-4 text-white font-bold rounded-lg transition-all shadow-lg text-sm"
+                  style={{ background: '#1b5e20' }}>
               Contact Us
             </Link>
           </div>

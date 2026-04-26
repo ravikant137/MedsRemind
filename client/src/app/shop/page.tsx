@@ -67,15 +67,15 @@ function ShopContent() {
   const allCategories = ['Fever', 'Antibiotic', 'Pain Relief', 'Allergy', 'Vitamins', 'Cold & Cough', 'Diabetes Care', 'Baby Care'];
 
   return (
-    <div className="min-h-screen bg-[#f5f7fa]">
+    <div className="min-h-screen" style={{ background: '#f5f7fa' }}>
       {/* Header */}
-      <section className="section-blue py-10">
-        <div className="max-w-7xl mx-auto px-4">
+      <section className="py-10" style={{ background: '#1a237e' }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <h1 className="text-3xl font-bold text-white mb-2">Search Medicines</h1>
-          <p className="text-blue-200 text-sm">Browse our wide range of genuine medicines and health products.</p>
+          <p className="text-sm" style={{ color: '#93a5cf' }}>Browse our wide range of genuine medicines and health products.</p>
           <div className="mt-6 max-w-2xl">
-            <div className="search-bar flex items-center bg-white">
-              <Search className="w-5 h-5 text-gray-400 ml-5" />
+            <div className="flex items-center bg-white rounded-full overflow-hidden border-2 shadow-sm" style={{ borderColor: '#e2e8f0' }}>
+              <Search className="w-5 h-5 ml-5" style={{ color: '#94a3b8' }} />
               <input 
                 type="text" 
                 placeholder="Search by medicine name, composition..."
@@ -85,8 +85,10 @@ function ShopContent() {
                   fetchMedicines(e.target.value);
                 }}
                 className="flex-1 px-4 py-4 text-sm focus:outline-none bg-transparent"
+                style={{ color: '#1a1a2e' }}
               />
-              <button onClick={() => fetchMedicines(search)} className="btn-green mr-2 px-6 py-2.5 rounded-full text-sm flex items-center gap-2">
+              <button onClick={() => fetchMedicines(search)} className="mr-2 px-6 py-2.5 rounded-full text-sm flex items-center gap-2 font-bold text-white"
+                      style={{ background: '#2e7d32' }}>
                 <Search className="w-4 h-4" /> Search
               </button>
             </div>

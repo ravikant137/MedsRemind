@@ -3,24 +3,23 @@ import { useState, useEffect } from 'react';
 import { 
   Search, ShoppingCart, ArrowRight, ShieldCheck, Truck, Clock, 
   Plus, Star, Upload, CheckCircle, Package, Headphones, Lock,
-  ThermometerSun, Baby, Heart, Pill, Droplets, Leaf, Shield, UserCheck
+  ThermometerSun, Baby, Heart, Pill, Droplets, Leaf, Shield, UserCheck, Cross
 } from 'lucide-react';
 import Link from 'next/link';
 import axios from 'axios';
 import { API_URL } from '@/config';
 
-// Bypass localtunnel anti-phishing screen for all API requests
 axios.defaults.headers.common['bypass-tunnel-reminder'] = 'true';
 
 const categories = [
-  { name: 'Fever & Pain Relief', icon: ThermometerSun, color: 'text-red-500' },
-  { name: 'Cold & Cough', icon: Droplets, color: 'text-blue-500' },
-  { name: 'Baby Care', icon: Baby, color: 'text-pink-500' },
-  { name: 'Personal Care', icon: UserCheck, color: 'text-purple-500' },
-  { name: 'Diabetes Care', icon: Heart, color: 'text-orange-500' },
-  { name: 'BP & Heart Care', icon: Shield, color: 'text-red-600' },
-  { name: 'Vitamins & Supplements', icon: Leaf, color: 'text-green-500' },
-  { name: 'First Aid', icon: Plus, color: 'text-teal-500' },
+  { name: 'Fever & Pain Relief', icon: ThermometerSun, bg: '#fef2f2', color: '#ef4444' },
+  { name: 'Cold & Cough', icon: Droplets, bg: '#eff6ff', color: '#3b82f6' },
+  { name: 'Baby Care', icon: Baby, bg: '#fdf2f8', color: '#ec4899' },
+  { name: 'Personal Care', icon: UserCheck, bg: '#f5f3ff', color: '#8b5cf6' },
+  { name: 'Diabetes Care', icon: Heart, bg: '#fff7ed', color: '#f97316' },
+  { name: 'BP & Heart Care', icon: Shield, bg: '#fef2f2', color: '#dc2626' },
+  { name: 'Vitamins & Supplements', icon: Leaf, bg: '#f0fdf4', color: '#22c55e' },
+  { name: 'First Aid & Health Care', icon: Plus, bg: '#f0fdfa', color: '#14b8a6' },
 ];
 
 const testimonials = [
@@ -51,49 +50,66 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#f5f7fa]">
+    <div className="min-h-screen" style={{ background: '#f5f7fa' }}>
 
-      {/* =================== HERO SECTION =================== */}
-      <section className="hero-gradient py-12 md:py-16 relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex flex-col lg:flex-row items-center gap-10">
-            {/* Left content */}
-            <div className="flex-1 space-y-6 z-10">
-              <p className="text-green-700 font-semibold text-sm">Your Trusted Neighborhood Pharmacy</p>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-gray-900 leading-tight">
+      {/* ═══════════════════ HERO ═══════════════════ */}
+      <section style={{ background: 'linear-gradient(135deg, #eef2ff 0%, #e8f5e9 30%, #ffffff 70%)' }}
+               className="py-14 md:py-20 relative overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="flex flex-col lg:flex-row items-center gap-12">
+            {/* Left Content */}
+            <div className="flex-1 space-y-5 z-10">
+              <p className="text-sm font-semibold" style={{ color: '#2e7d32' }}>Your Trusted Neighborhood Pharmacy</p>
+              <h1 className="text-4xl md:text-5xl lg:text-[56px] font-black leading-[1.1]" style={{ color: '#1a1a2e' }}>
                 Fast & Trusted<br />
-                <span className="text-green-600">Medicines</span> Near You
+                <span style={{ color: '#2e7d32' }}>Medicines</span> Near You
               </h1>
-              <p className="text-gray-500 text-lg max-w-lg">
+              <p className="text-base md:text-lg max-w-lg" style={{ color: '#64748b' }}>
                 Order medicines online and get delivery within 60 minutes at your doorstep.
               </p>
+              {/* CTA Buttons */}
               <div className="flex flex-wrap gap-3 pt-2">
-                <Link href="/shop" className="btn-green flex items-center gap-2 px-6 py-3 rounded-lg text-sm">
+                <Link href="/shop" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-sm font-bold text-white shadow-md hover:shadow-lg transition-all"
+                      style={{ background: '#2e7d32' }}>
                   <Search className="w-4 h-4" /> Search Medicines
                 </Link>
-                <Link href="/prescription" className="btn-outline-green flex items-center gap-2 px-6 py-3 rounded-lg text-sm">
+                <Link href="/prescription" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-sm font-bold border-2 hover:text-white transition-all"
+                      style={{ borderColor: '#2e7d32', color: '#2e7d32' }}
+                      onMouseEnter={(e) => { e.currentTarget.style.background = '#2e7d32'; e.currentTarget.style.color = 'white'; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#2e7d32'; }}>
                   <Upload className="w-4 h-4" /> Upload Prescription
                 </Link>
-                <a href="https://wa.me/919876543210" target="_blank" className="btn-whatsapp flex items-center gap-2 px-6 py-3 rounded-lg text-sm">
+                <a href="https://wa.me/919876543210" target="_blank"
+                   className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-sm font-bold text-white shadow-md hover:shadow-lg transition-all"
+                   style={{ background: '#25d366' }}>
                   💬 Order on WhatsApp
                 </a>
               </div>
-              {/* Trust badges row */}
-              <div className="flex flex-wrap gap-6 pt-4">
-                <div className="trust-badge"><ShieldCheck className="w-5 h-5 text-green-600" /> Genuine Medicines</div>
-                <div className="trust-badge"><Lock className="w-5 h-5 text-blue-600" /> 100% Safe Packaging</div>
-                <div className="trust-badge"><Truck className="w-5 h-5 text-orange-500" /> Fast Delivery</div>
-                <div className="trust-badge"><Star className="w-5 h-5 text-yellow-500" /> Best Prices Always</div>
+              {/* Trust Badges */}
+              <div className="flex flex-wrap gap-8 pt-5">
+                {[
+                  { icon: ShieldCheck, label: 'Genuine\nMedicines', color: '#2e7d32' },
+                  { icon: Lock, label: '100%\nSafe Packaging', color: '#1a237e' },
+                  { icon: Truck, label: 'Fast\nDelivery', color: '#f97316' },
+                  { icon: Star, label: 'Best Prices\nAlways', color: '#eab308' },
+                ].map((b, i) => (
+                  <div key={i} className="flex items-center gap-2.5">
+                    <b.icon className="w-5 h-5" style={{ color: b.color }} />
+                    <span className="text-xs font-semibold whitespace-pre-line leading-tight" style={{ color: '#64748b' }}>{b.label}</span>
+                  </div>
+                ))}
               </div>
             </div>
-            {/* Right image area */}
-            <div className="flex-1 relative hidden lg:block">
-              <div className="w-full aspect-[4/3] bg-gradient-to-br from-green-50 to-blue-50 rounded-3xl flex items-center justify-center relative overflow-hidden shadow-xl border border-white">
+            {/* Right Image Area */}
+            <div className="flex-1 relative hidden lg:flex justify-center">
+              <div className="w-full max-w-md aspect-square rounded-3xl flex items-center justify-center relative overflow-hidden shadow-2xl border border-white/80"
+                   style={{ background: 'linear-gradient(135deg, #e8f5e9 0%, #bbdefb 100%)' }}>
                 <div className="text-center space-y-4">
-                  <div className="text-8xl animate-float">🏥</div>
-                  <div className="bg-white/90 backdrop-blur-sm px-6 py-3 rounded-xl shadow-lg inline-block">
-                    <p className="text-xl font-black text-gray-900">ANJANEYA<span className="text-green-600"> PHARMACY</span></p>
-                    <p className="text-xs text-gray-500 font-medium">Trusted Medicines. Genuine Care.</p>
+                  <div className="text-[100px] animate-float">🏥</div>
+                  <div className="bg-white/90 backdrop-blur-sm px-8 py-4 rounded-xl shadow-lg inline-block">
+                    <p className="text-xl font-black" style={{ color: '#1a237e' }}>ANJANEYA</p>
+                    <p className="text-lg font-black" style={{ color: '#2e7d32' }}>PHARMACY</p>
+                    <p className="text-[10px] font-medium" style={{ color: '#64748b' }}>Trusted Medicines. Genuine Care.</p>
                   </div>
                 </div>
               </div>
@@ -102,38 +118,39 @@ export default function Home() {
         </div>
       </section>
 
-      {/* =================== SEARCH BAR =================== */}
-      <section className="py-8 -mt-6 relative z-20">
-        <div className="max-w-4xl mx-auto px-4">
-          <div className="search-bar flex items-center">
-            <select className="bg-transparent px-5 py-4 text-sm font-semibold text-gray-700 border-r border-gray-200 focus:outline-none cursor-pointer min-w-[140px]">
+      {/* ═══════════════════ SEARCH BAR (NAVY BLUE) ═══════════════════ */}
+      <section className="py-10" style={{ background: '#1a237e' }}>
+        <div className="max-w-4xl mx-auto px-4 sm:px-6">
+          <div className="flex items-center bg-white rounded-lg overflow-hidden shadow-2xl p-1">
+            <select className="hidden md:block bg-gray-50 px-5 py-3 text-xs font-black border-r border-gray-100 focus:outline-none cursor-pointer min-w-[140px] uppercase tracking-wider"
+                    style={{ color: '#1a1a2e' }}>
               <option>All Medicines</option>
               <option>Prescription</option>
               <option>OTC</option>
               <option>Ayurvedic</option>
             </select>
-            <input 
-              type="text" 
-              placeholder="Search for medicines, health products..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="flex-1 px-5 py-4 text-sm focus:outline-none bg-transparent"
-            />
-            <Link 
-              href={`/shop?search=${searchTerm}`}
-              className="btn-green mr-2 flex items-center gap-2 px-6 py-3 rounded-full text-sm"
-            >
-              <Search className="w-4 h-4" /> Search
+            <div className="flex-1 flex items-center px-4">
+              <Search className="w-5 h-5 text-gray-400" />
+              <input 
+                type="text" 
+                placeholder="Search for medicines, health products..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full px-4 py-4 text-sm font-medium focus:outline-none bg-transparent"
+                style={{ color: '#1a1a2e' }}
+              />
+            </div>
+            <Link href={`/shop?search=${searchTerm}`}
+                  className="flex items-center gap-2 px-8 py-4 rounded-md text-sm font-black text-white transition-all hover:brightness-110 shadow-lg"
+                  style={{ background: '#2e7d32' }}>
+              <Search className="w-4 h-4" strokeWidth={3} /> SEARCH
             </Link>
           </div>
-          <div className="flex flex-wrap gap-2 mt-4 px-1">
-            <span className="text-xs text-gray-400 font-medium">Popular Searches:</span>
+          <div className="flex flex-wrap gap-4 mt-5 px-2 items-center justify-center">
+            <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: '#93a5cf' }}>Popular Searches:</span>
             {popularSearches.map((term) => (
-              <Link 
-                key={term} 
-                href={`/shop?search=${term}`}
-                className="text-xs text-blue-700 font-semibold hover:text-green-600 hover:underline transition-colors"
-              >
+              <Link key={term} href={`/shop?search=${term}`}
+                    className="text-xs font-bold text-white hover:text-green-400 transition-colors underline decoration-white/20 underline-offset-4">
                 {term}
               </Link>
             ))}
@@ -141,58 +158,68 @@ export default function Home() {
         </div>
       </section>
 
-      {/* =================== SHOP BY CATEGORIES =================== */}
-      <section className="py-12">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex justify-between items-center mb-8">
-            <h2 className="text-2xl font-bold text-gray-900">Shop by Categories</h2>
-            <Link href="/shop" className="text-green-600 font-semibold text-sm hover:underline flex items-center gap-1">
+      {/* ═══════════════════ SHOP BY CATEGORIES ═══════════════════ */}
+      <section className="py-14" style={{ background: '#f5f7fa' }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="flex justify-between items-center mb-10">
+            <h2 className="text-2xl font-bold" style={{ color: '#1a1a2e' }}>Shop by Categories</h2>
+            <Link href="/shop" className="text-sm font-semibold flex items-center gap-1 hover:underline"
+                  style={{ color: '#2e7d32' }}>
               View All Categories <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-5">
             {categories.map((cat) => (
-              <Link href={`/shop?category=${cat.name}`} key={cat.name} className="category-card">
-                <div className="icon-wrap">
-                  <cat.icon className={`w-6 h-6 ${cat.color}`} />
+              <Link href={`/shop?category=${cat.name}`} key={cat.name}
+                    className="bg-white rounded-xl p-5 text-center border transition-all hover:shadow-lg hover:-translate-y-1 cursor-pointer group"
+                    style={{ borderColor: '#e2e8f0' }}>
+                <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-3 transition-all group-hover:scale-110"
+                     style={{ background: cat.bg }}>
+                  <cat.icon className="w-7 h-7" style={{ color: cat.color }} />
                 </div>
-                <p className="text-xs font-semibold text-gray-700 leading-tight">{cat.name}</p>
+                <p className="text-xs font-semibold leading-tight" style={{ color: '#374151' }}>{cat.name}</p>
               </Link>
             ))}
           </div>
         </div>
       </section>
 
-      {/* =================== ORDER IN 3 STEPS =================== */}
-      <section className="section-blue py-16">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex flex-col lg:flex-row items-center gap-12">
-            <div className="lg:w-1/3">
+      {/* ═══════════════════ 3 STEPS ═══════════════════ */}
+      <section className="py-16" style={{ background: '#1a237e' }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="flex flex-col lg:flex-row items-center gap-14">
+            {/* Left text */}
+            <div className="lg:w-[30%] shrink-0">
               <h2 className="text-3xl font-bold text-white leading-tight mb-4">
-                Order Medicines in<br /><span className="text-green-400">3 Simple Steps</span>
+                Order Medicines in<br /><span style={{ color: '#4caf50' }}>3 Simple Steps</span>
               </h2>
-              <p className="text-blue-200 mb-6">
+              <p className="mb-6" style={{ color: '#93a5cf' }}>
                 Getting your medicines is now quick, easy and reliable.
               </p>
-              <Link href="/prescription" className="btn-green inline-flex items-center gap-2 px-6 py-3 rounded-lg text-sm">
+              <Link href="/prescription" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-sm font-bold text-white shadow-md"
+                    style={{ background: '#2e7d32' }}>
                 <Upload className="w-4 h-4" /> Upload Prescription
               </Link>
             </div>
-            <div className="lg:w-2/3 grid md:grid-cols-3 gap-6">
+            {/* Steps cards */}
+            <div className="lg:w-[70%] grid md:grid-cols-3 gap-6">
               {[
                 { step: 1, icon: Upload, title: 'Upload Prescription', desc: 'Upload prescription or search medicines' },
                 { step: 2, icon: CheckCircle, title: 'We Confirm', desc: 'We check availability and confirm your order' },
                 { step: 3, icon: Package, title: 'Fast Delivery', desc: 'Get your medicines delivered to your doorstep' },
               ].map((item) => (
-                <div key={item.step} className="step-card relative">
-                  <div className="absolute -top-4 -right-2 w-10 h-10 bg-green-500 text-white rounded-full flex items-center justify-center font-black text-lg shadow-lg">
+                <div key={item.step} className="rounded-2xl p-7 text-center relative border"
+                     style={{ background: 'rgba(255,255,255,0.06)', borderColor: 'rgba(255,255,255,0.1)' }}>
+                  <div className="absolute -top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center font-black text-white text-lg shadow-lg"
+                       style={{ background: '#2e7d32' }}>
                     {item.step}
                   </div>
-                  <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <item.icon className="w-8 h-8 text-green-400" />
+                  <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4"
+                       style={{ background: 'rgba(255,255,255,0.1)' }}>
+                    <item.icon className="w-8 h-8" style={{ color: '#4caf50' }} />
                   </div>
-                  <h3 className="text-white font-bold mb-2">{item.title}</h3>
-                  <p className="text-blue-200 text-sm">{item.desc}</p>
+                  <h3 className="text-white font-bold text-base mb-2">{item.title}</h3>
+                  <p className="text-sm" style={{ color: '#93a5cf' }}>{item.desc}</p>
                 </div>
               ))}
             </div>
@@ -200,52 +227,10 @@ export default function Home() {
         </div>
       </section>
 
-      {/* =================== POPULAR MEDICINES =================== */}
-      <section className="py-14">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex justify-between items-center mb-8">
-            <h2 className="text-2xl font-bold text-gray-900">Popular Medicines</h2>
-            <Link href="/shop" className="text-green-600 font-semibold text-sm hover:underline flex items-center gap-1">
-              View All <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {loading ? (
-              [1,2,3,4].map(i => <div key={i} className="h-64 bg-white rounded-xl animate-pulse border border-gray-100"></div>)
-            ) : (
-              medicines.map((med: any) => (
-                <div key={med.id} className="card p-5 rounded-xl group">
-                  <div className="w-full aspect-square bg-gray-50 rounded-lg mb-4 flex items-center justify-center text-5xl group-hover:scale-105 transition-transform relative overflow-hidden">
-                    💊
-                    {(!med.stock || med.stock < 1) && (
-                      <div className="absolute inset-0 bg-gray-900/60 flex items-center justify-center">
-                        <span className="text-xs font-bold text-white bg-red-500 px-3 py-1 rounded-full">Out of Stock</span>
-                      </div>
-                    )}
-                  </div>
-                  <span className="text-[10px] font-bold text-green-700 bg-green-50 px-2.5 py-1 rounded-full uppercase">{med.category}</span>
-                  <h3 className="text-sm font-bold text-gray-900 mt-2 line-clamp-1">{med.name}</h3>
-                  <p className="text-xs text-gray-400 mt-1 line-clamp-1">{med.composition || med.description || 'Health product'}</p>
-                  <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-100">
-                    <span className="text-lg font-black text-gray-900">₹{med.price?.toFixed(2)}</span>
-                    <Link 
-                      href="/shop" 
-                      className="w-9 h-9 bg-green-600 text-white rounded-lg flex items-center justify-center hover:bg-green-700 transition-all shadow-md"
-                    >
-                      <Plus className="w-5 h-5" />
-                    </Link>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-      </section>
-
-      {/* =================== WHY CHOOSE US =================== */}
+      {/* ═══════════════════ WHY CHOOSE US ═══════════════════ */}
       <section className="py-14 bg-white">
-        <div className="max-w-7xl mx-auto px-4">
-          <h2 className="text-2xl font-bold text-gray-900 mb-8 text-center">Why Choose Anjaneya Pharmacy?</h2>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <h2 className="text-2xl font-bold mb-10" style={{ color: '#1a1a2e' }}>Why Choose Anjaneya Pharmacy?</h2>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
             {[
               { icon: Truck, title: '60 Min Delivery', desc: 'On orders within our delivery range' },
@@ -254,43 +239,47 @@ export default function Home() {
               { icon: Headphones, title: 'Expert Support', desc: 'Pharmacist support via call / WhatsApp' },
               { icon: Lock, title: 'Secure & Safe', desc: '100% safe packaging and handling' },
             ].map((item, i) => (
-              <div key={i} className="feature-card">
-                <div className="w-14 h-14 bg-blue-50 rounded-xl flex items-center justify-center mx-auto mb-3">
-                  <item.icon className="w-7 h-7 text-blue-800" />
+              <div key={i} className="text-center p-6 rounded-xl border transition-all hover:shadow-md"
+                   style={{ borderColor: '#e2e8f0' }}>
+                <div className="w-14 h-14 rounded-xl flex items-center justify-center mx-auto mb-4"
+                     style={{ background: '#eef2ff' }}>
+                  <item.icon className="w-7 h-7" style={{ color: '#1a237e' }} />
                 </div>
-                <h3 className="font-bold text-sm text-gray-900 mb-1">{item.title}</h3>
-                <p className="text-xs text-gray-500">{item.desc}</p>
+                <h3 className="font-bold text-sm mb-1" style={{ color: '#1a1a2e' }}>{item.title}</h3>
+                <p className="text-xs" style={{ color: '#94a3b8' }}>{item.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* =================== TESTIMONIALS =================== */}
-      <section className="py-14">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
-            <h2 className="text-2xl font-bold text-gray-900">Trusted by 500+ Happy Customers</h2>
+      {/* ═══════════════════ TESTIMONIALS ═══════════════════ */}
+      <section className="py-14" style={{ background: '#f5f7fa' }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10">
+            <h2 className="text-2xl font-bold" style={{ color: '#1a1a2e' }}>Trusted by 500+ Happy Customers</h2>
             <div className="flex items-center gap-2 mt-2 md:mt-0">
               <div className="flex gap-0.5">
-                {[1,2,3,4,5].map(i => <Star key={i} className="w-5 h-5 text-yellow-400 fill-yellow-400" />)}
+                {[1,2,3,4,5].map(i => <Star key={i} className="w-5 h-5 fill-yellow-400 text-yellow-400" />)}
               </div>
-              <span className="font-bold text-gray-900">4.9/5</span>
-              <span className="text-sm text-gray-400">Rating on Google</span>
+              <span className="font-bold" style={{ color: '#1a1a2e' }}>4.9/5</span>
+              <span className="text-sm" style={{ color: '#94a3b8' }}>Rating on Google</span>
             </div>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
             {testimonials.map((t, i) => (
-              <div key={i} className="testimonial-card">
-                <div className="flex gap-0.5 mb-3">
-                  {[1,2,3,4,5].map(s => <Star key={s} className="w-4 h-4 text-yellow-400 fill-yellow-400" />)}
+              <div key={i} className="bg-white rounded-2xl p-6 border shadow-sm"
+                   style={{ borderColor: '#e2e8f0' }}>
+                <div className="flex gap-0.5 mb-4">
+                  {[1,2,3,4,5].map(s => <Star key={s} className="w-4 h-4 fill-yellow-400 text-yellow-400" />)}
                 </div>
-                <p className="text-gray-600 text-sm leading-relaxed mb-4">{t.text}</p>
+                <p className="text-sm leading-relaxed mb-5" style={{ color: '#64748b' }}>{t.text}</p>
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                    <span className="text-green-700 font-bold text-sm">{t.name[0]}</span>
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center"
+                       style={{ background: '#e8f5e9' }}>
+                    <span className="font-bold text-sm" style={{ color: '#2e7d32' }}>{t.name[0]}</span>
                   </div>
-                  <span className="font-semibold text-gray-900 text-sm">{t.name}</span>
+                  <span className="font-semibold text-sm" style={{ color: '#1a1a2e' }}>{t.name}</span>
                 </div>
               </div>
             ))}
@@ -298,20 +287,19 @@ export default function Home() {
         </div>
       </section>
 
-      {/* =================== CTA BANNER =================== */}
-      <section className="section-green py-14">
-        <div className="max-w-4xl mx-auto px-4 text-center text-white">
+      {/* ═══════════════════ CTA BANNER ═══════════════════ */}
+      <section className="py-16" style={{ background: '#2e7d32' }}>
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center text-white">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Need Medicines Delivered?</h2>
-          <p className="text-green-100 mb-8 text-lg">Order now and get your medicines delivered within 60 minutes.</p>
+          <p className="mb-8 text-lg" style={{ color: '#a5d6a7' }}>Order now and get your medicines delivered within 60 minutes.</p>
           <div className="flex flex-wrap justify-center gap-4">
-            <Link href="/shop" className="px-8 py-4 bg-white text-green-700 font-bold rounded-lg hover:bg-green-50 transition-all shadow-lg">
+            <Link href="/shop" className="px-8 py-4 bg-white font-bold rounded-lg hover:bg-gray-50 transition-all shadow-lg text-sm"
+                  style={{ color: '#2e7d32' }}>
               Browse Medicines
             </Link>
-            <a 
-              href="https://wa.me/919876543210" 
-              target="_blank" 
-              className="px-8 py-4 bg-green-800 text-white font-bold rounded-lg hover:bg-green-900 transition-all shadow-lg flex items-center gap-2"
-            >
+            <a href="https://wa.me/919876543210" target="_blank"
+               className="px-8 py-4 font-bold rounded-lg transition-all shadow-lg flex items-center gap-2 text-white text-sm"
+               style={{ background: '#1b5e20' }}>
               💬 Order on WhatsApp
             </a>
           </div>
