@@ -1,14 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import OpenAI from 'openai';
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || '' });
 
 export async function POST(request: NextRequest) {
   try {
-    const { image } = await request.json();
+    const { image } = await request.json(); // base64 image
     
-    if (!process.env.GEMINI_API_KEY) {
-      return NextResponse.json({ error: 'Missing GEMINI_API_KEY' }, { status: 500 });
+    if (!process.env.OPENAI_API_KEY) {
+      return NextResponse.json({ 
+        error: 'Enterprise AI Error: Missing OPENAI_API_KEY. Please add it to your environment variables.',
+        missing_key: true
+      }, { status: 500 });
     }
 
     let base64Data = image;
@@ -18,40 +21,53 @@ export async function POST(request: NextRequest) {
       base64Data = image.split(',')[1];
     }
 
-    const prompt = `Analyze this medical prescription image and extract a JSON schedule:
+    const prompt = `You are a medical OCR and prescription analysis expert. 
+    Analyze this prescription image with 100% accuracy. 
+    Return a structured JSON object in this format:
     {
       "patient_name": "string",
-      "medicines": [{"name": "string", "dosage": "string", "frequency": "string", "duration": "string"}]
+      "medicines": [
+        {
+          "name": "string",
+          "dosage": "string",
+          "frequency": "string (e.g. 1-0-1)",
+          "duration": "string",
+          "timing": "string"
+        }
+      ],
+      "advice": "string"
     }
-    Return ONLY JSON.`;
+    If handwriting is messy, use medical context to determine the correct medicine name.
+    RETURN ONLY JSON.`;
 
-    // Advanced Triple-Retry Logic
-    const modelsToTry = ["gemini-1.5-pro", "gemini-1.5-pro-latest", "gemini-1.5-flash"];
-    let lastError = null;
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        {
+          role: "user",
+          content: [
+            { type: "text", text: prompt },
+            {
+              type: "image_url",
+              image_url: {
+                url: `data:image/jpeg;base64,${base64Data}`,
+                detail: "high"
+              }
+            }
+          ]
+        }
+      ],
+      response_format: { type: "json_object" }
+    });
 
-    for (const modelName of modelsToTry) {
-      try {
-        const model = genAI.getGenerativeModel({ model: modelName });
-        const result = await model.generateContent([
-          prompt,
-          { inlineData: { data: base64Data, mimeType: "image/jpeg" } }
-        ]);
-        const response = await result.response;
-        const text = response.text();
-        const jsonMatch = text.match(/\{[\s\S]*\}/);
-        if (jsonMatch) return NextResponse.json(JSON.parse(jsonMatch[0]));
-      } catch (err: any) {
-        console.error(`Model ${modelName} failed:`, err.message);
-        lastError = err.message;
-      }
-    }
-
-    return NextResponse.json({ 
-      error: `All AI models failed. Last error: ${lastError}`,
-      help: "Please check if your Gemini API key is active in your Google AI Studio dashboard."
-    }, { status: 500 });
-
+    const result = response.choices[0].message.content;
+    const data = JSON.parse(result || '{}');
+    
+    return NextResponse.json(data);
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error('Enterprise AI Error:', error);
+    return NextResponse.json({ 
+      error: `Enterprise Pipeline Error: ${error.message || 'Analysis failed'}`,
+    }, { status: 500 });
   }
 }

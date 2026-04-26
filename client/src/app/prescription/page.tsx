@@ -194,18 +194,59 @@ export default function PrescriptionUpload() {
                       <CheckCircle className="w-3.5 h-3.5" /> {result.confidence}% Match
                     </span>
                   </div>
-                  <div className="space-y-3 flex-1">
+                  <div className="space-y-4 flex-1 overflow-y-auto pr-2 custom-scrollbar">
                     {result.medicines.map((m: any, i: number) => (
-                      <div key={i} className="p-4 bg-gray-50 rounded-xl border border-gray-100 flex items-center gap-4">
-                        <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm">
-                          <Pill className="w-5 h-5 text-green-600" />
-                        </div>
-                        <div className="flex-1">
-                          <p className="font-bold text-gray-900 text-sm">{m.name}</p>
-                          <div className="flex gap-3 mt-1 text-xs text-gray-400">
-                            <span className="flex items-center gap-1"><Activity className="w-3 h-3" /> {m.dosage}</span>
-                            <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {m.duration}</span>
-                          </div>
+                      <div key={i} className="p-5 bg-slate-50 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-md transition-all group relative">
+                        <div className="flex items-start gap-4">
+                           <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm shrink-0 border border-slate-50">
+                              <Pill className="w-6 h-6 text-green-600" />
+                           </div>
+                           <div className="flex-1 space-y-3">
+                              <input 
+                                value={m.name}
+                                onChange={(e) => {
+                                  const newMeds = [...result.medicines];
+                                  newMeds[i].name = e.target.value;
+                                  setResult({ ...result, medicines: newMeds });
+                                }}
+                                className="w-full bg-transparent font-black text-slate-900 border-none p-0 focus:ring-0 text-base"
+                              />
+                              <div className="flex flex-wrap gap-2">
+                                <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-xl border border-slate-100">
+                                   <Activity className="w-3.5 h-3.5 text-blue-500" />
+                                   <input 
+                                     value={m.dosage}
+                                     onChange={(e) => {
+                                       const newMeds = [...result.medicines];
+                                       newMeds[i].dosage = e.target.value;
+                                       setResult({ ...result, medicines: newMeds });
+                                     }}
+                                     className="bg-transparent text-xs font-bold text-slate-500 border-none p-0 focus:ring-0 w-20"
+                                   />
+                                </div>
+                                <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-xl border border-slate-100">
+                                   <Clock className="w-3.5 h-3.5 text-purple-500" />
+                                   <input 
+                                     value={m.duration || m.frequency}
+                                     onChange={(e) => {
+                                       const newMeds = [...result.medicines];
+                                       newMeds[i].duration = e.target.value;
+                                       setResult({ ...result, medicines: newMeds });
+                                     }}
+                                     className="bg-transparent text-xs font-bold text-slate-500 border-none p-0 focus:ring-0 w-24"
+                                   />
+                                </div>
+                              </div>
+                           </div>
+                           <button 
+                             onClick={() => {
+                               const newMeds = result.medicines.filter((_: any, idx: number) => idx !== i);
+                               setResult({ ...result, medicines: newMeds });
+                             }}
+                             className="text-slate-300 hover:text-red-500 transition-colors"
+                           >
+                             <AlertCircle className="w-5 h-5" />
+                           </button>
                         </div>
                       </div>
                     ))}
