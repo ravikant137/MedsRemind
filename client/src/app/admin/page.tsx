@@ -11,6 +11,7 @@ import axios from 'axios';
 import { API_URL } from '@/config';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import Logo from '@/components/Logo';
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('Dashboard');
