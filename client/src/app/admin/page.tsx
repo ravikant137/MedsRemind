@@ -425,7 +425,7 @@ export default function AdminDashboard() {
                       <span className="text-[10px] font-black uppercase tracking-widest text-blue-500 bg-blue-50 px-3 py-1 rounded-full">High</span>
                    </div>
                    <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Platform Engagement</p>
-                   <h4 className="text-3xl font-black text-slate-900 mt-2">84%</h4>
+                   <h4 className="text-3xl font-black text-slate-900 mt-2">{stats.engagement || 0}%</h4>
                    <div className="mt-8 flex items-end gap-2 h-12">
                       {[20, 35, 25, 45, 30, 50, 40, 60, 45, 70].map((h, i) => (
                         <div key={i} className="flex-1 bg-blue-500 rounded-t-lg shadow-lg shadow-blue-200" style={{ height: `${h}%` }}></div>
@@ -439,9 +439,9 @@ export default function AdminDashboard() {
                       <span className="text-[10px] font-black uppercase tracking-widest text-purple-500 bg-purple-50 px-3 py-1 rounded-full">Active</span>
                    </div>
                    <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Customer Retention</p>
-                   <h4 className="text-3xl font-black text-slate-900 mt-2">92%</h4>
+                   <h4 className="text-3xl font-black text-slate-900 mt-2">{stats.retention || 0}%</h4>
                    <div className="mt-8 relative h-4 bg-slate-100 rounded-full overflow-hidden">
-                      <div className="absolute left-0 top-0 h-full bg-purple-500 rounded-full shadow-lg" style={{ width: '92%' }}></div>
+                      <div className="absolute left-0 top-0 h-full bg-purple-500 rounded-full shadow-lg" style={{ width: `${stats.retention || 0}%` }}></div>
                    </div>
                 </div>
              </div>
