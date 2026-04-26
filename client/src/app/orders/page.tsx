@@ -118,20 +118,36 @@ export default function MyOrders() {
 
                 {/* Items Summary - The requested Order Summary improvement */}
                 <div className="bg-slate-50/50 p-10 flex flex-wrap gap-4">
-                  {order.items?.slice(0, 3).map((item: any, i: number) => (
-                    <div key={i} className="bg-white px-6 py-4 rounded-2xl border border-slate-100 flex items-center gap-4 shadow-sm">
-                       <span className="text-2xl">💊</span>
-                       <div>
-                          <p className="text-sm font-black text-slate-900">{item.medicine_name}</p>
-                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{item.quantity} x ₹{item.price_at_time}</p>
-                       </div>
-                    </div>
-                  ))}
-                  {order.items?.length > 3 && (
-                    <div className="bg-slate-900 text-white px-6 py-4 rounded-2xl flex items-center justify-center font-black text-xs uppercase tracking-widest shadow-lg">
-                       +{order.items.length - 3} more
-                    </div>
-                  )}
+                  {(() => {
+                    let items = [];
+                    try {
+                      items = typeof order.items === 'string' ? JSON.parse(order.items) : (order.items || []);
+                    } catch (e) {
+                      items = [];
+                    }
+                    return items.slice(0, 3).map((item: any, i: number) => (
+                      <div key={i} className="bg-white px-6 py-4 rounded-2xl border border-slate-100 flex items-center gap-4 shadow-sm">
+                         <span className="text-2xl">💊</span>
+                         <div>
+                            <p className="text-sm font-black text-slate-900">{item.name || item.medicine_name || 'Medicine'}</p>
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{item.quantity} x ₹{item.price || item.price_at_time || 0}</p>
+                         </div>
+                      </div>
+                    ));
+                  })()}
+                  {(() => {
+                    let items = [];
+                    try {
+                      items = typeof order.items === 'string' ? JSON.parse(order.items) : (order.items || []);
+                    } catch (e) {
+                      items = [];
+                    }
+                    return items.length > 3 && (
+                      <div className="bg-slate-900 text-white px-6 py-4 rounded-2xl flex items-center justify-center font-black text-xs uppercase tracking-widest shadow-lg">
+                         +{items.length - 3} more
+                      </div>
+                    );
+                  })()}
                 </div>
               </motion.div>
             ))}
