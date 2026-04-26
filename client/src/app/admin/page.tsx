@@ -710,9 +710,11 @@ export default function AdminDashboard() {
                       await axios.post(`${API_URL}/api/notifications/read`, {}, {
                         headers: { Authorization: `Bearer ${token}` }
                       });
-                      setNotifCount(0);
+                      setNotifCount(0); // Instantly clear badge
                     }
-                  } catch (e) {}
+                  } catch (e) {
+                    console.error('Failed to clear notifications:', e);
+                  }
                 }}
               >
                  <Bell className="w-6 h-6 text-slate-400 group-hover:text-green-600" />
