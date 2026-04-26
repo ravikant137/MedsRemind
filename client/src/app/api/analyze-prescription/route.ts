@@ -20,6 +20,18 @@ export async function POST(request: NextRequest) {
 
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
+    // Robust Base64 and MIME Type handling
+    let mimeType = "image/jpeg";
+    let base64Data = image;
+
+    if (image.includes(';base64,')) {
+      const parts = image.split(';base64,');
+      mimeType = parts[0].split(':')[1];
+      base64Data = parts[1];
+    } else if (image.includes(',')) {
+      base64Data = image.split(',')[1];
+    }
+
     const prompt = `Analyze this medical prescription image with maximum accuracy. 
     Extract a detailed medication schedule in the following JSON format:
     {
@@ -46,8 +58,8 @@ export async function POST(request: NextRequest) {
       prompt,
       {
         inlineData: {
-          data: image.split(',')[1],
-          mimeType: "image/jpeg"
+          data: base64Data,
+          mimeType: mimeType
         }
       }
     ]);
@@ -55,11 +67,19 @@ export async function POST(request: NextRequest) {
     const response = await result.response;
     const text = response.text();
     
-    // Extract JSON from the response text
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    const data = jsonMatch ? JSON.parse(jsonMatch[0]) : { medicines: [] };
-
-    return NextResponse.json(data);
+    // Robust JSON Extraction
+    try {
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) throw new Error("No JSON found in AI response");
+      const data = JSON.parse(jsonMatch[0]);
+      return NextResponse.json(data);
+    } catch (parseErr) {
+      console.error('AI Response Text:', text);
+      return NextResponse.json({ 
+        error: 'Failed to parse AI response',
+        raw: text.substring(0, 100)
+      }, { status: 500 });
+    }
   } catch (error: any) {
     console.error('AI Analysis Error:', error);
     return NextResponse.json({ error: 'Failed to analyze prescription' }, { status: 500 });
