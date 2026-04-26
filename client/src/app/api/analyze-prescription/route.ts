@@ -7,15 +7,12 @@ export async function POST(request: NextRequest) {
   try {
     const { image } = await request.json(); // base64 image
     
-    if (!process.env.GEMINI_API_KEY) {
-      // Fallback for demo if no API key is provided
-      return NextResponse.json({
-        medicines: [
-          { name: "Paracetamol", dosage: "500mg", frequency: "Twice a day", duration: "5 days", instructions: "After food" },
-          { name: "Amoxicillin", dosage: "250mg", frequency: "Thrice a day", duration: "7 days", instructions: "Complete the course" }
-        ],
-        summary: "Demo result: Please set GEMINI_API_KEY for real AI analysis."
-      });
+    if (!process.env.GEMINI_API_KEY && !process.env.NEXT_PUBLIC_GEMINI_API_KEY) {
+      console.error('CRITICAL: GEMINI_API_KEY is missing from environment variables.');
+      return NextResponse.json({ 
+        error: 'AI Analysis Configuration Error: Missing API Key. Please add GEMINI_API_KEY to your .env file.',
+        missing_key: true
+      }, { status: 500 });
     }
 
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
