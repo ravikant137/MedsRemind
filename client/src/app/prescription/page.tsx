@@ -58,16 +58,18 @@ export default function PrescriptionUpload() {
 
     setIsSettingReminders(true);
     try {
-      await axios.post(`${API_URL}/api/reminders/bulk`, {
+      await axios.post('/api/reminders/bulk', {
         medicines: result.medicines
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setRemindersSet(true);
       setTimeout(() => { router.push('/reminders'); }, 2000);
-    } catch (err) {
-      alert('Failed to sync reminders. Please try logging in again.');
-      router.push('/login');
+    } catch (err: any) {
+      const errorMsg = err.response?.data?.error || err.message || 'Unknown error';
+      alert(`Sync Failed: ${errorMsg}. Please try logging in again.`);
+      console.error('Sync error:', err);
+      // router.push('/login'); // Temporarily disable redirect to see error
     } finally {
       setIsSettingReminders(false);
     }
