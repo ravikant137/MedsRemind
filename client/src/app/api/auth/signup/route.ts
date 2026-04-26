@@ -1,30 +1,36 @@
 import { NextResponse } from 'next/server';
+import { supabase } from '@/lib/supabase';
 import bcrypt from 'bcryptjs';
-import sqlite3 from 'sqlite3';
-import { open } from 'sqlite';
-import path from 'path';
-
-async function getDb() {
-  return open({
-    filename: path.join(process.cwd(), '../server/database.sqlite'),
-    driver: sqlite3.Database
-  });
-}
 
 export async function POST(request: Request) {
   try {
     const { name, email, password } = await request.json();
-    const db = await getDb();
     
+    // Check if user exists
+    const { data: existingUser } = await supabase
+      .from('users')
+      .select('id')
+      .eq('email', email)
+      .single();
+      
+    if (existingUser) {
+      return NextResponse.json({ error: 'User already exists' }, { status: 400 });
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
     
-    await db.run(
-      'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)',
-      [name, email, hashedPassword, 'USER']
-    );
+    const { data, error } = await supabase
+      .from('users')
+      .insert([
+        { name, email, password: hashedPassword, role: 'USER' }
+      ])
+      .select();
+      
+    if (error) throw error;
     
-    return NextResponse.json({ message: 'User created successfully' }, { status: 201 });
+    return NextResponse.json({ message: 'User created successfully', user: data[0] }, { status: 201 });
   } catch (err: any) {
+    console.error('Signup error:', err);
     return NextResponse.json({ error: err.message || 'Registration failed' }, { status: 500 });
   }
 }
