@@ -242,20 +242,24 @@ function OrderTrackingContent() {
                   <div className="bg-white p-12 rounded-[4rem] border border-slate-100 shadow-2xl flex flex-col">
                      <h3 className="text-2xl font-black text-slate-900 mb-12">Order Summary</h3>
                      <div className="space-y-6 mb-10 flex-1 overflow-y-auto max-h-[500px] pr-2 custom-scrollbar">
-                        {trackingData.items && trackingData.items.length > 0 ? (
-                          trackingData.items.map((item: any, i: number) => (
-                            <div key={i} className="flex justify-between items-center p-6 bg-slate-50 rounded-[2.5rem] border border-transparent">
-                               <div className="flex items-center gap-5">
-                                  <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-3xl shadow-sm">💊</div>
-                                  <div>
-                                     <p className="font-black text-slate-900">{item.medicine_name}</p>
-                                     <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Qty: {item.quantity} × ₹{item.price_at_time}</p>
-                                  </div>
-                               </div>
-                               <p className="font-black text-slate-900 text-lg">₹{(item.quantity * item.price_at_time).toFixed(2)}</p>
-                            </div>
-                          ))
-                        ) : (
+                         {trackingData.items && trackingData.items.length > 0 ? (
+                           trackingData.items.map((item: any, i: number) => (
+                             <div key={i} className="flex justify-between items-center p-6 bg-slate-50 rounded-[2.5rem] border border-transparent">
+                                <div className="flex items-center gap-5">
+                                   <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-3xl shadow-sm">💊</div>
+                                   <div>
+                                      <p className="font-black text-slate-900">{item.name || item.medicine_name || 'Medicine'}</p>
+                                      <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+                                        Qty: {item.quantity} × ₹{item.price || item.price_at_time || 0}
+                                      </p>
+                                   </div>
+                                </div>
+                                <p className="font-black text-slate-900 text-lg">
+                                  ₹{(item.quantity * (item.price || item.price_at_time || 0)).toFixed(2)}
+                                </p>
+                             </div>
+                           ))
+                         ) : (
                           <div className="flex flex-col items-center justify-center py-20 opacity-20">
                              <Box className="w-16 h-16 mb-4 text-slate-900" />
                              <p className="font-black text-slate-900 uppercase tracking-widest text-xs">No items found</p>
