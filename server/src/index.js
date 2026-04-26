@@ -183,6 +183,42 @@ app.get('/api/orders/:id', auth, async (req, res) => {
   }
 });
 
+// Public Tracking Endpoint
+app.get('/api/track/:id', async (req, res) => {
+  try {
+    const orderId = req.params.id.replace(/[^0-9]/g, '');
+    if (!orderId) {
+      return res.status(400).json({ error: 'Invalid order ID' });
+    }
+    const orderResult = await db.query(
+      'SELECT o.id, o.status, o.created_at, o.total_amount, o.address, u.name as user_name FROM orders o JOIN users u ON o.user_id = u.id WHERE o.id = ?',
+      [orderId]
+    );
+
+    if (orderResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+
+    const order = orderResult.rows[0];
+
+    const itemsResult = await db.query(
+      'SELECT oi.quantity, oi.price_at_time, m.name as medicine_name FROM order_items oi JOIN medicines m ON oi.medicine_id = m.id WHERE oi.order_id = ?',
+      [orderId]
+    );
+
+    const historyResult = await db.query(
+      'SELECT status, timestamp FROM order_status_history WHERE order_id = ? ORDER BY timestamp ASC',
+      [orderId]
+    );
+
+    order.items = itemsResult.rows;
+    order.statusHistory = historyResult.rows;
+    res.json(order);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.patch('/api/orders/:id/status', auth, async (req, res) => {
   try {
     // Only ADMIN should be able to update status

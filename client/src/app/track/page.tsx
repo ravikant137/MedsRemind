@@ -15,10 +15,8 @@ export default function OrderTracking() {
     setLoading(true);
     setTrackingData(null);
     try {
-      const token = localStorage.getItem('token');
-      const res = await axios.get(`${API_URL}/api/orders/${orderId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      // Use the new public tracking endpoint which doesn't require authentication
+      const res = await axios.get(`${API_URL}/api/track/${orderId}`);
       
       const order = res.data;
       const createdAt = new Date(order.created_at.includes(' ') && !order.created_at.includes('T') ? order.created_at + ' UTC' : order.created_at);
