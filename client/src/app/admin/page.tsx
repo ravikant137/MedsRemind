@@ -22,6 +22,8 @@ export default function AdminDashboard() {
   const [customers, setCustomers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [discountConfig, setDiscountConfig] = useState({ enabled: false, percentage: 0, message: '' });
+  const [savingDiscount, setSavingDiscount] = useState(false);
   const [search, setSearch] = useState('');
   const [notifCount, setNotifCount] = useState(0);
   const [newMed, setNewMed] = useState({
@@ -87,6 +89,9 @@ export default function AdminDashboard() {
       } else if (activeTab === 'Customers') {
         const res = await axios.get(`${API_URL}/api/admin/users`, config);
         setCustomers(res.data || []);
+      } else if (activeTab === 'Discounts') {
+        const res = await axios.get(`${API_URL}/api/admin/discounts`, config);
+        setDiscountConfig(res.data);
       }
     } catch (err) {
       console.error('Error fetching admin data:', err);
@@ -477,13 +482,74 @@ export default function AdminDashboard() {
           </motion.div>
         );
 
-      default:
+      case 'Discounts':
         return (
-          <div className="flex flex-col items-center justify-center h-96 text-slate-400 gap-6">
-            <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center text-4xl">🚧</div>
-            <h3 className="text-2xl font-bold">Section Under Development</h3>
-            <p className="font-medium">We're working hard to bring this feature to life.</p>
-          </div>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+             <div className="bg-white rounded-[3rem] p-12 border border-slate-100 shadow-xl max-w-2xl mx-auto text-center">
+                <div className={`w-24 h-24 rounded-[2rem] flex items-center justify-center mx-auto mb-8 text-4xl shadow-inner ${discountConfig.enabled ? 'bg-green-50 text-green-600' : 'bg-slate-50 text-slate-400'}`}>
+                   {discountConfig.enabled ? '🎉' : '💤'}
+                </div>
+                <h3 className="text-3xl font-black mb-4">Periodic <span className="text-green-600">Discounts</span></h3>
+                <p className="text-slate-500 font-medium mb-12">Enable global store-wide discounts for a specific period to boost sales.</p>
+                
+                <div className="space-y-8 text-left">
+                   <div className="flex items-center justify-between p-6 bg-slate-50 rounded-[2rem]">
+                      <div>
+                         <p className="font-black text-slate-900">Enable Flash Sale</p>
+                         <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Status: {discountConfig.enabled ? 'ACTIVE' : 'INACTIVE'}</p>
+                      </div>
+                      <button 
+                        onClick={() => setDiscountConfig({...discountConfig, enabled: !discountConfig.enabled})}
+                        className={`w-16 h-8 rounded-full relative transition-all ${discountConfig.enabled ? 'bg-green-600' : 'bg-slate-300'}`}
+                      >
+                         <div className={`absolute top-1 w-6 h-6 bg-white rounded-full transition-all ${discountConfig.enabled ? 'left-9' : 'left-1'}`} />
+                      </button>
+                   </div>
+
+                   <div className="space-y-3">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-4">Discount Percentage (%)</label>
+                      <input 
+                        type="number" 
+                        value={discountConfig.percentage} 
+                        onChange={e => setDiscountConfig({...discountConfig, percentage: parseInt(e.target.value) || 0})}
+                        className="w-full p-6 bg-slate-50 rounded-[2rem] border-none focus:ring-2 focus:ring-green-500/20 font-black text-2xl"
+                        placeholder="0"
+                      />
+                   </div>
+
+                   <div className="space-y-3">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-4">Announcement Message</label>
+                      <textarea 
+                        value={discountConfig.message} 
+                        onChange={e => setDiscountConfig({...discountConfig, message: e.target.value})}
+                        className="w-full p-6 bg-slate-50 rounded-[2rem] border-none focus:ring-2 focus:ring-green-500/20 font-bold h-32"
+                        placeholder="e.g. Summer Health Sale! Get 10% off on all medicines."
+                      />
+                   </div>
+
+                   <button 
+                     onClick={async () => {
+                        setSavingDiscount(true);
+                        try {
+                           const token = localStorage.getItem('token');
+                           await axios.post(`${API_URL}/api/admin/discounts`, discountConfig, {
+                              headers: { Authorization: `Bearer ${token}` }
+                           });
+                           alert('Discount settings saved successfully! 🚀');
+                        } catch (err) {
+                           alert('Failed to save discounts');
+                        } finally {
+                           setSavingDiscount(false);
+                        }
+                     }}
+                     disabled={savingDiscount}
+                     className="w-full py-6 bg-slate-900 text-white rounded-[2rem] font-black text-lg hover:bg-green-600 transition-all shadow-xl shadow-slate-200 disabled:opacity-50"
+                   >
+                      {savingDiscount ? <Loader2 className="animate-spin mx-auto" /> : 'APPLY GLOBAL DISCOUNT'}
+                   </button>
+                </div>
+             </div>
+          </motion.div>
         );
     }
   };
@@ -591,6 +657,7 @@ export default function AdminDashboard() {
             { name: 'Orders', icon: ShoppingBag },
             { name: 'Customers', icon: Users },
             { name: 'Analytics', icon: BarChart3 },
+            { name: 'Discounts', icon: DollarSign },
           ].map((item) => (
             <button 
               key={item.name} 

@@ -26,15 +26,12 @@ export async function POST(
     if (rError) throw rError;
 
     // 2. TIME-WINDOW LOGIC
-    // Check if the current time is within +/- 1 hour of the remind_at time
     const now = new Date();
     const [hours, minutes] = (reminder.remind_at || '08:00:00').split(':');
     const scheduledTime = new Date();
     scheduledTime.setHours(parseInt(hours), parseInt(minutes), 0);
 
     const diffInMinutes = Math.abs(now.getTime() - scheduledTime.getTime()) / (1000 * 60);
-    
-    // Reward Window: 60 minutes
     const isWithinWindow = diffInMinutes <= 60;
     const coinsEarned = isWithinWindow ? 10 : 0;
 
@@ -52,10 +49,30 @@ export async function POST(
           .from('users')
           .update({ reward_coins: newBalance })
           .eq('id', user.id);
+
+        // 4. ADD REWARD NOTIFICATION
+        await supabase
+          .from('notifications')
+          .insert({
+            user_id: user.id,
+            title: 'Reward Earned! 🪙',
+            message: `Congratulations! You earned ${coinsEarned} Health Coins for taking your ${reminder.medicine_name} on time!`,
+            type: 'REWARD'
+          });
       }
+    } else {
+      // Notification for late take
+      await supabase
+        .from('notifications')
+        .insert({
+          user_id: user.id,
+          title: 'Dose Taken Late ⏰',
+          message: `You marked ${reminder.medicine_name} as taken, but it was outside the reward window. Stay on track next time to earn coins!`,
+          type: 'INFO'
+        });
     }
 
-    // 4. Update reminder status
+    // 5. Update reminder status
     await supabase
       .from('reminders')
       .update({ 
@@ -69,7 +86,7 @@ export async function POST(
       success: true, 
       pointsEarned: coinsEarned,
       isLate: !isWithinWindow,
-      message: isWithinWindow ? 'Perfect timing! You earned 10 coins!' : 'Medicine taken, but late. No coins earned this time.'
+      message: isWithinWindow ? `Earned ${coinsEarned} coins!` : 'Taken late, no coins.'
     });
   } catch (err: any) {
     console.error('Complete reminder error:', err);
