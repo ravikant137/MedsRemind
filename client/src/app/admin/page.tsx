@@ -507,9 +507,9 @@ export default function AdminDashboard() {
 
       {/* Admin Sidebar */}
       <aside className="w-80 bg-slate-900 text-white hidden lg:flex flex-col p-10 fixed h-full z-10">
-        <div className="flex items-center gap-4 mb-16">
-          <div className="w-12 h-12 bg-green-600 rounded-2xl flex items-center justify-center font-black shadow-2xl shadow-green-500/20">M</div>
-          <span className="text-2xl font-black tracking-tighter">Admin <span className="text-green-500">Panel</span></span>
+        <div className="flex items-center gap-5 mb-16">
+          <Logo className="w-12 h-12" />
+          <span className="text-2xl font-black tracking-tighter text-white">Admin <span className="text-green-500">Panel</span></span>
         </div>
         
         <nav className="flex-1 space-y-4">

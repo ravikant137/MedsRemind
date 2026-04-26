@@ -26,9 +26,14 @@ export async function POST(request: Request) {
     
     const token = jwt.sign({ id: user.id, role: user.role, name: user.name }, JWT_SECRET);
     
+    // For admin users, we might want to flag that OTP is required
+    const requiresOtp = user.role === 'ADMIN';
+    
     return NextResponse.json({ 
       token, 
-      user: { id: user.id, name: user.name, email: user.email, role: user.role } 
+      user: { id: user.id, name: user.name, email: user.email, role: user.role },
+      requiresOtp,
+      otpCode: requiresOtp ? "123456" : null // Mock OTP for demonstration
     });
   } catch (err: any) {
     console.error('Login error:', err);
