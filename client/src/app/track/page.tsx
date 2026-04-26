@@ -18,13 +18,22 @@ function OrderTrackingContent() {
     try {
       const res = await axios.get(`${API_URL}/api/orders/${id}`);
       const order = res.data;
+      if (!order) throw new Error('Order not found');
       
-      // Handle SQLite date format safely for local time display
+      // Safety: Parse items if they come back as a string
+      let parsedItems = [];
+      try {
+        parsedItems = typeof order.items === 'string' ? JSON.parse(order.items) : (order.items || []);
+      } catch (e) {
+        console.error('Failed to parse items:', e);
+        parsedItems = [];
+      }
+      
+      // Handle SQLite/Supabase date format safely
       const parseDate = (dateStr: string) => {
         if (!dateStr) return new Date();
-        // If it lacks 'T', it's likely 'YYYY-MM-DD HH:MM:SS'
         if (!dateStr.includes('T') && dateStr.includes(' ')) {
-          return new Date(dateStr.replace(' ', 'T') + 'Z'); // Assume UTC from server
+          return new Date(dateStr.replace(' ', 'T') + 'Z');
         }
         return new Date(dateStr);
       };
@@ -35,51 +44,36 @@ function OrderTrackingContent() {
 
       const allSteps = ['ORDER_PLACED', 'CONFIRMED', 'PACKED', 'OUT_FOR_DELIVERY', 'DELIVERED'];
       const historyMap: Record<string, Date> = {};
-      if (order.statusHistory) {
-         order.statusHistory.forEach((h: any) => {
-             historyMap[h.status] = parseDate(h.timestamp);
-         });
-      }
-
+      
       let currentStatus = order.status || 'ORDER_PLACED';
-      if (currentStatus === 'PENDING') currentStatus = 'ORDER_PLACED'; // Fallback
+      if (currentStatus === 'PENDING') currentStatus = 'ORDER_PLACED';
       
       let currentStepIndex = allSteps.indexOf(currentStatus);
-      if (currentStepIndex === -1) currentStepIndex = 0; // Default to first step
+      if (currentStepIndex === -1) currentStepIndex = 0;
       
-      let mappedSteps = [];
-      if (order.status === 'CANCELLED') {
-        mappedSteps = [
-          { status: 'ORDER PLACED', time: historyMap['ORDER_PLACED'] ? historyMap['ORDER_PLACED'].toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Success', completed: true, isCurrent: false },
-          { status: 'CANCELLED', time: historyMap['CANCELLED'] ? historyMap['CANCELLED'].toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Cancelled', completed: false, isCurrent: true }
-        ];
-      } else {
-        mappedSteps = allSteps.map((step, index) => {
-           const isCompleted = index <= currentStepIndex;
-           const isCurrent = index === currentStepIndex && order.status !== 'DELIVERED';
-           const time = historyMap[step] 
-              ? historyMap[step].toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
-              : (isCompleted ? 'Success' : 'Pending');
-           const label = step.replace(/_/g, ' ');
-           return { status: label, time, completed: isCompleted, isCurrent };
-        });
-      }
+      const mappedSteps = allSteps.map((step, index) => {
+         const isCompleted = index <= currentStepIndex;
+         const isCurrent = index === currentStepIndex && order.status !== 'DELIVERED';
+         const label = step.replace(/_/g, ' ');
+         return { status: label, time: isCompleted ? 'Success' : 'Pending', completed: isCompleted, isCurrent };
+      });
 
       setTrackingData({
-        id: `#ORD-${order.id}`,
+        id: order.id.startsWith('ANJ-') ? order.id : `#ORD-${order.id}`,
         rawId: order.id,
-        status: order.status === 'PENDING' ? 'PROCESSING' : (order.status || 'ORDER_PLACED').replace(/_/g, ' '),
-        customer: order.user_name,
-        address: order.address,
-        total_amount: order.total_amount,
-        items: order.items || [],
+        status: (order.status || 'ORDER_PLACED').replace(/_/g, ' '),
+        customer: order.user_name || 'Customer',
+        address: order.address || 'Delivery Address',
+        total_amount: order.total_amount || 0,
+        items: Array.isArray(parsedItems) ? parsedItems : [],
         estimated_delivery: estDelivery.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         steps: mappedSteps,
         isDelivered: order.status === 'DELIVERED'
       });
       setIsLive(order.status !== 'DELIVERED' && order.status !== 'CANCELLED');
     } catch (err: any) {
-      if (!isSilent) alert('Order not found or could not fetch details.');
+      console.error('Tracking Error:', err);
+      if (!isSilent) alert('Order details could not be loaded. Please try again.');
       setIsLive(false);
     } finally {
       if (!isSilent) setLoading(false);
