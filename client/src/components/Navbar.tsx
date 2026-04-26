@@ -148,9 +148,11 @@ export default function Navbar() {
                             <ShieldCheck className="w-4 h-4" /> Admin Panel
                           </Link>
                         )}
-                        <Link href="/orders" onClick={() => setIsProfileOpen(false)} className="flex items-center gap-3 px-5 py-3 text-sm font-bold text-gray-700 hover:bg-gray-50 transition-colors">
-                          <ShoppingCart className="w-4 h-4" /> My Orders
-                        </Link>
+                        {user.role !== 'ADMIN' && (
+                          <Link href="/orders" onClick={() => setIsProfileOpen(false)} className="flex items-center gap-3 px-5 py-3 text-sm font-bold text-gray-700 hover:bg-gray-50 transition-colors">
+                            <ShoppingCart className="w-4 h-4" /> My Orders
+                          </Link>
+                        )}
                         <button onClick={() => { handleLogout(); setIsProfileOpen(false); }} className="w-full flex items-center gap-3 px-5 py-3 text-sm font-bold text-red-500 hover:bg-red-50 transition-colors">
                           <LogOut className="w-4 h-4" /> Logout
                         </button>
@@ -203,7 +205,7 @@ export default function Navbar() {
                 </div>
               ) : (
                 <div className="flex flex-col gap-3">
-                  <Link href="/dashboard" onClick={() => setIsMenuOpen(false)} className="w-full py-4 text-center bg-green-50 text-[#2e7d32] rounded-xl font-black text-sm border border-green-100">My Dashboard</Link>
+                  <Link href="/admin" onClick={() => setIsMenuOpen(false)} className="w-full py-4 text-center bg-green-600 text-white rounded-xl font-black text-sm shadow-lg">Admin Panel</Link>
                   <button onClick={() => { handleLogout(); setIsMenuOpen(false); }} className="w-full py-4 text-center bg-red-50 text-red-600 rounded-xl font-black text-sm border border-red-100">Logout</button>
                 </div>
               )}

@@ -1,10 +1,10 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { 
   LayoutDashboard, Package, ShoppingBag, Users, TrendingUp, 
   AlertTriangle, Search, Plus, ExternalLink, Trash2, 
   Edit3, CheckCircle, Clock, XCircle, ChevronRight, Loader2, X,
-  BarChart3, PieChart, Activity, DollarSign, Calendar, ArrowLeft, LogOut, Camera, ShieldAlert
+  BarChart3, PieChart, Activity, DollarSign, Calendar, ArrowLeft, LogOut, Camera, ShieldAlert, Bell
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
@@ -22,6 +22,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [search, setSearch] = useState('');
+  const [notifCount, setNotifCount] = useState(0);
   const [newMed, setNewMed] = useState({
     name: '', composition: '', price: '', stock: '', category: 'Fever', description: ''
   });
@@ -57,19 +58,18 @@ export default function AdminDashboard() {
     checkAuth();
   }, [router]);
 
-  useEffect(() => {
-    if (authorized) {
-      fetchData();
-    }
-  }, [authorized, activeTab]);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
       if (!token) return;
       const config = { headers: { Authorization: `Bearer ${token}` } };
       
+      // Fetch notifications unread count
+      const notifRes = await axios.get(`${API_URL}/api/notifications`, config);
+      const unread = notifRes.data.filter((n: any) => !n.read).length;
+      setNotifCount(unread);
+
       if (activeTab === 'Dashboard' || activeTab === 'Analytics') {
         const [statsRes, ordersRes] = await Promise.all([
           axios.get(`${API_URL}/api/admin/stats`, config),
@@ -92,7 +92,16 @@ export default function AdminDashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [activeTab]);
+
+  useEffect(() => {
+    if (authorized) {
+      fetchData();
+      // Poll for new notifications every 30 seconds
+      const interval = setInterval(fetchData, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [authorized, fetchData]);
 
   const deleteMedicine = async (id: number) => {
     if (!confirm('Are you sure you want to delete this medicine?')) return;
@@ -152,7 +161,6 @@ export default function AdminDashboard() {
       case 'Dashboard':
         return (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-12">
-            {/* Stats Grid */}
             <div className="grid md:grid-cols-4 gap-8">
                {[
                  { label: 'Total Revenue', value: `₹${stats.revenue.toLocaleString()}`, icon: TrendingUp, color: 'text-green-600', bg: 'bg-green-50' },
@@ -410,8 +418,8 @@ export default function AdminDashboard() {
                       ].map((item, i) => (
                         <div key={i} className="space-y-2">
                            <div className="flex justify-between text-sm font-bold">
-                              <span>{item.label}</span>
-                              <span className="text-slate-400">{item.val}</span>
+                               <span>{item.label}</span>
+                               <span className="text-slate-400">{item.val}</span>
                            </div>
                            <div className="h-2 bg-white/10 rounded-full overflow-hidden">
                               <div className={`h-full ${item.color}`} style={{ width: item.val }}></div>
@@ -476,7 +484,6 @@ export default function AdminDashboard() {
                             onChange={(e) => {
                                const f = e.target.files?.[0];
                                if (f) {
-                                  // Mock AI Scan for product
                                   const name = f.name.split('.')[0].replace(/_/g, ' ');
                                   setNewMed({
                                      ...newMed,
@@ -535,7 +542,6 @@ export default function AdminDashboard() {
         )}
       </AnimatePresence>
 
-      {/* Admin Sidebar */}
       <aside className="w-80 bg-slate-900 text-white hidden lg:flex flex-col p-10 fixed h-full z-10">
         <div className="flex items-center gap-5 mb-16">
           <Logo className="w-12 h-12" />
@@ -573,14 +579,13 @@ export default function AdminDashboard() {
         </div>
       </aside>
 
-      {/* Main Content Area */}
       <main className="flex-1 lg:ml-80 p-12">
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-16 gap-8">
            <div>
               <h1 className="text-4xl font-black text-slate-900 tracking-tight">{activeTab}</h1>
               <p className="text-slate-500 font-medium">Managing Ecosystem in ₹ INR</p>
            </div>
-           <div className="flex gap-4">
+           <div className="flex items-center gap-6">
               <div className="relative group">
                  <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-green-600 w-5 h-5 transition-colors" />
                  <input 
@@ -591,6 +596,15 @@ export default function AdminDashboard() {
                   className="pl-14 pr-6 py-5 rounded-[2rem] bg-white border border-slate-100 shadow-xl shadow-slate-100/50 focus:outline-none focus:ring-2 focus:ring-green-500/20 transition-all font-bold min-w-[300px]" 
                  />
               </div>
+
+              <Link href="/notifications" className="relative w-16 h-16 bg-white rounded-2xl flex items-center justify-center border border-slate-100 shadow-xl shadow-slate-100/50 hover:bg-slate-50 transition-all group">
+                 <Bell className="w-6 h-6 text-slate-400 group-hover:text-green-600" />
+                 {notifCount > 0 && (
+                   <span className="absolute -top-2 -right-2 w-7 h-7 bg-red-600 text-white text-[10px] font-black rounded-full flex items-center justify-center border-4 border-slate-50 shadow-lg animate-bounce">
+                     {notifCount}
+                   </span>
+                 )}
+              </Link>
            </div>
         </header>
 
