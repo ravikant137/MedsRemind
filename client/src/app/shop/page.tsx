@@ -131,6 +131,17 @@ function ShopContent() {
 
           {/* Product Grid */}
           <div className="flex-1">
+            {medicines.some(m => m.discount_active) && (
+              <div className="mb-8 p-6 bg-green-600 text-white rounded-3xl shadow-xl shadow-green-100 flex items-center justify-between overflow-hidden relative group">
+                 <div className="relative z-10">
+                    <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-80 mb-1">Limited Time Offer</p>
+                    <h3 className="text-2xl font-black">{medicines.find(m => m.discount_active)?.discount_message || 'Flash Sale Active!'}</h3>
+                 </div>
+                 <div className="w-20 h-20 bg-white/10 rounded-full flex items-center justify-center text-4xl group-hover:rotate-12 transition-transform">🏷️</div>
+                 <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-white/5 rounded-full blur-3xl"></div>
+              </div>
+            )}
+            
             <div className="flex justify-between items-center mb-6">
               <p className="text-sm text-gray-500">{medicines.length} products found</p>
             </div>
@@ -155,6 +166,11 @@ function ShopContent() {
                   <div key={med.id} className="card p-4 rounded-xl group">
                     <div className="w-full aspect-square bg-gray-50 rounded-lg mb-3 flex items-center justify-center text-4xl group-hover:scale-105 transition-transform relative overflow-hidden">
                       💊
+                      {med.discount_active && (
+                        <div className="absolute top-2 right-2 bg-green-600 text-white text-[9px] font-black px-2 py-1 rounded-lg shadow-lg animate-pulse">
+                          SAVE {med.discount_percentage}%
+                        </div>
+                      )}
                       {(!med.stock || med.stock < 1) && (
                         <div className="absolute inset-0 bg-gray-900/60 flex items-center justify-center">
                           <span className="text-xs font-bold text-white bg-red-500 px-2 py-1 rounded-full">Out of Stock</span>
@@ -165,7 +181,12 @@ function ShopContent() {
                     <h3 className="text-sm font-bold text-gray-900 mt-1.5 line-clamp-1">{med.name}</h3>
                     <p className="text-xs text-gray-400 mt-0.5 line-clamp-1">{med.composition || 'Health product'}</p>
                     <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-100">
-                      <span className="text-base font-black text-gray-900">₹{med.price?.toFixed(2)}</span>
+                      <div>
+                        {med.discount_active && (
+                          <span className="text-[10px] font-bold text-gray-400 line-through block">₹{med.original_price?.toFixed(2)}</span>
+                        )}
+                        <span className="text-base font-black text-gray-900">₹{med.price?.toFixed(2)}</span>
+                      </div>
                       <div className="flex items-center gap-1.5">
                         <button 
                           onClick={() => updateCart(med.id, -1)}

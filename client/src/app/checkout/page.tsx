@@ -174,10 +174,21 @@ export default function Checkout() {
             <div className="space-y-4 mb-8">
               {cart.map((item, i) => (
                 <div key={i} className="flex justify-between text-sm opacity-80">
-                  <span>{item.name} x {item.quantity}</span>
+                  <div className="flex flex-col">
+                    <span>{item.name} x {item.quantity}</span>
+                    {item.discount_active && (
+                      <span className="text-[10px] text-green-400 font-black uppercase tracking-[0.1em]">Sale Price Applied</span>
+                    )}
+                  </div>
                   <span>₹{(item.price * item.quantity).toFixed(2)}</span>
                 </div>
               ))}
+              {cart.some(m => m.discount_active) && (
+                <div className="flex justify-between text-[11px] text-green-400 font-black uppercase tracking-widest border-t border-white/5 pt-4">
+                  <span>Flash Sale Savings</span>
+                  <span>-₹{cart.reduce((sum, item) => sum + (item.discount_active ? (item.original_price - item.price) * item.quantity : 0), 0).toFixed(2)}</span>
+                </div>
+              )}
               {usePoints && (
                 <div className="flex justify-between text-sm text-[#4CAF50] font-bold border-t border-white/10 pt-4">
                   <span>Health Reward Discount</span>
