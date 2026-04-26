@@ -48,6 +48,9 @@ io.on('connection', (socket) => {
   socket.on('join_order', (orderId) => {
     socket.join(`order_${orderId}`);
   });
+  socket.on('join_user', (userId) => {
+    socket.join(`user_${userId}`);
+  });
 });
 
 // --- AUTH APIs ---
@@ -157,6 +160,12 @@ app.post('/api/payments/verify', auth, async (req, res) => {
         [req.user.id, 'order_placed', 'Order Placed Successfully', `Your order #ORD-${orderId} has been received.`]
       );
 
+      // Real-time Notification
+      io.to(`user_${req.user.id}`).emit('new_notification', {
+        title: 'Order Placed Successfully',
+        message: `Your order #ORD-${orderId} has been received.`
+      });
+
       await db.query('INSERT INTO order_status_history (order_id, status) VALUES (?, ?)', [orderId, 'ORDER_PLACED']);
       for (let item of items) {
         await db.query(
@@ -208,6 +217,12 @@ app.post('/api/orders/cod', auth, async (req, res) => {
       'INSERT INTO notifications (user_id, type, title, message) VALUES (?, ?, ?, ?)',
       [req.user.id, 'order_placed', 'Order Placed Successfully', `Your COD order #ORD-${orderId} has been received.`]
     );
+
+    // Real-time Notification
+    io.to(`user_${req.user.id}`).emit('new_notification', {
+      title: 'Order Placed Successfully',
+      message: `Your COD order #ORD-${orderId} has been received.`
+    });
 
     await db.query('INSERT INTO order_status_history (order_id, status) VALUES (?, ?)', [orderId, 'ORDER_PLACED']);
     for (let item of items) {
@@ -314,6 +329,15 @@ app.post('/api/admin/discounts', auth, async (req, res) => {
       'INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = ?',
       ['periodic_discount', JSON.stringify({ enabled, percentage, message }), JSON.stringify({ enabled, percentage, message })]
     );
+    
+    // Global Broadcast for Flash Sale
+    if (enabled) {
+      io.emit('broadcast_notification', { 
+        title: '🎉 Flash Sale Active!', 
+        message: message || `Get ${percentage}% off on all medicines now!` 
+      });
+    }
+    
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -338,6 +362,12 @@ app.patch('/api/orders/:id/status', auth, async (req, res) => {
       'INSERT INTO notifications (user_id, type, title, message) VALUES (?, ?, ?, ?)',
       [userId, 'order_update', 'Order Status Update', `Your order #ORD-${orderId} is now ${status.replace(/_/g, ' ')}.`]
     );
+
+    // Real-time Notification for User
+    io.to(`user_${userId}`).emit('new_notification', {
+      title: 'Order Status Update',
+      message: `Your order #ORD-${orderId} is now ${status.replace(/_/g, ' ')}.`
+    });
 
     // 4. Push real-time update via Socket.io
     io.to(`order_${orderId}`).emit('status_updated', { status });
