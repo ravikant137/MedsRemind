@@ -83,8 +83,39 @@ app.post('/api/auth/login', async (req, res) => {
 // --- MEDICINES ---
 app.get('/api/medicines', async (req, res) => {
   try {
-    const result = await db.query('SELECT * FROM medicines WHERE stock > 0');
-    res.json(result.rows);
+    const medicinesRes = await db.query('SELECT * FROM medicines WHERE stock > 0');
+    const medicines = medicinesRes.rows;
+
+    // Fetch periodic discount
+    let discount = { enabled: false, percentage: 0 };
+    try {
+      const resSettings = await db.query('SELECT value FROM settings WHERE key = "periodic_discount"');
+      if (resSettings.rows.length > 0) {
+        discount = JSON.parse(resSettings.rows[0].value);
+      }
+    } catch (e) {}
+
+    const discountedMedicines = medicines.map(med => {
+      const originalPrice = parseFloat(med.price) || 0;
+      if (discount.enabled && discount.percentage > 0) {
+        const discountAmount = (originalPrice * discount.percentage) / 100;
+        return {
+          ...med,
+          original_price: originalPrice,
+          price: Number((originalPrice - discountAmount).toFixed(2)),
+          discount_active: true,
+          discount_percentage: discount.percentage,
+          discount_message: discount.message
+        };
+      }
+      return { 
+        ...med, 
+        price: originalPrice,
+        discount_active: false 
+      };
+    });
+
+    res.json(discountedMedicines);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
