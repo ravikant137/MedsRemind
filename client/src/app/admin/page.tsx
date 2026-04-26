@@ -15,7 +15,8 @@ import Logo from '@/components/Logo';
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('Dashboard');
-  const [stats, setStats] = useState({ revenue: 0, orders: 0, users: 0, medicines: 0 });
+  const [timeRange, setTimeRange] = useState('ALL');
+  const [stats, setStats] = useState({ revenue: 0, orders: 0, users: 0, medicines: 0, categoryDistribution: {} as any });
   const [medicines, setMedicines] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [customers, setCustomers] = useState<any[]>([]);
@@ -72,10 +73,10 @@ export default function AdminDashboard() {
 
       if (activeTab === 'Dashboard' || activeTab === 'Analytics') {
         const [statsRes, ordersRes] = await Promise.all([
-          axios.get(`${API_URL}/api/admin/stats`, config),
+          axios.get(`${API_URL}/api/admin/stats?range=${timeRange}`, config),
           axios.get(`${API_URL}/api/admin/orders`, config)
         ]);
-        setStats(statsRes.data || { revenue: 0, orders: 0, users: 0, medicines: 0 });
+        setStats(statsRes.data || { revenue: 0, orders: 0, users: 0, medicines: 0, categoryDistribution: {} });
         setOrders(ordersRes.data || []);
       } else if (activeTab === 'Inventory') {
         const res = await axios.get(`${API_URL}/api/medicines`);
@@ -381,6 +382,21 @@ export default function AdminDashboard() {
       case 'Analytics':
         return (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-12">
+             <div className="flex justify-between items-center bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                <h3 className="font-black text-slate-900 uppercase tracking-widest text-xs">Reporting Period</h3>
+                <div className="flex gap-2">
+                   {['DAY', 'WEEK', 'MONTH', 'QUARTER', 'YEAR', 'ALL'].map((r) => (
+                     <button 
+                       key={r}
+                       onClick={() => setTimeRange(r)}
+                       className={`px-4 py-2 rounded-xl text-[10px] font-black tracking-widest transition-all ${timeRange === r ? 'bg-slate-900 text-white' : 'bg-slate-50 text-slate-400 hover:bg-slate-100'}`}
+                     >
+                       {r}
+                     </button>
+                   ))}
+                </div>
+             </div>
+
              <div className="grid md:grid-cols-3 gap-8">
                 <div className="bg-white p-10 rounded-[3rem] border border-slate-100 shadow-xl">
                    <div className="flex items-center justify-between mb-8">

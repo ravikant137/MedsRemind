@@ -67,18 +67,23 @@ export async function POST(request: NextRequest) {
     // Robust JSON Extraction
     try {
       const jsonMatch = text.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) throw new Error("No JSON found in AI response");
+      if (!jsonMatch) {
+        throw new Error(`The AI returned an invalid response format. Raw output: ${text.substring(0, 50)}...`);
+      }
       const data = JSON.parse(jsonMatch[0]);
       return NextResponse.json(data);
-    } catch (parseErr) {
+    } catch (parseErr: any) {
       console.error('AI Response Text:', text);
       return NextResponse.json({ 
-        error: 'Failed to parse AI response',
+        error: `AI Processing Failed: ${parseErr.message}`,
         raw: text.substring(0, 100)
       }, { status: 500 });
     }
   } catch (error: any) {
     console.error('AI Analysis Error:', error);
-    return NextResponse.json({ error: 'Failed to analyze prescription' }, { status: 500 });
+    return NextResponse.json({ 
+      error: `System Error: ${error.message || 'Unknown failure during analysis'}`,
+      details: error.stack?.substring(0, 50)
+    }, { status: 500 });
   }
 }
