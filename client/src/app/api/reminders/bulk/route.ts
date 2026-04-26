@@ -16,20 +16,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid medicines data' }, { status: 400 });
     }
 
-    // Map medicines to reminder format
+    // Map medicines to reminder format using only existing columns
     const reminders = medicines.map(med => ({
       user_id: user.id,
       medicine_name: med.name,
-      dosage: med.dosage || '1 pill',
-      schedule: med.frequency || '1-0-1',
+      dosage: med.dosage || '1 dose',
+      frequency: med.frequency || '1-0-1',
       timing: med.timing || 'After Food',
-      is_active: true,
+      duration: med.duration || '5 Days',
+      status: 'PENDING', // Standard status instead of is_active
       created_at: new Date().toISOString()
     }));
 
     const { error } = await supabase.from('reminders').insert(reminders);
 
-    if (error) throw error;
+    if (error) {
+      console.error('Supabase Error:', error);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
 
     return NextResponse.json({ success: true, count: reminders.length });
   } catch (err: any) {
