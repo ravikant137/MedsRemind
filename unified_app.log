@@ -369,3 +369,18 @@ read failed 9: Bad file descriptor
 [1]     at settle (.next\dev\static\chunks\00kl_axios_lib_08zo4xt._.js:2070:16)
 [1]     at XMLHttpRequest.onloadend (.next\dev\static\chunks\00kl_axios_lib_08zo4xt._.js:2615:211) (.next\dev\static\chunks\workspace_MedsRemind_client_0112br.._.js:55:21)
 [1]  GET /notifications 200 in 110ms (next.js: 6ms, application-code: 104ms)
+[1]  GET /notifications 200 in 1844ms (next.js: 9ms, application-code: 1836ms)
+[1]  GET /orders 200 in 116ms (next.js: 22ms, application-code: 94ms)
+[1] [browser] AxiosError: Request failed with status code 404
+[1]     at settle (.next\dev\static\chunks\00kl_axios_lib_08zo4xt._.js:2070:16)
+[1]     at XMLHttpRequest.onloadend (.next\dev\static\chunks\00kl_axios_lib_08zo4xt._.js:2615:211) (.next\dev\static\chunks\workspace_MedsRemind_client_0112br.._.js:55:21)
+[1] [browser] AxiosError: Request failed with status code 404
+[1]     at settle (.next\dev\static\chunks\00kl_axios_lib_08zo4xt._.js:2070:16)
+[1]     at XMLHttpRequest.onloadend (.next\dev\static\chunks\00kl_axios_lib_08zo4xt._.js:2615:211) (.next\dev\static\chunks\workspace_MedsRemind_client_0112br.._.js:55:21)
+[1]  GET /shop 200 in 1850ms (next.js: 1624ms, application-code: 226ms)
+[1] [browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior (.next\dev\static\chunks\00kl_next_dist_0e~eko-._.js:2431:13)
+[1]  GET /checkout 200 in 1487ms (next.js: 1336ms, application-code: 151ms)
+[1] ○ Compiling /track ...
+[1]  GET /notifications 200 in 1174ms (next.js: 1135ms, application-code: 39ms)
+[1]  GET /track?id=21 200 in 5.9s (next.js: 5.7s, application-code: 228ms)
+[1] ✓ Finished writing to filesystem cache in 17.8s

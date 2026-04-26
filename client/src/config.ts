@@ -1,3 +1,1 @@
-// src/config.ts
-// Centralized API URL configuration for both local dev and production
-export const API_URL = ''; // Relative path handled by Next.js proxy
+export const API_URL = process.env.NEXT_PUBLIC_API_URL || ''; // Empty string uses Next.js proxy locally
