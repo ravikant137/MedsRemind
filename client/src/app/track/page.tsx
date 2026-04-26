@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect, useCallback, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { Truck, Package, MapPin, CheckCircle, Clock, Search, ArrowRight, ShieldCheck, Box, Loader2, Zap, Radio } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
@@ -8,10 +8,22 @@ import { API_URL } from '@/config';
 
 function OrderTrackingContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const [orderId, setOrderId] = useState('');
   const [trackingData, setTrackingData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [isLive, setIsLive] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      try {
+        const user = JSON.parse(userData);
+        setIsAdmin(user.role === 'ADMIN');
+      } catch (e) {}
+    }
+  }, []);
 
   const fetchTrackingInfo = useCallback(async (id: string, isSilent = false) => {
     if (!isSilent) setLoading(true);
@@ -137,6 +149,61 @@ function OrderTrackingContent() {
              </motion.div>
           )}
         </header>
+
+        {isAdmin && trackingData && (
+          <motion.div 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-slate-900 p-8 rounded-[3rem] border border-green-500/30 shadow-2xl mb-8 relative overflow-hidden"
+          >
+             <div className="absolute top-0 right-0 p-8 opacity-10"><ShieldCheck className="w-32 h-32 text-green-500" /></div>
+             <div className="flex flex-col md:flex-row items-center justify-between gap-8 relative z-10">
+                <div>
+                   <h3 className="text-xl font-black text-white flex items-center gap-3">
+                     <Radio className="w-5 h-5 text-green-500 animate-pulse" /> Admin Control Center
+                   </h3>
+                   <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-1">Directly managing order #{trackingData.rawId}</p>
+                </div>
+                <div className="flex flex-wrap items-center gap-4">
+                   <select 
+                     value={trackingData.status.toUpperCase().replace(/ /g, '_')}
+                     onChange={async (e) => {
+                        try {
+                          const config = { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } };
+                          await axios.patch(`${API_URL}/api/orders/${trackingData.rawId}/status`, { status: e.target.value }, config);
+                          
+                          // Send notification
+                          await axios.post(`${API_URL}/api/notifications`, {
+                            user_id: trackingData.rawUserId || (await axios.get(`${API_URL}/api/orders/${trackingData.rawId}`)).data.user_id,
+                            title: `Order Update: ${e.target.value.replace(/_/g, ' ')}`,
+                            message: `Your order ${trackingData.rawId} is now ${e.target.value.replace(/_/g, ' ')}.`,
+                            type: 'order'
+                          }, config);
+
+                          fetchTrackingInfo(trackingData.rawId);
+                        } catch (err) {
+                          alert('Update failed');
+                        }
+                     }}
+                     className="bg-white/10 text-white border-white/20 rounded-xl px-4 py-3 font-black text-xs uppercase tracking-widest focus:ring-green-500"
+                   >
+                      <option value="ORDER_PLACED" className="text-slate-900">Order Placed</option>
+                      <option value="CONFIRMED" className="text-slate-900">Confirmed</option>
+                      <option value="PACKED" className="text-slate-900">Packed</option>
+                      <option value="OUT_FOR_DELIVERY" className="text-slate-900">Out for Delivery</option>
+                      <option value="DELIVERED" className="text-slate-900">Delivered</option>
+                      <option value="CANCELLED" className="text-slate-900">Cancelled</option>
+                   </select>
+                   <button 
+                     onClick={() => router.push('/admin')}
+                     className="px-6 py-3 bg-green-600 text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-green-700 transition-all shadow-lg"
+                   >
+                      Full Registry
+                   </button>
+                </div>
+             </div>
+          </motion.div>
+        )}
 
         <motion.div 
           initial={{ opacity: 0, y: 20 }}

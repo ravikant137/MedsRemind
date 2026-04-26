@@ -38,6 +38,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to create order' }, { status: 500 });
     }
 
+    // --- DECREASE STOCK ---
+    try {
+      for (const item of items) {
+        if (item.id) {
+          const { data: med } = await supabase.from('medicines').select('stock').eq('id', item.id).single();
+          if (med) {
+            const newStock = Math.max(0, med.stock - (item.quantity || 1));
+            await supabase.from('medicines').update({ stock: newStock }).eq('id', item.id);
+          }
+        }
+      }
+    } catch (stockErr) {
+      console.error('Stock Update Error:', stockErr);
+      // We don't fail the order if stock update fails, but we log it
+    }
+    // -----------------------
+
     // Add a notification for the user
     await supabase.from('notifications').insert({
       user_id: decoded.id,
