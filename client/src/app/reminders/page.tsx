@@ -111,16 +111,24 @@ export default function Reminders() {
   };
 
   const playVoiceReminder = (reminder: any) => {
-    const text = language === 'en' 
-      ? `It's time to take ${reminder.medicine_name}. ${reminder.suggestion || ''}`
-      : t.takeMedMsg(reminder.medicine_name);
-    
+    let text = '';
+    if (language === 'hi') {
+      text = `${reminder.medicine_name} लेने का समय हो गया है। डोज़: ${reminder.dosage}। ${reminder.timing || ''}।`;
+    } else if (language === 'kn') {
+      text = `${reminder.medicine_name} ತೆಗೆದುಕೊಳ್ಳುವ ಸಮಯವಾಗಿದೆ. ಡೋಸೇಜ್: ${reminder.dosage}. ${reminder.timing || ''}.`;
+    } else {
+      text = `It is time to take ${reminder.medicine_name}. Dosage is ${reminder.dosage}. ${reminder.timing || ''}.`;
+    }
     const utterance = new SpeechSynthesisUtterance(text);
-    
     const voices = window.speechSynthesis.getVoices();
-    const voice = voices.find(v => v.lang.includes(language === 'hi' ? 'hi-IN' : language === 'kn' ? 'kn-IN' : 'en-IN')) || voices[0];
+    const voice = voices.find(v => {
+      const l = v.lang.toLowerCase();
+      if (language === 'hi') return l.includes('hi-in');
+      if (language === 'kn') return l.includes('kn-in');
+      return l.includes('en-in') || l.includes('en-gb');
+    }) || voices[0];
     if (voice) utterance.voice = voice;
-    
+    utterance.rate = 0.9;
     window.speechSynthesis.speak(utterance);
   };
 
