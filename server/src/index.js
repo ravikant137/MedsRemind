@@ -1,36 +1,67 @@
 const express = require('express');
 const cors = require('cors');
-const morgan = require('morgan');
-const bcrypt = require('bcryptjs');
+const http = require('http');
+const { Server } = require('socket.io');
+const Razorpay = require('razorpay');
+const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 require('dotenv').config();
 const db = require('./db');
-const { auth, adminAuth } = require('./middleware/auth');
-const { predictNextRefill } = require('./utils/refillEngine');
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"]
+  }
+});
 
-// Middleware
 app.use(cors());
 app.use(express.json());
-app.use(morgan('dev'));
 
-// --- AUTH ROUTES ---
+const PORT = process.env.PORT || 5007;
+const JWT_SECRET = process.env.JWT_SECRET || 'anjaneya_secret_key';
+
+// Razorpay Instance
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID || 'rzp_test_placeholder',
+  key_secret: process.env.RAZORPAY_KEY_SECRET || 'rzp_test_secret_placeholder',
+});
+
+// Middleware: Auth
+const auth = (req, res, next) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) return res.status(401).json({ error: 'No token provided' });
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch (err) {
+    res.status(401).json({ error: 'Invalid token' });
+  }
+};
+
+// WebSocket Connection
+io.on('connection', (socket) => {
+  socket.on('join_order', (orderId) => {
+    socket.join(`order_${orderId}`);
+  });
+});
+
+// --- AUTH APIs ---
 app.post('/api/auth/signup', async (req, res) => {
-  const { name, email, password, phone, address } = req.body;
+  const { name, email, password } = req.body;
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
-    const result = await db.query(
-      'INSERT INTO users (name, email, password, phone, address) VALUES (?, ?, ?, ?, ?)',
-      [name, email, hashedPassword, phone, address]
+    await db.query(
+      'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)',
+      [name, email, hashedPassword, 'USER']
     );
-    const userId = result.lastID;
-    const user = { id: userId, name, email, role: 'USER' };
-    const token = jwt.sign({ id: userId, role: 'USER' }, process.env.JWT_SECRET);
-    res.status(201).json({ user, token });
+    res.status(201).json({ message: 'User created' });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Email already exists' });
   }
 });
 
@@ -38,462 +69,117 @@ app.post('/api/auth/login', async (req, res) => {
   const { email, password } = req.body;
   try {
     const result = await db.query('SELECT * FROM users WHERE email = ?', [email]);
+    if (result.rows.length === 0) return res.status(401).json({ error: 'User not found' });
     const user = result.rows[0];
-    if (!user || !(await bcrypt.compare(password, user.password))) {
-      return res.status(401).json({ error: 'Invalid credentials' });
-    }
-    const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET);
-    res.json({ user: { id: user.id, name: user.name, email: user.email, role: user.role }, token });
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) return res.status(401).json({ error: 'Invalid credentials' });
+    const token = jwt.sign({ id: user.id, role: user.role, name: user.name }, JWT_SECRET);
+    res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role } });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// --- MEDICINE ROUTES ---
+// --- MEDICINES ---
 app.get('/api/medicines', async (req, res) => {
   try {
-    const { category, search } = req.query;
-    let sql = 'SELECT * FROM medicines WHERE 1=1';
-    const params = [];
-    
-    if (category) {
-      const categories = category.split(',');
-      const placeholders = categories.map(() => '?').join(',');
-      sql += ` AND category IN (${placeholders})`;
-      params.push(...categories);
-    }
-    if (search) {
-      params.push(`%${search}%`, `%${search}%`);
-      sql += ' AND (name LIKE ? OR description LIKE ?)';
-    }
-    
-    const result = await db.query(sql, params);
+    const result = await db.query('SELECT * FROM medicines WHERE stock > 0');
     res.json(result.rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-app.post('/api/medicines', auth, async (req, res) => {
-  const { name, composition, price, stock, category, description } = req.body;
+// --- PAYMENTS (Razorpay) ---
+app.post('/api/payments/create-order', auth, async (req, res) => {
+  const { amount } = req.body;
   try {
-    const result = await db.query(
-      'INSERT INTO medicines (name, composition, price, stock, category, description) VALUES (?, ?, ?, ?, ?, ?)',
-      [name, composition, price, stock, category, description]
-    );
-    res.status(201).json({ id: result.lastID, message: 'Medicine added' });
+    const options = {
+      amount: amount * 100, // in paisa
+      currency: "INR",
+      receipt: `receipt_${Date.now()}`,
+    };
+    const order = await razorpay.orders.create(options);
+    res.json(order);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-app.delete('/api/medicines/:id', auth, async (req, res) => {
-  try {
-    await db.query('DELETE FROM medicines WHERE id = ?', [req.params.id]);
-    res.json({ message: 'Medicine deleted' });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+app.post('/api/payments/verify', auth, async (req, res) => {
+  const { razorpay_order_id, razorpay_payment_id, razorpay_signature, orderDetails } = req.body;
+  const hmac = crypto.createHmac('sha256', razorpay.key_secret);
+  hmac.update(razorpay_order_id + "|" + razorpay_payment_id);
+  const generated_signature = hmac.digest('hex');
 
-// --- ORDER ROUTES ---
-app.post('/api/orders', auth, async (req, res) => {
-  const { items, total_amount, address, is_emergency } = req.body;
-  const user_id = req.user.id;
-  try {
-    const orderResult = await db.query(
-      'INSERT INTO orders (user_id, total_amount, address, payment_status, is_emergency, status, deliveryLocation) VALUES (?, ?, ?, ?, ?, ?, ?)',
-      [user_id, total_amount, address, 'PAID', is_emergency ? 1 : 0, 'ORDER_PLACED', req.body.deliveryLocation || null]
-    );
-    const orderId = orderResult.lastID;
-
-    // Add status history
-    await db.query('INSERT INTO order_status_history (order_id, status) VALUES (?, ?)', [orderId, 'ORDER_PLACED']);
-
-    
-    for (let item of items) {
-      const medicineName = item.name || item.medicine_name || 'Prescription Medicine';
-      await db.query(
-        'INSERT INTO order_items (order_id, medicine_id, medicine_name, quantity, price_at_time) VALUES (?, ?, ?, ?, ?)',
-        [orderId, item.id || null, medicineName, item.quantity, item.price]
+  if (generated_signature === razorpay_signature) {
+    try {
+      const { items, total_amount, address } = orderDetails;
+      const orderResult = await db.query(
+        'INSERT INTO orders (user_id, total_amount, address, payment_id, payment_status, status) VALUES (?, ?, ?, ?, ?, ?)',
+        [req.user.id, total_amount, address, razorpay_payment_id, 'PAID', 'PENDING']
       );
-      await db.query('UPDATE medicines SET stock = stock - ? WHERE id = ?', [item.quantity, item.id]);
+      const orderId = orderResult.lastID;
+      await db.query('INSERT INTO order_status_history (order_id, status) VALUES (?, ?)', [orderId, 'PENDING']);
+      for (let item of items) {
+        await db.query(
+          'INSERT INTO order_items (order_id, medicine_id, medicine_name, quantity, price_at_time) VALUES (?, ?, ?, ?, ?)',
+          [orderId, item.id, item.name, item.quantity, item.price]
+        );
+        await db.query('UPDATE medicines SET stock = stock - ? WHERE id = ?', [item.quantity, item.id]);
+      }
+      res.json({ success: true, orderId });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
     }
-    
-    res.status(201).json({ id: orderId, message: 'Order placed successfully' });
-
-    // Create Notification
-    await db.query(
-      'INSERT INTO notifications (user_id, type, title, message) VALUES (?, ?, ?, ?)',
-      [user_id, 'info', 'Order Placed', `Your order #ORD-${orderId} for ₹${total_amount} has been placed successfully.`]
-    );
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+  } else {
+    res.status(400).json({ success: false, message: 'Invalid signature' });
   }
 });
 
-app.get('/api/orders', auth, async (req, res) => {
+// --- TRACKING ---
+app.get('/api/track/:id', async (req, res) => {
   try {
-    const ordersResult = await db.query(
-      'SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC',
-      [req.user.id]
-    );
-    
-    const orders = ordersResult.rows;
-    
-    // Fetch items for each order
-    for (let order of orders) {
-      const itemsResult = await db.query(
-        'SELECT oi.quantity, oi.price_at_time, COALESCE(oi.medicine_name, m.name, "Unknown Medicine") as medicine_name FROM order_items oi LEFT JOIN medicines m ON oi.medicine_id = m.id WHERE oi.order_id = ?',
-        [order.id]
-      );
-      order.items = itemsResult.rows;
-    }
-    
-    res.json(orders);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.get('/api/orders/:id', auth, async (req, res) => {
-  try {
-    const orderId = req.params.id.replace(/[^0-9]/g, '');
-    if (!orderId) {
-      return res.status(400).json({ error: 'Invalid order ID' });
-    }
+    const orderId = req.params.id;
     const orderResult = await db.query(
       'SELECT o.*, u.name as user_name FROM orders o JOIN users u ON o.user_id = u.id WHERE o.id = ?',
       [orderId]
     );
-
-    if (orderResult.rows.length === 0) {
-      return res.status(404).json({ error: 'Order not found' });
-    }
-
-    const order = orderResult.rows[0];
-    
-    // Authorization check
-    if (Number(order.user_id) !== Number(req.user.id) && req.user.role !== 'ADMIN') {
-      return res.status(403).json({ error: 'Unauthorized access to this order' });
-    }
-
-    const itemsResult = await db.query(
-      'SELECT oi.quantity, oi.price_at_time, COALESCE(oi.medicine_name, m.name, "Unknown Medicine") as medicine_name FROM order_items oi LEFT JOIN medicines m ON oi.medicine_id = m.id WHERE oi.order_id = ?',
-      [orderId]
-    );
-
-    const historyResult = await db.query(
-      'SELECT status, created_at AS timestamp FROM order_status_history WHERE order_id = ? ORDER BY created_at ASC',
-      [orderId]
-    );
-
-    order.items = itemsResult.rows;
-    order.statusHistory = historyResult.rows;
-    res.json(order);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Public Tracking Endpoint
-app.get('/api/track/:id', async (req, res) => {
-  try {
-    const orderId = req.params.id.replace(/[^0-9]/g, '');
-    if (!orderId) {
-      return res.status(400).json({ error: 'Invalid order ID' });
-    }
-    
-    const orderResult = await db.query(
-      'SELECT o.id, o.status, o.created_at, o.total_amount, o.address, u.name as user_name FROM orders o JOIN users u ON o.user_id = u.id WHERE o.id = ?',
-      [orderId]
-    );
-
-    if (orderResult.rows.length === 0) {
-      return res.status(404).json({ error: 'Order not found' });
-    }
-
-    const order = orderResult.rows[0];
-
-    const itemsResult = await db.query(
-      'SELECT oi.quantity, oi.price_at_time, COALESCE(oi.medicine_name, m.name, "Prescription Medicine") as medicine_name FROM order_items oi LEFT JOIN medicines m ON oi.medicine_id = m.id WHERE oi.order_id = ?',
-      [orderId]
-    );
-
-    const historyResult = await db.query(
-      'SELECT status, created_at AS timestamp FROM order_status_history WHERE order_id = ? ORDER BY created_at ASC',
-      [orderId]
-    );
-
-    order.items = itemsResult.rows;
-    order.statusHistory = historyResult.rows;
-
-    res.json(order);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.get('/api/simulate/:id', async (req, res) => {
-  try {
-    const orderId = req.params.id;
-    const orderResult = await db.query('SELECT status FROM orders WHERE id = ?', [orderId]);
     if (orderResult.rows.length === 0) return res.status(404).json({ error: 'Order not found' });
-    
-    const currentStatus = orderResult.rows[0].status;
-    const allSteps = ['ORDER_PLACED', 'CONFIRMED', 'PACKED', 'OUT_FOR_DELIVERY', 'DELIVERED'];
-    const nextIndex = allSteps.indexOf(currentStatus) + 1;
-    
-    if (nextIndex >= allSteps.length) {
-      return res.json({ message: 'Order already delivered', status: currentStatus });
-    }
-    
-    const nextStatus = allSteps[nextIndex];
-    await db.query('UPDATE orders SET status = ? WHERE id = ?', [nextStatus, orderId]);
-    await db.query('INSERT INTO order_status_history (order_id, status) VALUES (?, ?)', [orderId, nextStatus]);
-    
-    res.json({ message: 'Status updated', oldStatus: currentStatus, newStatus: nextStatus });
+    const order = orderResult.rows[0];
+    const itemsResult = await db.query('SELECT * FROM order_items WHERE order_id = ?', [orderId]);
+    const historyResult = await db.query('SELECT status, created_at AS timestamp FROM order_status_history WHERE order_id = ? ORDER BY created_at ASC', [orderId]);
+    order.items = itemsResult.rows;
+    order.statusHistory = historyResult.rows;
+    res.json(order);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// --- ADMIN APIs ---
+app.get('/api/admin/orders', auth, async (req, res) => {
+  if (req.user.role !== 'ADMIN') return res.status(403).json({ error: 'Unauthorized' });
+  try {
+    const result = await db.query('SELECT o.*, u.name as user_name FROM orders o JOIN users u ON o.user_id = u.id ORDER BY created_at DESC');
+    res.json(result.rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
 app.patch('/api/orders/:id/status', auth, async (req, res) => {
+  if (req.user.role !== 'ADMIN') return res.status(403).json({ error: 'Unauthorized' });
+  const { status } = req.body;
+  const orderId = req.params.id;
   try {
-    // Only ADMIN should be able to update status
-    if (req.user.role !== 'ADMIN') {
-      return res.status(403).json({ error: 'Unauthorized to update order status' });
-    }
-
-    const orderId = req.params.id;
-    const { status, deliveryLocation } = req.body;
-
-    if (!status) {
-      return res.status(400).json({ error: 'Status is required' });
-    }
-
-    // Verify order exists
-    const orderResult = await db.query('SELECT * FROM orders WHERE id = ?', [orderId]);
-    if (orderResult.rows.length === 0) {
-      return res.status(404).json({ error: 'Order not found' });
-    }
-
-    // Update order status
-    if (deliveryLocation) {
-       await db.query('UPDATE orders SET status = ?, deliveryLocation = ? WHERE id = ?', [status, deliveryLocation, orderId]);
-    } else {
-       await db.query('UPDATE orders SET status = ? WHERE id = ?', [status, orderId]);
-    }
-    
-    // Add to history
+    await db.query('UPDATE orders SET status = ? WHERE id = ?', [status, orderId]);
     await db.query('INSERT INTO order_status_history (order_id, status) VALUES (?, ?)', [orderId, status]);
-
-    // Create Notification for the user
-    await db.query(
-      'INSERT INTO notifications (user_id, type, title, message) VALUES (?, ?, ?, ?)',
-      [orderResult.rows[0].user_id, 'info', 'Order Update', `Your order #ORD-${orderId} status has been updated to ${status}.`]
-    );
-
-    res.json({ message: 'Order status updated successfully', status });
+    io.to(`order_${orderId}`).emit('status_updated', { status });
+    res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-app.get('/api/reminders', auth, async (req, res) => {
-  try {
-    const result = await db.query('SELECT * FROM reminders WHERE user_id = ?', [req.user.id]);
-    res.json(result.rows);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.post('/api/reminders', auth, async (req, res) => {
-  const { medicine_name, dosage, time, frequency } = req.body;
-  try {
-    const suggestion = getSuggestion(medicine_name);
-    const result = await db.query(
-      'INSERT INTO reminders (user_id, medicine_name, dosage, time, frequency, suggestion) VALUES (?, ?, ?, ?, ?, ?)',
-      [req.user.id, medicine_name, dosage, time, frequency, suggestion]
-    );
-    res.status(201).json({ id: result.lastID, message: 'Reminder set', suggestion });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-const getSuggestion = (name) => {
-  const n = name.toLowerCase();
-  if (n.includes('paracetamol') || n.includes('ibuprofen') || n.includes('pain')) 
-    return 'Take after food to avoid stomach upset. Avoid alcohol.';
-  if (n.includes('amoxicillin') || n.includes('antibiotic') || n.includes('penicillin'))
-    return 'Complete the full course even if you feel better. Take with plenty of water.';
-  if (n.includes('cetirizine') || n.includes('allergy') || n.includes('loratadine'))
-    return 'May cause drowsiness. Avoid driving if affected.';
-  if (n.includes('vitamin') || n.includes('multivitamin'))
-    return 'Best taken with your largest meal of the day for better absorption.';
-  if (n.includes('metformin') || n.includes('diabetes'))
-    return 'Take with meals to reduce gastrointestinal side effects.';
-  if (n.includes('atorvastatin') || n.includes('cholesterol'))
-    return 'Avoid grapefruit juice. Contact doctor if you experience unusual muscle pain.';
-  return 'Follow your doctor\'s instructions. Maintain consistent timings.';
-};
-
-app.post('/api/reminders/:id/complete', auth, async (req, res) => {
-  try {
-    // Award 10 points for taking medicine
-    await db.query('UPDATE users SET points = points + 10 WHERE id = ?', [req.user.id]);
-    // Delete or mark as completed (here we just keep it but user gets points)
-    res.json({ message: 'Reminder completed! You earned 10 points.', pointsEarned: 10 });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.get('/api/user/points', auth, async (req, res) => {
-  try {
-    const result = await db.query('SELECT points FROM users WHERE id = ?', [req.user.id]);
-    res.json({ points: result.rows[0]?.points || 0 });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.post('/api/reminders/bulk', auth, async (req, res) => {
-  const { medicines } = req.body;
-  try {
-    for (const med of medicines) {
-      const suggestion = getSuggestion(med.name);
-      await db.query(
-        'INSERT INTO reminders (user_id, medicine_name, dosage, time, frequency, suggestion, status) VALUES (?, ?, ?, ?, ?, ?, ?)',
-        [req.user.id, med.name, med.dosage, '09:00 AM', med.duration, suggestion, 'ACTIVE']
-      );
-    }
-    res.status(201).json({ message: 'All reminders set successfully' });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.delete('/api/reminders/:id', auth, async (req, res) => {
-  try {
-    await db.query('DELETE FROM reminders WHERE id = ? AND user_id = ?', [req.params.id, req.user.id]);
-    res.json({ message: 'Reminder deleted' });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// --- ADMIN ROUTES ---
-app.get('/api/admin/orders', auth, async (req, res) => {
-  try {
-    const result = await db.query(`
-      SELECT o.*, u.name as user_name 
-      FROM orders o 
-      JOIN users u ON o.user_id = u.id 
-      ORDER BY o.created_at DESC
-    `);
-    res.json(result.rows);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.get('/api/admin/users', auth, async (req, res) => {
-  try {
-    const result = await db.query('SELECT id, name, email, role, phone, created_at FROM users');
-    res.json(result.rows);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.get('/api/admin/stats', auth, async (req, res) => {
-  try {
-    const revenue = await db.query('SELECT SUM(total_amount) as total FROM orders');
-    const orders = await db.query('SELECT COUNT(*) as count FROM orders');
-    const users = await db.query('SELECT COUNT(*) as count FROM users');
-    const medicines = await db.query('SELECT COUNT(*) as count FROM medicines');
-    
-    res.json({
-      revenue: revenue.rows[0].total || 0,
-      orders: orders.rows[0].count,
-      users: users.rows[0].count,
-      medicines: medicines.rows[0].count
-    });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// --- SCHEDULE ROUTES ---
-app.get('/api/schedules', auth, async (req, res) => {
-  try {
-    const result = await db.query('SELECT * FROM schedules WHERE user_id = ?', [req.user.id]);
-    res.json(result.rows);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.post('/api/schedules', auth, async (req, res) => {
-  const { medicine_name, dosage, timings, start_date } = req.body;
-  try {
-    const result = await db.query(
-      'INSERT INTO schedules (user_id, medicine_name, dosage, timings, start_date) VALUES (?, ?, ?, ?, ?)',
-      [req.user.id, medicine_name, dosage, timings, start_date]
-    );
-    res.status(201).json({ id: result.lastID, message: 'Schedule created' });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// --- NOTIFICATION ROUTES ---
-app.get('/api/notifications', auth, async (req, res) => {
-  try {
-    const result = await db.query(
-      'SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC',
-      [req.user.id]
-    );
-    res.json(result.rows);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.put('/api/notifications/read-all', auth, async (req, res) => {
-  try {
-    await db.query('UPDATE notifications SET read = 1 WHERE user_id = ?', [req.user.id]);
-    res.json({ message: 'All notifications marked as read' });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.delete('/api/notifications/:id', auth, async (req, res) => {
-  try {
-    await db.query('DELETE FROM notifications WHERE id = ? AND user_id = ?', [req.params.id, req.user.id]);
-    res.json({ message: 'Notification deleted' });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// --- SUBSCRIPTION ROUTES ---
-app.get('/api/subscriptions', auth, async (req, res) => {
-  try {
-    const result = await db.query(
-      'SELECT * FROM subscriptions WHERE user_id = ?',
-      [req.user.id]
-    );
-    res.json(result.rows);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+server.listen(PORT, () => console.log(`Unified Server running on port ${PORT}`));

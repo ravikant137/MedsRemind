@@ -2,6 +2,8 @@
   "name": "medsremind-root",
   "version": "1.0.0",
   "scripts": {
-    "start": "cd server && npm install && npm start"
+    "start:all": "npm run stop:all && start /B \"backend\" cmd /c \"cd server && node src/index.js\" && cd client && npm run dev",
+    "stop:all": "taskkill /F /IM node.exe /T 2>nul || exit 0",
+    "init:db": "cd server && node init-db.js"
   }
 }

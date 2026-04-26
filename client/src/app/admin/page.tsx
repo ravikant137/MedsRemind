@@ -260,6 +260,13 @@ export default function AdminDashboard() {
                               <p className="text-xs text-slate-400 font-black uppercase tracking-widest">Amount</p>
                               <p className="font-black text-green-600 text-lg">₹{order.total_amount}</p>
                            </div>
+                           <div className="text-center min-w-[100px]">
+                              <p className="text-xs text-slate-400 font-black uppercase tracking-widest">Payment</p>
+                              <p className={`font-black text-[10px] ${order.payment_status === 'PAID' ? 'text-green-600' : 'text-orange-600'}`}>
+                                {order.payment_status || 'COD'}
+                              </p>
+                              {order.payment_id && <p className="text-[8px] text-slate-400 font-mono mt-1">{order.payment_id}</p>}
+                           </div>
                            <div className="text-center">
                               <p className="text-xs text-slate-400 font-black uppercase tracking-widest">Status</p>
                               <select 
