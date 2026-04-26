@@ -70,6 +70,10 @@ function OrderTrackingContent() {
          return { status: label, time: isCompleted ? 'Success' : 'Pending', completed: isCompleted, isCurrent };
       });
 
+      const deliveryTime = order.status === 'DELIVERED' 
+        ? parseDate(order.updated_at || order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        : estDelivery.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
       setTrackingData({
         id: order.id.startsWith('ANJ-') ? order.id : `#ORD-${order.id}`,
         rawId: order.id,
@@ -78,9 +82,9 @@ function OrderTrackingContent() {
         address: order.address || 'Delivery Address',
         total_amount: order.total_amount || 0,
         items: Array.isArray(parsedItems) ? parsedItems : [],
-        estimated_delivery: estDelivery.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        steps: mappedSteps,
-        isDelivered: order.status === 'DELIVERED'
+        estimated_delivery: deliveryTime,
+        isDelivered: order.status === 'DELIVERED',
+        steps: mappedSteps
       });
       setIsLive(order.status !== 'DELIVERED' && order.status !== 'CANCELLED');
     } catch (err: any) {
@@ -244,7 +248,7 @@ function OrderTrackingContent() {
                <div className="grid md:grid-cols-3 gap-8">
                   {[
                     { label: 'Status', value: trackingData.status, icon: Package, color: 'text-green-600', bg: 'bg-green-50', live: isLive },
-                    { label: 'Estimated Arrival', value: trackingData.estimated_delivery, icon: Clock, color: 'text-blue-600', bg: 'bg-blue-50' },
+                    { label: trackingData.isDelivered ? 'Actual Arrival' : 'Estimated Arrival', value: trackingData.estimated_delivery, icon: trackingData.isDelivered ? CheckCircle : Clock, color: trackingData.isDelivered ? 'text-green-600' : 'text-blue-600', bg: trackingData.isDelivered ? 'bg-green-50' : 'bg-blue-50' },
                     { label: 'Shipping To', value: trackingData.address, icon: MapPin, color: 'text-purple-600', bg: 'bg-purple-50' }
                   ].map((stat, i) => (
                     <div key={i} className="bg-white p-8 rounded-[3rem] border border-slate-100 shadow-xl shadow-slate-100/50 relative overflow-hidden group">
