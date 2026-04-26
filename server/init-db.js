@@ -145,6 +145,9 @@ async function init() {
       await db.query("ALTER TABLE orders ADD COLUMN deliveryLocation TEXT");
     } catch (e) {}
     try {
+      await db.query("ALTER TABLE orders ADD COLUMN discount_amount REAL DEFAULT 0");
+    } catch (e) {}
+    try {
       await db.query("ALTER TABLE users ADD COLUMN points INTEGER DEFAULT 0");
     } catch (e) {}
 

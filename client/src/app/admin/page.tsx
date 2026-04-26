@@ -452,6 +452,22 @@ export default function AdminDashboard() {
                       <div className="absolute left-0 top-0 h-full bg-purple-500 rounded-full shadow-lg" style={{ width: `${stats.retention || 0}%` }}></div>
                    </div>
                 </div>
+
+                <div className="bg-white p-10 rounded-[3rem] border border-slate-100 shadow-xl">
+                    <div className="flex items-center justify-between mb-8">
+                       <div className="w-14 h-14 bg-orange-50 text-orange-600 rounded-2xl flex items-center justify-center">🏷️</div>
+                       <span className="text-[10px] font-black uppercase tracking-widest text-orange-500 bg-orange-50 px-3 py-1 rounded-full">Savings</span>
+                    </div>
+                    <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Total Discounts Given</p>
+                    <h4 className="text-3xl font-black text-slate-900 mt-2">₹{(stats as any).totalDiscounts?.toLocaleString() || '0'}</h4>
+                    <div className="mt-8 flex gap-1 h-2">
+                       {[30, 50, 40, 70, 50, 80, 60].map((h, i) => (
+                         <div key={i} className="flex-1 bg-orange-100 rounded-full relative overflow-hidden">
+                            <div className="absolute bottom-0 w-full bg-orange-500 rounded-full" style={{ height: `${h}%` }}></div>
+                         </div>
+                       ))}
+                    </div>
+                 </div>
              </div>
 
              <div className="bg-slate-900 p-12 rounded-[4rem] text-white overflow-hidden relative shadow-2xl">

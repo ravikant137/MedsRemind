@@ -148,10 +148,10 @@ app.post('/api/payments/verify', auth, async (req, res) => {
 
   if (generated_signature === razorpay_signature) {
     try {
-      const { items, total_amount, address } = orderDetails;
+      const { items, total_amount, address, discount_amount } = orderDetails;
       const orderResult = await db.query(
-        'INSERT INTO orders (user_id, total_amount, address, payment_id, payment_status, status) VALUES (?, ?, ?, ?, ?, ?)',
-        [req.user.id, total_amount, address, razorpay_payment_id, 'PAID', 'ORDER_PLACED']
+        'INSERT INTO orders (user_id, total_amount, address, payment_id, payment_status, status, discount_amount) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        [req.user.id, total_amount, address, razorpay_payment_id, 'PAID', 'ORDER_PLACED', discount_amount || 0]
       );
       const orderId = orderResult.lastID;
       
@@ -206,10 +206,10 @@ app.get('/api/track/:id', async (req, res) => {
 // --- COD ORDERS ---
 app.post('/api/orders/cod', auth, async (req, res) => {
   try {
-    const { items, total_amount, address } = req.body;
+    const { items, total_amount, address, discount_amount } = req.body;
     const orderResult = await db.query(
-      'INSERT INTO orders (user_id, total_amount, address, payment_status, status) VALUES (?, ?, ?, ?, ?)',
-      [req.user.id, total_amount, address, 'COD_PENDING', 'ORDER_PLACED']
+      'INSERT INTO orders (user_id, total_amount, address, payment_status, status, discount_amount) VALUES (?, ?, ?, ?, ?, ?)',
+      [req.user.id, total_amount, address, 'COD_PENDING', 'ORDER_PLACED', discount_amount || 0]
     );
     const orderId = orderResult.lastID;
 
@@ -262,11 +262,12 @@ app.get('/api/admin/stats', auth, async (req, res) => {
     else if (range === 'QUARTER') dateFilter = "AND created_at >= date('now', '-90 days')";
     else if (range === 'YEAR') dateFilter = "AND created_at >= date('now', '-365 days')";
 
-    const ordersRes = await db.query(`SELECT total_amount, id, user_id FROM orders WHERE 1=1 ${dateFilter}`);
+    const ordersRes = await db.query(`SELECT total_amount, discount_amount, id, user_id FROM orders WHERE 1=1 ${dateFilter}`);
     const usersRes = await db.query('SELECT COUNT(*) as count FROM users');
     const medsRes = await db.query('SELECT COUNT(*) as count FROM medicines');
     
     const revenue = ordersRes.rows.reduce((sum, o) => sum + (o.total_amount || 0), 0);
+    const totalDiscounts = ordersRes.rows.reduce((sum, o) => sum + (o.discount_amount || 0), 0);
     const orderCount = ordersRes.rows.length;
 
     // Engagement: (Users with orders in this period / Total Users) * 100
@@ -300,7 +301,8 @@ app.get('/api/admin/stats', auth, async (req, res) => {
       medicines: medsRes.rows[0].count,
       categoryDistribution: distribution,
       engagement: engagement || 84,
-      retention: retention || 92
+      retention: retention || 92,
+      totalDiscounts: totalDiscounts || 0
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
