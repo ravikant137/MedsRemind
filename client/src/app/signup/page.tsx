@@ -42,11 +42,7 @@ export default function Signup() {
         className="w-full max-w-[540px] bg-white p-12 rounded-[4rem] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.08)] border border-slate-100 relative"
       >
         <div className="flex flex-col items-center mb-10">
-          <Logo className="w-16 h-16 mb-6" />
-          <h1 className="text-3xl font-black text-slate-900 tracking-tight">
-            Join <span className="text-green-600">Anjaneya</span>
-          </h1>
-          <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-3 text-center">Start your journey to better health today</p>
+          <Logo showText={true} size="lg" />
         </div>
 
         <form onSubmit={handleSignup} className="grid grid-cols-1 md:grid-cols-2 gap-6">

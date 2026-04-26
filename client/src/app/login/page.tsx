@@ -69,13 +69,7 @@ export default function Login() {
         className="w-full max-w-[480px] bg-white p-12 rounded-[4rem] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.08)] border border-slate-100 relative"
       >
         <div className="flex flex-col items-center mb-12">
-          <Logo className="w-20 h-20 mb-8" />
-          <h1 className="text-4xl font-black text-slate-900 tracking-tight flex items-center gap-2">
-            {showOtp ? 'Verify' : 'Welcome'} <span className="text-green-600">{showOtp ? 'OTP' : 'Back'}</span>
-          </h1>
-          <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-4">
-            {showOtp ? 'Enter the 6-digit code sent to your admin device' : 'Continue your healthy journey'}
-          </p>
+          <Logo showText={true} size="lg" />
         </div>
 
         <form onSubmit={handleLogin} className="space-y-8">

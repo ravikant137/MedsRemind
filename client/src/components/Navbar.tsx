@@ -79,18 +79,8 @@ export default function Navbar() {
       <div className={`border-b border-gray-100 transition-all duration-300 ${isScrolled ? 'py-2 shadow-md' : 'py-4'}`}>
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 flex items-center justify-between">
           
-          {/* Logo */}
           <Link href="/" className="flex items-center gap-2 group flex-shrink-0">
-            <Logo className="w-16 h-16" />
-            <div className="leading-tight flex flex-col justify-center">
-              <span className="text-[#003366] text-[22px] font-black tracking-tight block">ANJANEYA</span>
-              <div className="flex items-center gap-1.5 -mt-1">
-                <span className="h-[2px] w-6 bg-[#4CAF50]"></span>
-                <span className="text-[#4CAF50] text-[15px] font-black tracking-widest block uppercase">PHARMACY</span>
-                <span className="h-[2px] w-6 bg-[#4CAF50]"></span>
-              </div>
-              <span className="text-gray-600 text-[10px] font-bold tracking-wide mt-0.5">Fast Medicines. Trusted Care.</span>
-            </div>
+            <Logo showText={true} size="sm" vertical={false} />
           </Link>
 
           {/* Desktop Nav Links (Centered) */}
