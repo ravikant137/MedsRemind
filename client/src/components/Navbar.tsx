@@ -124,8 +124,10 @@ export default function Navbar() {
                 <>
                   <Link href="/notifications" className="relative p-2 text-gray-400 hover:text-[#003366] transition-colors">
                     <Bell className="w-6 h-6" />
-                    {user && (
-                      <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
+                    {notifCount > 0 && (
+                      <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-600 text-white text-[10px] font-black rounded-full flex items-center justify-center border-2 border-white shadow-lg animate-bounce">
+                        {notifCount}
+                      </span>
                     )}
                   </Link>
                   <div className="relative">
