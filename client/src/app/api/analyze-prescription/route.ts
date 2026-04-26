@@ -1,30 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import Groq from 'groq-sdk';
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY || '' });
 
 export async function POST(request: NextRequest) {
   try {
     const { image } = await request.json(); // base64 image
     
-    if (!process.env.GEMINI_API_KEY && !process.env.NEXT_PUBLIC_GEMINI_API_KEY) {
-      console.error('CRITICAL: GEMINI_API_KEY is missing from environment variables.');
+    if (!process.env.GROQ_API_KEY) {
       return NextResponse.json({ 
-        error: 'AI Analysis Configuration Error: Missing API Key. Please add GEMINI_API_KEY to your .env file.',
+        error: 'Open Source AI Error: Missing GROQ_API_KEY. Please add it to your .env file to use Llama 3.2 Vision.',
         missing_key: true
       }, { status: 500 });
     }
 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
-    // Robust Base64 and MIME Type handling
-    let mimeType = "image/jpeg";
+    // Prepare the image for Llama 3.2 Vision
     let base64Data = image;
-
     if (image.includes(';base64,')) {
-      const parts = image.split(';base64,');
-      mimeType = parts[0].split(':')[1];
-      base64Data = parts[1];
+      base64Data = image.split(';base64,')[1];
     } else if (image.includes(',')) {
       base64Data = image.split(',')[1];
     }
@@ -47,42 +40,52 @@ export async function POST(request: NextRequest) {
     }
     
     Important: 
-    1. suggestion: If handwriting is unclear, use your medical knowledge to suggest the most likely medicine name based on context.
-    2. Be extremely precise with the 1-0-1 (Morning-Afternoon-Night) schedule if visible.
-    Return ONLY valid JSON.`;
+    1. If handwriting is unclear, suggest the most likely medicine name based on context.
+    2. Return ONLY valid JSON. No conversational text.`;
 
-    const result = await model.generateContent([
-      prompt,
-      {
-        inlineData: {
-          data: base64Data,
-          mimeType: mimeType
+    const chatCompletion = await groq.chat.completions.create({
+      "messages": [
+        {
+          "role": "user",
+          "content": [
+            {
+              "type": "text",
+              "text": prompt
+            },
+            {
+              "type": "image_url",
+              "image_url": {
+                "url": `data:image/jpeg;base64,${base64Data}`
+              }
+            }
+          ]
         }
-      }
-    ]);
+      ],
+      "model": "llama-3.2-11b-vision-preview",
+      "temperature": 0.1,
+      "max_tokens": 1024,
+      "top_p": 1,
+      "stream": false,
+      "response_format": { "type": "json_object" },
+      "stop": null
+    });
 
-    const response = await result.response;
-    const text = response.text();
+    const result = chatCompletion.choices[0].message.content;
     
-    // Robust JSON Extraction
     try {
-      const jsonMatch = text.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) {
-        throw new Error(`The AI returned an invalid response format. Raw output: ${text.substring(0, 50)}...`);
-      }
-      const data = JSON.parse(jsonMatch[0]);
+      const data = JSON.parse(result || '{}');
       return NextResponse.json(data);
     } catch (parseErr: any) {
-      console.error('AI Response Text:', text);
+      console.error('Llama Response Text:', result);
       return NextResponse.json({ 
-        error: `AI Processing Failed: ${parseErr.message}`,
-        raw: text.substring(0, 100)
+        error: `Llama Processing Failed: ${parseErr.message}`,
+        raw: result?.substring(0, 100)
       }, { status: 500 });
     }
   } catch (error: any) {
-    console.error('AI Analysis Error:', error);
+    console.error('Open Source AI Error:', error);
     return NextResponse.json({ 
-      error: `System Error: ${error.message || 'Unknown failure during analysis'}`,
+      error: `Open Source Engine Error: ${error.message || 'Unknown failure'}`,
       details: error.stack?.substring(0, 50)
     }, { status: 500 });
   }
