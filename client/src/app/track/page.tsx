@@ -41,12 +41,16 @@ function OrderTrackingContent() {
          });
       }
 
-      let currentStepIndex = allSteps.indexOf(order.status || 'ORDER_PLACED');
+      let currentStatus = order.status || 'ORDER_PLACED';
+      if (currentStatus === 'PENDING') currentStatus = 'ORDER_PLACED'; // Fallback
+      
+      let currentStepIndex = allSteps.indexOf(currentStatus);
+      if (currentStepIndex === -1) currentStepIndex = 0; // Default to first step
       
       let mappedSteps = [];
       if (order.status === 'CANCELLED') {
         mappedSteps = [
-          { status: 'ORDER PLACED', time: historyMap['ORDER_PLACED'] ? historyMap['ORDER_PLACED'].toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Done', completed: true, isCurrent: false },
+          { status: 'ORDER PLACED', time: historyMap['ORDER_PLACED'] ? historyMap['ORDER_PLACED'].toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Success', completed: true, isCurrent: false },
           { status: 'CANCELLED', time: historyMap['CANCELLED'] ? historyMap['CANCELLED'].toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Cancelled', completed: false, isCurrent: true }
         ];
       } else {
@@ -55,7 +59,7 @@ function OrderTrackingContent() {
            const isCurrent = index === currentStepIndex && order.status !== 'DELIVERED';
            const time = historyMap[step] 
               ? historyMap[step].toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
-              : (isCompleted ? 'Done' : 'Pending');
+              : (isCompleted ? 'Success' : 'Pending');
            const label = step.replace(/_/g, ' ');
            return { status: label, time, completed: isCompleted, isCurrent };
         });

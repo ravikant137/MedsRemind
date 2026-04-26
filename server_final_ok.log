@@ -1,0 +1,12 @@
+
+> server@1.0.0 start
+> node init-db.js && node src/index.js
+
+◇ injected env (2) from .env // tip: ⌘ suppress logs { quiet: true }
+Initializing database...
+Connected to the SQLite database at: D:\workspace\MedsRemind\server\database.sqlite
+Database initialized successfully.
+◇ injected env (2) from .env // tip: ⌘ override existing { override: true }
+◇ injected env (0) from .env // tip: ◈ encrypted .env [www.dotenvx.com]
+Unified Server running on port 5009
+Connected to the SQLite database at: D:\workspace\MedsRemind\server\database.sqlite

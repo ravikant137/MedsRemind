@@ -1,0 +1,12 @@
+
+> server@1.0.0 start
+> node init-db.js && node src/index.js
+
+◇ injected env (2) from .env // tip: ⌘ custom filepath { path: '/custom/path/.env' }
+Initializing database...
+Connected to the SQLite database at: D:\workspace\MedsRemind\server\database.sqlite
+Database initialized successfully.
+◇ injected env (2) from .env // tip: ⌁ auth for agents [www.vestauth.com]
+◇ injected env (0) from .env // tip: ⌘ enable debugging { debug: true }
+Unified Server running on port 5007
+Connected to the SQLite database at: D:\workspace\MedsRemind\server\database.sqlite

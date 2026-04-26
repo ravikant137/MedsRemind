@@ -5,6 +5,7 @@ import { Phone, Menu, X, ShoppingCart, LogOut, LayoutDashboard, ShieldCheck, Bel
 import { useRouter, usePathname } from 'next/navigation';
 import axios from 'axios';
 import Logo from './Logo';
+import { API_URL } from '@/config';
 
 axios.defaults.headers.common['bypass-tunnel-reminder'] = 'true';
 
@@ -13,16 +14,38 @@ export default function Navbar() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const [notifCount, setNotifCount] = useState(0);
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 10);
     window.addEventListener('scroll', handleScroll);
-    const userData = localStorage.getItem('user');
-    if (userData) setUser(JSON.parse(userData));
+    try {
+      const userData = localStorage.getItem('user');
+      const token = localStorage.getItem('token');
+      if (userData && userData !== 'undefined') {
+        setUser(JSON.parse(userData));
+        fetchNotifCount(token);
+      }
+    } catch (e) {
+      console.error('Failed to parse user data');
+    }
     return () => window.removeEventListener('scroll', handleScroll);
   }, [pathname]);
+
+  const fetchNotifCount = async (token: string | null) => {
+    if (!token) return;
+    try {
+      const res = await axios.get(`${API_URL}/api/notifications`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const unread = res.data.filter((n: any) => !n.read).length;
+      setNotifCount(unread);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -111,7 +134,9 @@ export default function Navbar() {
                 <>
                   <Link href="/notifications" className="relative p-2 text-gray-400 hover:text-[#003366] transition-colors">
                     <Bell className="w-6 h-6" />
-                    <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
+                    {user && (
+                      <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
+                    )}
                   </Link>
                   <div className="relative">
                     <button 

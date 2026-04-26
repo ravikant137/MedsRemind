@@ -48,7 +48,7 @@ export default function Notifications() {
       });
       const processedData = res.data.map((n: any) => ({
         ...n,
-        created_at: n.created_at.includes(' ') && !n.created_at.includes('T') ? n.created_at + ' UTC' : n.created_at
+        created_at: n.created_at && n.created_at.includes(' ') && !n.created_at.includes('T') ? n.created_at + ' UTC' : (n.created_at || new Date().toISOString())
       }));
       setNotifications(processedData);
     } catch (err) {

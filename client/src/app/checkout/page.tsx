@@ -1,7 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { CreditCard, Truck, ShieldCheck, ArrowRight, Loader2, MapPin, CheckCircle, ShoppingBag } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { CreditCard, Truck, ShieldCheck, ArrowRight, Loader2, MapPin, CheckCircle } from 'lucide-react';
 import axios from 'axios';
 import { API_URL } from '@/config';
 import { useRouter } from 'next/navigation';
@@ -10,6 +9,7 @@ export default function Checkout() {
   const [cart, setCart] = useState<any[]>([]);
   const [address, setAddress] = useState('');
   const [loading, setLoading] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState('UPI');
   const router = useRouter();
 
   useEffect(() => {
@@ -23,12 +23,39 @@ export default function Checkout() {
 
   const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
-  const handleRazorpayPayment = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+  const handleCOD = async () => {
     const token = localStorage.getItem('token');
-    if (!token) return alert('Please login to place order');
+    if (!token) {
+      alert('Please login to continue.');
+      return router.push('/login');
+    }
 
+    setLoading(true);
+    try {
+      const res = await axios.post(`${API_URL}/api/orders/cod`, {
+        items: cart, total_amount: total, address: address
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.data.success) {
+        localStorage.removeItem('meds_cart');
+        router.push(`/track?id=${res.data.orderId}`);
+      }
+    } catch (err: any) {
+      alert(err.response?.data?.error || 'Order failed. Please check your connection.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRazorpayPayment = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert('Please login to continue.');
+      return router.push('/login');
+    }
+
+    setLoading(true);
     try {
       const orderRes = await axios.post(`${API_URL}/api/payments/create-order`, { amount: total }, {
         headers: { Authorization: `Bearer ${token}` }
@@ -48,7 +75,6 @@ export default function Checkout() {
           }, {
             headers: { Authorization: `Bearer ${token}` }
           });
-          
           if (verifyRes.data.success) {
             localStorage.removeItem('meds_cart');
             router.push(`/track?id=${verifyRes.data.orderId}`);
@@ -56,14 +82,20 @@ export default function Checkout() {
         },
         theme: { color: "#003366" }
       };
-
       const rzp = (window as any).Razorpay(options);
       rzp.open();
-    } catch (err) {
-      alert('Payment failed to initialize');
+    } catch (err: any) {
+      alert('Payment failed to initialize. Please check your network.');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handlePlaceOrder = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!address) return alert('Please enter your delivery address.');
+    if (paymentMethod === 'COD') handleCOD();
+    else handleRazorpayPayment();
   };
 
   return (
@@ -75,21 +107,40 @@ export default function Checkout() {
             <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm">
               <h3 className="text-xl font-bold mb-6 flex items-center gap-2"><MapPin className="text-[#4CAF50]" /> Delivery Address</h3>
               <textarea 
-                required
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
+                required value={address} onChange={(e) => setAddress(e.target.value)}
                 className="w-full p-6 bg-slate-50 rounded-2xl border-none focus:ring-2 focus:ring-[#4CAF50] font-bold h-32"
                 placeholder="Enter full address..."
               />
             </div>
+
             <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm">
               <h3 className="text-xl font-bold mb-6 flex items-center gap-2"><CreditCard className="text-[#4CAF50]" /> Payment Method</h3>
-              <div className="p-6 border-2 border-[#4CAF50] bg-green-50 rounded-2xl flex items-center justify-between">
-                <span className="font-bold text-[#003366]">Pay via UPI / Card / NetBanking</span>
-                <CheckCircle className="text-[#4CAF50]" />
+              <div className="space-y-4">
+                <div 
+                  onClick={() => setPaymentMethod('UPI')}
+                  className={`p-6 border-2 rounded-2xl flex items-center justify-between cursor-pointer transition-all ${paymentMethod === 'UPI' ? 'border-[#4CAF50] bg-green-50' : 'border-slate-100 hover:border-slate-200'}`}
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 bg-[#003366] text-white rounded-lg flex items-center justify-center"><CreditCard className="w-5 h-5" /></div>
+                    <span className="font-bold text-[#003366]">Online Payment (UPI/Card)</span>
+                  </div>
+                  {paymentMethod === 'UPI' && <CheckCircle className="text-[#4CAF50]" />}
+                </div>
+
+                <div 
+                  onClick={() => setPaymentMethod('COD')}
+                  className={`p-6 border-2 rounded-2xl flex items-center justify-between cursor-pointer transition-all ${paymentMethod === 'COD' ? 'border-[#4CAF50] bg-green-50' : 'border-slate-100 hover:border-slate-200'}`}
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 bg-slate-100 text-slate-600 rounded-lg flex items-center justify-center"><Truck className="w-5 h-5" /></div>
+                    <span className="font-bold text-[#003366]">Cash on Delivery (COD)</span>
+                  </div>
+                  {paymentMethod === 'COD' && <CheckCircle className="text-[#4CAF50]" />}
+                </div>
               </div>
             </div>
           </div>
+
           <div className="bg-[#003366] text-white p-10 rounded-[3rem] shadow-2xl h-fit">
             <h3 className="text-xl font-bold mb-8">Order Summary</h3>
             <div className="space-y-4 mb-8">
@@ -106,11 +157,11 @@ export default function Checkout() {
                 <span>₹{total.toFixed(2)}</span>
               </div>
               <button 
-                onClick={handleRazorpayPayment}
+                onClick={handlePlaceOrder}
                 disabled={loading}
                 className="w-full py-5 bg-[#4CAF50] hover:bg-[#388E3C] text-white rounded-2xl font-black text-lg shadow-xl transition-all disabled:opacity-50"
               >
-                {loading ? <Loader2 className="animate-spin mx-auto" /> : "PAY & PLACE ORDER"}
+                {loading ? <Loader2 className="animate-spin mx-auto" /> : paymentMethod === 'COD' ? "CONFIRM ORDER" : "PAY & PLACE ORDER"}
               </button>
             </div>
           </div>

@@ -4,7 +4,7 @@ require('dotenv').config();
 
 // Use an absolute path that is stable across WSL/Windows when possible
 // If running from server/ directory, this will point to server/database.sqlite
-const DB_PATH = path.resolve(process.cwd(), 'database.sqlite');
+const DB_PATH = path.resolve(__dirname, '../../database.sqlite');
 
 const db = new sqlite3.Database(DB_PATH, (err) => {
   if (err) {

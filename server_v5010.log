@@ -1,0 +1,15 @@
+nohup: ignoring input
+read failed 9: Bad file descriptor
+read failed 9: Bad file descriptor
+
+> server@1.0.0 start
+> node init-db.js && node src/index.js
+
+◇ injected env (2) from .env // tip: ⌘ override existing { override: true }
+Initializing database...
+Connected to the SQLite database at: D:\workspace\MedsRemind\server\database.sqlite
+Database initialized successfully.
+◇ injected env (2) from .env // tip: ◈ encrypted .env [www.dotenvx.com]
+◇ injected env (0) from .env // tip: ◈ encrypted .env [www.dotenvx.com]
+Unified Server running on port 5010
+Connected to the SQLite database at: D:\workspace\MedsRemind\server\database.sqlite

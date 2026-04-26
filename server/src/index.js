@@ -21,7 +21,7 @@ const io = new Server(server, {
 app.use(cors());
 app.use(express.json());
 
-const PORT = process.env.PORT || 5007;
+const PORT = process.env.PORT || 5010;
 const JWT_SECRET = process.env.JWT_SECRET || 'anjaneya_secret_key';
 
 // Razorpay Instance
@@ -117,10 +117,16 @@ app.post('/api/payments/verify', auth, async (req, res) => {
       const { items, total_amount, address } = orderDetails;
       const orderResult = await db.query(
         'INSERT INTO orders (user_id, total_amount, address, payment_id, payment_status, status) VALUES (?, ?, ?, ?, ?, ?)',
-        [req.user.id, total_amount, address, razorpay_payment_id, 'PAID', 'PENDING']
+        [req.user.id, total_amount, address, razorpay_payment_id, 'PAID', 'ORDER_PLACED']
       );
       const orderId = orderResult.lastID;
-      await db.query('INSERT INTO order_status_history (order_id, status) VALUES (?, ?)', [orderId, 'PENDING']);
+      
+      await db.query(
+        'INSERT INTO notifications (user_id, type, title, message) VALUES (?, ?, ?, ?)',
+        [req.user.id, 'order_placed', 'Order Placed Successfully', `Your order #ORD-${orderId} has been received.`]
+      );
+
+      await db.query('INSERT INTO order_status_history (order_id, status) VALUES (?, ?)', [orderId, 'ORDER_PLACED']);
       for (let item of items) {
         await db.query(
           'INSERT INTO order_items (order_id, medicine_id, medicine_name, quantity, price_at_time) VALUES (?, ?, ?, ?, ?)',
@@ -157,6 +163,34 @@ app.get('/api/track/:id', async (req, res) => {
   }
 });
 
+// --- COD ORDERS ---
+app.post('/api/orders/cod', auth, async (req, res) => {
+  try {
+    const { items, total_amount, address } = req.body;
+    const orderResult = await db.query(
+      'INSERT INTO orders (user_id, total_amount, address, payment_status, status) VALUES (?, ?, ?, ?, ?)',
+      [req.user.id, total_amount, address, 'COD_PENDING', 'ORDER_PLACED']
+    );
+    const orderId = orderResult.lastID;
+
+    await db.query(
+      'INSERT INTO notifications (user_id, type, title, message) VALUES (?, ?, ?, ?)',
+      [req.user.id, 'order_placed', 'Order Placed Successfully', `Your COD order #ORD-${orderId} has been received.`]
+    );
+
+    await db.query('INSERT INTO order_status_history (order_id, status) VALUES (?, ?)', [orderId, 'ORDER_PLACED']);
+    for (let item of items) {
+      await db.query(
+        'INSERT INTO order_items (order_id, medicine_id, medicine_name, quantity, price_at_time) VALUES (?, ?, ?, ?, ?)',
+        [orderId, item.id, item.name, item.quantity, item.price]
+      );
+    }
+    res.json({ success: true, orderId });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // --- ADMIN APIs ---
 app.get('/api/admin/orders', auth, async (req, res) => {
   if (req.user.role !== 'ADMIN') return res.status(403).json({ error: 'Unauthorized' });
@@ -173,10 +207,87 @@ app.patch('/api/orders/:id/status', auth, async (req, res) => {
   const { status } = req.body;
   const orderId = req.params.id;
   try {
+    // 1. Update Order Status
     await db.query('UPDATE orders SET status = ? WHERE id = ?', [status, orderId]);
     await db.query('INSERT INTO order_status_history (order_id, status) VALUES (?, ?)', [orderId, status]);
+
+    // 2. Fetch User ID to notify
+    const orderRes = await db.query('SELECT user_id FROM orders WHERE id = ?', [orderId]);
+    const userId = orderRes.rows[0].user_id;
+
+    // 3. Create Notification for User
+    await db.query(
+      'INSERT INTO notifications (user_id, type, title, message) VALUES (?, ?, ?, ?)',
+      [userId, 'order_update', 'Order Status Update', `Your order #ORD-${orderId} is now ${status.replace(/_/g, ' ')}.`]
+    );
+
+    // 4. Push real-time update via Socket.io
     io.to(`order_${orderId}`).emit('status_updated', { status });
+    
     res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// --- NOTIFICATIONS ---
+app.get('/api/notifications', auth, async (req, res) => {
+  try {
+    const result = await db.query(
+      'SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 50',
+      [req.user.id]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.put('/api/notifications/read-all', auth, async (req, res) => {
+  try {
+    await db.query('UPDATE notifications SET read = 1 WHERE user_id = ?', [req.user.id]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// --- USER ORDERS ---
+app.get('/api/orders', auth, async (req, res) => {
+  try {
+    const ordersRes = await db.query(
+      'SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC',
+      [req.user.id]
+    );
+    const orders = ordersRes.rows;
+    
+    // Fetch items for each order
+    for (let order of orders) {
+      const itemsRes = await db.query('SELECT * FROM order_items WHERE order_id = ?', [order.id]);
+      order.items = itemsRes.rows;
+    }
+    
+    res.json(orders);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/orders/:id', auth, async (req, res) => {
+  try {
+    const orderId = req.params.id;
+    const orderRes = await db.query(
+      'SELECT * FROM orders WHERE id = ? AND (user_id = ? OR ? = "ADMIN")',
+      [orderId, req.user.id, req.user.role]
+    );
+    
+    if (orderRes.rows.length === 0) return res.status(404).json({ error: 'Order not found' });
+    
+    const order = orderRes.rows[0];
+    const itemsRes = await db.query('SELECT * FROM order_items WHERE order_id = ?', [orderId]);
+    order.items = itemsRes.rows;
+    
+    res.json(order);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
