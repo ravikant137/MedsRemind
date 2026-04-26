@@ -35,12 +35,12 @@ export async function POST(request: Request) {
       
     if (error) {
       console.error('Supabase Insert Error:', error);
-      throw error;
+      return NextResponse.json({ error: `Database Error: ${error.message} (Code: ${error.code})` }, { status: 500 });
     }
     
     return NextResponse.json({ message: 'User created successfully', user: data[0] }, { status: 201 });
   } catch (err: any) {
-    console.error('Signup error:', err);
-    return NextResponse.json({ error: err.message || 'Registration failed' }, { status: 500 });
+    console.error('Signup crash:', err);
+    return NextResponse.json({ error: `System Error: ${err.message || 'Unknown error'}` }, { status: 500 });
   }
 }
