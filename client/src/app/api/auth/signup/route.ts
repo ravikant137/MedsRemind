@@ -4,7 +4,7 @@ import bcrypt from 'bcryptjs';
 
 export async function POST(request: Request) {
   try {
-    const { name, email, password } = await request.json();
+    const { name, email, password, phone, address } = await request.json();
     
     // Check if user exists
     const { data: existingUser } = await supabase
@@ -22,11 +22,21 @@ export async function POST(request: Request) {
     const { data, error } = await supabase
       .from('users')
       .insert([
-        { name, email, password: hashedPassword, role: 'USER' }
+        { 
+          name, 
+          email, 
+          password: hashedPassword, 
+          role: 'USER',
+          phone: phone || null,
+          address: address || null
+        }
       ])
       .select();
       
-    if (error) throw error;
+    if (error) {
+      console.error('Supabase Insert Error:', error);
+      throw error;
+    }
     
     return NextResponse.json({ message: 'User created successfully', user: data[0] }, { status: 201 });
   } catch (err: any) {
