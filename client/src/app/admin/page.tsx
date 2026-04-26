@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { 
   LayoutDashboard, Package, ShoppingBag, Users, TrendingUp, 
   AlertTriangle, Search, Plus, ExternalLink, Trash2, 
-  Edit3, CheckCircle, Clock, XCircle, ChevronRight, Loader2, X,
+  Edit3, CheckCircle, Clock, XCircle, ChevronRight, ChevronLeft, Loader2, X,
   BarChart3, PieChart, Activity, DollarSign, Calendar, ArrowLeft, LogOut, Camera, ShieldAlert, Bell
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -16,6 +16,7 @@ import Logo from '@/components/Logo';
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('Dashboard');
   const [timeRange, setTimeRange] = useState('ALL');
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const [stats, setStats] = useState({ 
     revenue: 0, 
     orders: 0, 
@@ -670,10 +671,18 @@ export default function AdminDashboard() {
         )}
       </AnimatePresence>
 
-      <aside className="w-80 bg-slate-900 text-white hidden lg:flex flex-col p-10 fixed h-full z-10">
-        <div className="flex items-center gap-5 mb-16">
-          <Logo className="w-12 h-12" />
-          <span className="text-2xl font-black tracking-tighter text-white">Admin <span className="text-green-500">Panel</span></span>
+      <aside className={`${isCollapsed ? 'w-24' : 'w-80'} bg-slate-900 text-white hidden lg:flex flex-col p-10 fixed h-full z-10 transition-all duration-300`}>
+        <div className="flex items-center justify-between mb-16">
+           <div className={`flex items-center gap-5 ${isCollapsed ? 'hidden' : 'flex'}`}>
+              <Logo className="w-12 h-12" />
+              <span className="text-2xl font-black tracking-tighter text-white">Admin <span className="text-green-500">Panel</span></span>
+           </div>
+           <button 
+             onClick={() => setIsCollapsed(!isCollapsed)}
+             className={`p-3 bg-white/5 hover:bg-green-600 rounded-xl transition-all text-white ${isCollapsed ? 'mx-auto' : ''}`}
+           >
+              {isCollapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
+           </button>
         </div>
         
         <nav className="flex-1 space-y-4">
@@ -688,27 +697,28 @@ export default function AdminDashboard() {
             <button 
               key={item.name} 
               onClick={() => setActiveTab(item.name)}
-              className={`w-full flex items-center gap-5 px-6 py-4 rounded-2xl transition-all ${activeTab === item.name ? 'bg-green-600 text-white shadow-xl shadow-green-600/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
+              className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'gap-5'} px-6 py-4 rounded-2xl transition-all ${activeTab === item.name ? 'bg-green-600 text-white shadow-xl shadow-green-600/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
+              title={isCollapsed ? item.name : ''}
             >
-               <item.icon className="w-6 h-6" />
-               <span className="font-black tracking-wide">{item.name}</span>
+               <item.icon className="w-6 h-6 flex-shrink-0" />
+               {!isCollapsed && <span className="font-black tracking-wide">{item.name}</span>}
             </button>
           ))}
         </nav>
 
         <div className="pt-8 border-t border-white/5 space-y-4">
-          <Link href="/" className="w-full flex items-center gap-5 px-6 py-4 rounded-2xl text-slate-400 hover:text-white hover:bg-white/5 transition-all">
-             <ArrowLeft className="w-6 h-6" />
-             <span className="font-black tracking-wide">Exit to Site</span>
+          <Link href="/" className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'gap-5'} px-6 py-4 rounded-2xl text-slate-400 hover:text-white hover:bg-white/5 transition-all`} title={isCollapsed ? 'Exit' : ''}>
+             <ArrowLeft className="w-6 h-6 flex-shrink-0" />
+             {!isCollapsed && <span className="font-black tracking-wide">Exit to Site</span>}
           </Link>
-          <button onClick={() => { localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.href='/login'; }} className="w-full flex items-center gap-5 px-6 py-4 rounded-2xl text-red-400 hover:text-white hover:bg-red-600 transition-all">
-             <LogOut className="w-6 h-6" />
-             <span className="font-black tracking-wide">Logout</span>
+          <button onClick={() => { localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.href='/login'; }} className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'gap-5'} px-6 py-4 rounded-2xl text-red-400 hover:text-white hover:bg-red-600 transition-all`} title={isCollapsed ? 'Logout' : ''}>
+             <LogOut className="w-6 h-6 flex-shrink-0" />
+             {!isCollapsed && <span className="font-black tracking-wide">Logout</span>}
           </button>
         </div>
       </aside>
 
-      <main className="flex-1 lg:ml-80 p-12">
+      <main className={`flex-1 ${isCollapsed ? 'lg:ml-24' : 'lg:ml-80'} p-12 transition-all duration-300`}>
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-16 gap-8">
            <div>
               <h1 className="text-4xl font-black text-slate-900 tracking-tight">{activeTab}</h1>
