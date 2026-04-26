@@ -34,6 +34,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to create order' }, { status: 500 });
     }
 
+    // Add a notification for the user
+    await supabase.from('notifications').insert({
+      user_id: decoded.id,
+      title: 'Order Placed Successfully',
+      message: `Your order #${order.id} for ₹${total_amount} has been placed.`,
+      type: 'order'
+    });
+
     return NextResponse.json({ success: true, orderId: order.id });
   } catch (err: any) {
     console.error('COD Order Error:', err);
