@@ -16,7 +16,15 @@ import Logo from '@/components/Logo';
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('Dashboard');
   const [timeRange, setTimeRange] = useState('ALL');
-  const [stats, setStats] = useState({ revenue: 0, orders: 0, users: 0, medicines: 0, categoryDistribution: {} as any });
+  const [stats, setStats] = useState({ 
+    revenue: 0, 
+    orders: 0, 
+    users: 0, 
+    medicines: 0, 
+    categoryDistribution: {} as any,
+    engagement: 0,
+    retention: 0
+  });
   const [medicines, setMedicines] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [customers, setCustomers] = useState<any[]>([]);
