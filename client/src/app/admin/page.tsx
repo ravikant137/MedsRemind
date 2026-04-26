@@ -123,13 +123,15 @@ export default function AdminDashboard() {
       const config = { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } };
       await axios.patch(`${API_URL}/api/orders/${id}/status`, { status }, config);
       
-      // Also add a notification for the user when status changes
-      await axios.post(`${API_URL}/api/notifications`, {
-        user_id: orders.find((o: any) => o.id === id)?.user_id,
-        title: `Order Update: ${status.replace(/_/g, ' ')}`,
-        message: `Your order ${id} status has been updated to ${status.replace(/_/g, ' ')}.`,
-        type: 'order'
-      }, config);
+      const order = orders.find((o: any) => o.id === id);
+      if (order && order.user_id) {
+        await axios.post(`${API_URL}/api/notifications`, {
+          user_id: order.user_id,
+          title: `Order Update: ${status.replace(/_/g, ' ')}`,
+          message: `Your order ${id} status has been updated to ${status.replace(/_/g, ' ')}.`,
+          type: 'order'
+        }, config);
+      }
 
       fetchData();
     } catch (err) {

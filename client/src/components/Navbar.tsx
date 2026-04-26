@@ -193,16 +193,30 @@ export default function Navbar() {
                 {link.name}
               </Link>
             ))}
-            <div className="pt-6 mt-6 border-t border-gray-50 space-y-4">
-              <a href="tel:+919876543210" className="flex items-center gap-4 px-5">
-                <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center border border-gray-100">
-                  <Phone className="w-5 h-5 text-[#2e7d32]" />
+            <div className="pt-6 mt-6 border-t border-gray-100 space-y-4 px-5">
+              {!user ? (
+                <div className="flex flex-col gap-3">
+                  <Link href="/login" onClick={() => setIsMenuOpen(false)} className="w-full py-4 text-center border-2 border-[#003366] text-[#003366] rounded-xl font-black text-sm">Login</Link>
+                  <Link href="/signup" onClick={() => setIsMenuOpen(false)} className="w-full py-4 text-center bg-[#003366] text-white rounded-xl font-black text-sm shadow-lg">Sign Up</Link>
                 </div>
-                <span className="font-black text-[#003366]">+91 98765 43210</span>
-              </a>
-              <a href="https://wa.me/919876543210" target="_blank" className="block w-full text-center py-4 text-white rounded-xl font-black text-sm shadow-lg" style={{ background: '#25d366' }}>
-                💬 Order on WhatsApp
-              </a>
+              ) : (
+                <div className="flex flex-col gap-3">
+                  <Link href="/dashboard" onClick={() => setIsMenuOpen(false)} className="w-full py-4 text-center bg-green-50 text-[#2e7d32] rounded-xl font-black text-sm border border-green-100">My Dashboard</Link>
+                  <button onClick={() => { handleLogout(); setIsMenuOpen(false); }} className="w-full py-4 text-center bg-red-50 text-red-600 rounded-xl font-black text-sm border border-red-100">Logout</button>
+                </div>
+              )}
+              
+              <div className="pt-4 flex flex-col gap-4">
+                <a href="tel:+919876543210" className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center border border-gray-100">
+                    <Phone className="w-5 h-5 text-[#2e7d32]" />
+                  </div>
+                  <span className="font-black text-[#003366]">+91 98765 43210</span>
+                </a>
+                <a href="https://wa.me/919876543210" target="_blank" className="block w-full text-center py-4 text-white rounded-xl font-black text-sm shadow-lg" style={{ background: '#25d366' }}>
+                  💬 Order on WhatsApp
+                </a>
+              </div>
             </div>
           </div>
         </div>
