@@ -20,7 +20,27 @@ export async function POST(request: NextRequest) {
 
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-    const prompt = "Analyze this medical prescription image. Extract all medicines mentioned. For each medicine, provide: name, dosage (e.g. 500mg), frequency (e.g. twice daily), duration (e.g. 5 days), and specific instructions. Return ONLY a JSON object with a 'medicines' array containing these objects.";
+    const prompt = `Analyze this medical prescription image with maximum accuracy. 
+    Extract a detailed medication schedule in the following JSON format:
+    {
+      "patient_name": "string or unknown",
+      "medicines": [
+        {
+          "name": "string",
+          "dosage": "string (e.g. 500mg)",
+          "frequency": "string (e.g. 1-0-1 or Twice a day)",
+          "timing": "string (e.g. Before Food)",
+          "duration": "string (e.g. 5 days)",
+          "purpose": "string (e.g. Fever)"
+        }
+      ],
+      "advice": "string (general instructions)"
+    }
+    
+    Important: 
+    1. suggestion: If handwriting is unclear, use your medical knowledge to suggest the most likely medicine name based on context.
+    2. Be extremely precise with the 1-0-1 (Morning-Afternoon-Night) schedule if visible.
+    Return ONLY valid JSON.`;
 
     const result = await model.generateContent([
       prompt,
