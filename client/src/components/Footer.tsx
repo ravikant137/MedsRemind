@@ -15,7 +15,7 @@ export default function Footer() {
       <div className="bg-green-50 border-t border-green-100">
         <div className="max-w-7xl mx-auto px-4 py-12 grid md:grid-cols-3 gap-10">
           <div>
-            <h4 className="font-bold text-gray-900 text-lg mb-3">About MedsRemind Pharmacy</h4>
+            <h4 className="font-bold text-gray-900 text-lg mb-3">About Anjaneya Pharmacy</h4>
             <p className="text-gray-600 text-sm leading-relaxed mb-3">
               We are committed to your health and well-being by providing genuine medicines, expert advice and reliable services since 2018.
             </p>
@@ -60,10 +60,10 @@ export default function Footer() {
             <div className="col-span-2 md:col-span-1">
               <Link href="/" className="flex items-center gap-2 mb-4">
                 <div className="w-9 h-9 bg-green-500 rounded-lg flex items-center justify-center">
-                  <span className="text-white text-lg font-black">M</span>
+                  <span className="text-white text-lg font-black">A</span>
                 </div>
                 <div className="leading-tight">
-                  <span className="text-white text-base font-black block">MEDS<span className="text-green-400">REMIND</span></span>
+                  <span className="text-white text-base font-black block">ANJANEYA<span className="text-green-400"> PHARMACY</span></span>
                   <span className="text-blue-300 text-[9px]">Trusted Medicines. Genuine Care.</span>
                 </div>
               </Link>
@@ -95,7 +95,7 @@ export default function Footer() {
               <h4 className="font-bold text-white text-sm mb-4">Contact Us</h4>
               <ul className="space-y-2.5 text-blue-200 text-sm">
                 <li className="flex items-center gap-2"><Phone className="w-3.5 h-3.5 text-green-400" /> +91 98765 43210</li>
-                <li className="flex items-center gap-2"><Mail className="w-3.5 h-3.5 text-green-400" /> help@medsremind.com</li>
+                <li className="flex items-center gap-2"><Mail className="w-3.5 h-3.5 text-green-400" /> anjaneyapharmacy@gmail.com</li>
                 <li className="flex items-start gap-2"><MapPin className="w-3.5 h-3.5 text-green-400 mt-0.5 shrink-0" /> Anganwadi, Karnataka - 585209</li>
               </ul>
             </div>
@@ -122,7 +122,7 @@ export default function Footer() {
               <strong>Disclaimer:</strong> Prescription medicines will be dispensed only against valid prescription.
             </p>
             <p className="text-blue-300 text-xs font-medium">
-              © {currentYear} MedsRemind Pharmacy. All Rights Reserved.
+              © {currentYear} Anjaneya Pharmacy. All Rights Reserved.
             </p>
           </div>
         </div>

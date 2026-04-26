@@ -26,7 +26,7 @@ export default function Privacy() {
             <h2 className="text-2xl font-black text-slate-900 flex items-center gap-4">
               <Lock className="w-7 h-7 text-blue-600" /> Your Data is Secure
             </h2>
-            <p className="text-slate-600 leading-relaxed font-medium">At MedsRemind, we take your medical privacy with the utmost seriousness. We use industry-standard AES-256 encryption to protect your sensitive health records and personal information.</p>
+            <p className="text-slate-600 leading-relaxed font-medium">At Anjaneya Pharmacy, we take your medical privacy with the utmost seriousness. We use industry-standard AES-256 encryption to protect your sensitive health records and personal information.</p>
           </section>
 
           <section className="space-y-6">

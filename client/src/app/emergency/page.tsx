@@ -16,7 +16,7 @@ export default function Emergency() {
     { name: 'Ambulance Service', number: '108', desc: 'Immediate trauma support' },
     { name: 'Poison Control', number: '1800-222-1222', desc: 'Ingestion of toxic substances' },
     { name: 'Women Helpline', number: '1091', desc: 'Safety and medical assistance' },
-    { name: 'MedsRemind Priority', number: '1800-MEDS-SOS', desc: 'Priority order support' }
+    { name: 'Anjaneya Pharmacy Priority', number: '1800-PHARMACY', desc: 'Priority order support' }
   ];
 
   const activateSOS = async () => {

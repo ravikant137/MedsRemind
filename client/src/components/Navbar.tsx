@@ -60,11 +60,11 @@ export default function Navbar() {
             {/* Logo */}
             <Link href="/" className="flex items-center gap-3 group">
               <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
-                <span className="text-white text-xl font-black">M</span>
+                <span className="text-white text-xl font-black">A</span>
               </div>
               <div className="leading-tight">
                 <span className="text-white text-xl font-black tracking-tight block">
-                  MEDS<span className="text-green-400">REMIND</span>
+                  ANJANEYA<span className="text-green-400"> PHARMACY</span>
                 </span>
                 <span className="text-blue-200 text-[10px] font-medium tracking-wide">Trusted Medicines. Genuine Care.</span>
               </div>

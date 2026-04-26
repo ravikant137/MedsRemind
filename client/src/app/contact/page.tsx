@@ -103,7 +103,7 @@ export default function Contact() {
               {[
                 { icon: MapPin, label: 'Visit Us', value: 'Anganwadi, Karnataka - 585209\nNear Bus Stand, Main Road', color: 'bg-blue-50 text-blue-600' },
                 { icon: Phone, label: 'Call Us', value: '+91 98765 43210\nCall Us Anytime', color: 'bg-green-50 text-green-600' },
-                { icon: Mail, label: 'Email Us', value: 'help@medsremind.com', color: 'bg-purple-50 text-purple-600' },
+                { icon: Mail, label: 'Email Us', value: 'anjaneyapharmacy@gmail.com', color: 'bg-purple-50 text-purple-600' },
                 { icon: Clock, label: 'Working Hours', value: 'Mon-Sat: 8AM - 9PM\nSunday: 8AM - 1PM', color: 'bg-orange-50 text-orange-600' },
               ].map((item, i) => (
                 <div key={i} className="bg-white p-6 rounded-xl shadow-md border border-gray-100 flex items-start gap-4">
@@ -151,7 +151,7 @@ export default function Contact() {
               allowFullScreen
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
-              title="MedsRemind Pharmacy Location"
+              title="Anjaneya Pharmacy Location"
             />
           </div>
           <div className="mt-6 flex flex-wrap justify-center gap-6 text-sm text-gray-600">

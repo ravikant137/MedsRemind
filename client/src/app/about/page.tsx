@@ -24,7 +24,7 @@ export default function About() {
               Our Mission is to make <span className="text-green-600">Healthcare Accessible</span> for everyone.
             </h2>
             <p className="text-gray-500 leading-relaxed">
-              MedsRemind started with a simple observation: finding the right medicines at the right time is stressful. We built a pharmacy that combines technology with care — offering online ordering, prescription uploads, and lightning-fast delivery so you can focus on getting better.
+              Anjaneya Pharmacy started with a simple observation: finding the right medicines at the right time is stressful. We built a pharmacy that combines technology with care — offering online ordering, prescription uploads, and lightning-fast delivery so you can focus on getting better.
             </p>
             <p className="text-gray-500 leading-relaxed">
               Our trained pharmacists verify every prescription, ensure safe packaging, and provide expert guidance whenever you need it. Whether you order through our website or WhatsApp, we treat every order with the same care.
@@ -97,7 +97,7 @@ export default function About() {
       <section className="section-green py-14">
         <div className="max-w-4xl mx-auto px-4 text-center text-white">
           <h2 className="text-3xl font-bold mb-4">Ready to experience our service?</h2>
-          <p className="text-green-100 mb-8">Join hundreds of satisfied customers who trust MedsRemind for their healthcare needs.</p>
+          <p className="text-green-100 mb-8">Join hundreds of satisfied customers who trust Anjaneya Pharmacy for their healthcare needs.</p>
           <div className="flex flex-wrap justify-center gap-4">
             <Link href="/shop" className="px-8 py-4 bg-white text-green-700 font-bold rounded-lg hover:bg-green-50 transition-all shadow-lg flex items-center gap-2">
               Browse Medicines <ArrowRight className="w-4 h-4" />

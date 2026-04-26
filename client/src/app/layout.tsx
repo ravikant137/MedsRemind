@@ -11,8 +11,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "MedsRemind Pharmacy | Trusted Medicines. Genuine Care.",
-  description: "Order genuine medicines online. Fast delivery within 60 minutes. Upload prescriptions, search medicines, and get expert pharmacist support.",
+  title: "Anjaneya Pharmacy | Trusted Medicines. Genuine Care.",
+  description: "Order genuine medicines online from Anjaneya Pharmacy. Fast delivery within 60 minutes. Upload prescriptions, search medicines, and get expert pharmacist support.",
 };
 
 export default function RootLayout({

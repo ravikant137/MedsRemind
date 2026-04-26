@@ -25,13 +25,13 @@ export default function Terms() {
           <div className="p-8 bg-orange-50 border border-orange-100 rounded-3xl flex gap-6 items-start">
             <AlertCircle className="w-8 h-8 text-orange-600 shrink-0" />
             <p className="text-sm font-bold text-orange-900 leading-relaxed">
-              IMPORTANT MEDICAL DISCLAIMER: MedsRemind is a tracking and ordering tool. We do not provide medical advice. Always consult with a licensed healthcare professional before changing your medication regimen.
+              IMPORTANT MEDICAL DISCLAIMER: Anjaneya Pharmacy is a tracking and ordering tool. We do not provide medical advice. Always consult with a licensed healthcare professional before changing your medication regimen.
             </p>
           </div>
 
           <section className="space-y-6">
             <h2 className="text-2xl font-black text-slate-900">1. Acceptance of Terms</h2>
-            <p className="text-slate-600 leading-relaxed font-medium">By using the MedsRemind application, you agree to comply with and be bound by the following terms and conditions of use. If you disagree with any part of these terms, please do not use our services.</p>
+            <p className="text-slate-600 leading-relaxed font-medium">By using the Anjaneya Pharmacy application, you agree to comply with and be bound by the following terms and conditions of use. If you disagree with any part of these terms, please do not use our services.</p>
           </section>
 
           <section className="space-y-6">
@@ -52,7 +52,7 @@ export default function Terms() {
 
           <section className="space-y-6">
             <h3 className="text-xl font-black text-slate-900">3. Limitation of Liability</h3>
-            <p className="text-slate-600 leading-relaxed font-medium">MedsRemind is not liable for any missed doses, incorrect medication usage, or side effects. The reminder system is an auxiliary tool and should not be the sole method for managing critical health routines.</p>
+            <p className="text-slate-600 leading-relaxed font-medium">Anjaneya Pharmacy is not liable for any missed doses, incorrect medication usage, or side effects. The reminder system is an auxiliary tool and should not be the sole method for managing critical health routines.</p>
           </section>
 
           <section className="space-y-6">
@@ -61,7 +61,7 @@ export default function Terms() {
           </section>
 
           <div className="pt-12 border-t border-slate-100">
-            <p className="text-xs text-slate-400 font-bold text-center">Questions about our terms? Contact us at legal@medsremind.com</p>
+            <p className="text-xs text-slate-400 font-bold text-center">Questions about our terms? Contact us at legal@anjaneyapharmacy.com</p>
           </div>
         </div>
       </div>

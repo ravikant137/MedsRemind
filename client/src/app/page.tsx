@@ -92,7 +92,7 @@ export default function Home() {
                 <div className="text-center space-y-4">
                   <div className="text-8xl animate-float">🏥</div>
                   <div className="bg-white/90 backdrop-blur-sm px-6 py-3 rounded-xl shadow-lg inline-block">
-                    <p className="text-xl font-black text-gray-900">MEDS<span className="text-green-600">REMIND</span></p>
+                    <p className="text-xl font-black text-gray-900">ANJANEYA<span className="text-green-600"> PHARMACY</span></p>
                     <p className="text-xs text-gray-500 font-medium">Trusted Medicines. Genuine Care.</p>
                   </div>
                 </div>
@@ -245,7 +245,7 @@ export default function Home() {
       {/* =================== WHY CHOOSE US =================== */}
       <section className="py-14 bg-white">
         <div className="max-w-7xl mx-auto px-4">
-          <h2 className="text-2xl font-bold text-gray-900 mb-8 text-center">Why Choose MedsRemind Pharmacy?</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-8 text-center">Why Choose Anjaneya Pharmacy?</h2>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
             {[
               { icon: Truck, title: '60 Min Delivery', desc: 'On orders within our delivery range' },
