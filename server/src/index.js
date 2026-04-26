@@ -202,6 +202,81 @@ app.get('/api/admin/orders', auth, async (req, res) => {
   }
 });
 
+// --- ADMIN STATS ---
+app.get('/api/admin/stats', auth, async (req, res) => {
+  if (req.user.role !== 'ADMIN') return res.status(403).json({ error: 'Unauthorized' });
+  const range = req.query.range || 'ALL';
+
+  try {
+    let dateFilter = '';
+    if (range === 'DAY') dateFilter = "AND created_at >= date('now', 'start of day')";
+    else if (range === 'WEEK') dateFilter = "AND created_at >= date('now', '-7 days')";
+    else if (range === 'MONTH') dateFilter = "AND created_at >= date('now', '-30 days')";
+    else if (range === 'QUARTER') dateFilter = "AND created_at >= date('now', '-90 days')";
+    else if (range === 'YEAR') dateFilter = "AND created_at >= date('now', '-365 days')";
+
+    const ordersRes = await db.query(`SELECT total_amount, id FROM orders WHERE 1=1 ${dateFilter}`);
+    const usersRes = await db.query('SELECT COUNT(*) as count FROM users');
+    const medsRes = await db.query('SELECT COUNT(*) as count FROM medicines');
+    
+    const revenue = ordersRes.rows.reduce((sum, o) => sum + (o.total_amount || 0), 0);
+    const orderCount = ordersRes.rows.length;
+
+    // Category Distribution logic for SQLite
+    const categoryRes = await db.query(`
+      SELECT m.category, COUNT(*) as count 
+      FROM order_items oi 
+      JOIN medicines m ON oi.medicine_id = m.id 
+      JOIN orders o ON oi.order_id = o.id
+      WHERE 1=1 ${dateFilter}
+      GROUP BY m.category
+    `);
+    
+    const distribution = {};
+    categoryRes.rows.forEach(r => {
+      distribution[r.category || 'Others'] = r.count;
+    });
+
+    res.json({
+      revenue,
+      orders: orderCount,
+      users: usersRes.rows[0].count,
+      medicines: medsRes.rows[0].count,
+      categoryDistribution: distribution
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// --- ADMIN DISCOUNTS ---
+app.get('/api/admin/discounts', auth, async (req, res) => {
+  if (req.user.role !== 'ADMIN') return res.status(403).json({ error: 'Unauthorized' });
+  try {
+    const resSettings = await db.query('SELECT value FROM settings WHERE key = "periodic_discount"');
+    if (resSettings.rows.length === 0) {
+      return res.json({ enabled: false, percentage: 0, message: '' });
+    }
+    res.json(JSON.parse(resSettings.rows[0].value));
+  } catch (err) {
+    res.json({ enabled: false, percentage: 0, message: '' });
+  }
+});
+
+app.post('/api/admin/discounts', auth, async (req, res) => {
+  if (req.user.role !== 'ADMIN') return res.status(403).json({ error: 'Unauthorized' });
+  const { enabled, percentage, message } = req.body;
+  try {
+    await db.query(
+      'INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = ?',
+      ['periodic_discount', JSON.stringify({ enabled, percentage, message }), JSON.stringify({ enabled, percentage, message })]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.patch('/api/orders/:id/status', auth, async (req, res) => {
   if (req.user.role !== 'ADMIN') return res.status(403).json({ error: 'Unauthorized' });
   const { status } = req.body;
