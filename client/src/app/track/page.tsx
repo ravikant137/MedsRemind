@@ -16,7 +16,7 @@ function OrderTrackingContent() {
   const fetchTrackingInfo = useCallback(async (id: string, isSilent = false) => {
     if (!isSilent) setLoading(true);
     try {
-      const res = await axios.get(`${API_URL}/api/track/${id}`);
+      const res = await axios.get(`${API_URL}/api/orders/${id}`);
       const order = res.data;
       
       // Handle SQLite date format safely for local time display
@@ -106,7 +106,7 @@ function OrderTrackingContent() {
 
   const handleTrack = (e: React.FormEvent) => {
     e.preventDefault();
-    const id = orderId.replace(/[^0-9]/g, '');
+    const id = orderId.trim();
     if (id) fetchTrackingInfo(id);
   };
 
