@@ -219,6 +219,30 @@ app.get('/api/track/:id', async (req, res) => {
   }
 });
 
+app.get('/api/simulate/:id', async (req, res) => {
+  try {
+    const orderId = req.params.id;
+    const orderResult = await db.query('SELECT status FROM orders WHERE id = ?', [orderId]);
+    if (orderResult.rows.length === 0) return res.status(404).json({ error: 'Order not found' });
+    
+    const currentStatus = orderResult.rows[0].status;
+    const allSteps = ['ORDER_PLACED', 'CONFIRMED', 'PACKED', 'OUT_FOR_DELIVERY', 'DELIVERED'];
+    const nextIndex = allSteps.indexOf(currentStatus) + 1;
+    
+    if (nextIndex >= allSteps.length) {
+      return res.json({ message: 'Order already delivered', status: currentStatus });
+    }
+    
+    const nextStatus = allSteps[nextIndex];
+    await db.query('UPDATE orders SET status = ? WHERE id = ?', [nextStatus, orderId]);
+    await db.query('INSERT INTO order_status_history (order_id, status) VALUES (?, ?)', [orderId, nextStatus]);
+    
+    res.json({ message: 'Status updated', oldStatus: currentStatus, newStatus: nextStatus });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.patch('/api/orders/:id/status', auth, async (req, res) => {
   try {
     // Only ADMIN should be able to update status

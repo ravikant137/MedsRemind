@@ -1,0 +1,143 @@
+
+> server@1.0.0 start
+> node init-db.js && node src/index.js
+
+◇ injected env (2) from .env // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
+Initializing database...
+EXECUTING SQL: CREATE TABLE IF NOT EXISTS users (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      email TEXT UNIQUE NOT NULL,
+      password TEXT NOT NULL,
+      role TEXT DEFAULT 'USER',
+      points INTEGER DEFAULT 0,
+      phone TEXT,
+      address TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+Connected to the SQLite database.
+EXECUTING SQL: CREATE TABLE IF NOT EXISTS medicines (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      composition TEXT,
+      price REAL NOT NULL,
+      stock INTEGER DEFAULT 0,
+      category TEXT,
+      description TEXT,
+      image_url TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+EXECUTING SQL: CREATE TABLE IF NOT EXISTS orders (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER,
+      total_amount REAL NOT NULL,
+      status TEXT DEFAULT 'PENDING',
+      payment_status TEXT DEFAULT 'UNPAID',
+      address TEXT,
+      is_emergency BOOLEAN DEFAULT 0,
+      deliveryLocation TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (user_id) REFERENCES users(id)
+    )
+EXECUTING SQL: CREATE TABLE IF NOT EXISTS order_status_history (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      order_id INTEGER,
+      status TEXT NOT NULL,
+      notes TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (order_id) REFERENCES orders(id)
+    )
+EXECUTING SQL: CREATE TABLE IF NOT EXISTS order_items (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      order_id INTEGER,
+      medicine_id INTEGER,
+      quantity INTEGER NOT NULL,
+      price_at_time REAL NOT NULL,
+      FOREIGN KEY (order_id) REFERENCES orders(id),
+      FOREIGN KEY (medicine_id) REFERENCES medicines(id)
+    )
+EXECUTING SQL: CREATE TABLE IF NOT EXISTS schedules (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER,
+      medicine_name TEXT NOT NULL,
+      dosage TEXT,
+      timings TEXT NOT NULL,
+      start_date TEXT NOT NULL,
+      is_active BOOLEAN DEFAULT 1,
+      FOREIGN KEY (user_id) REFERENCES users(id)
+    )
+EXECUTING SQL: CREATE TABLE IF NOT EXISTS reminders (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER,
+      medicine_name TEXT NOT NULL,
+      dosage TEXT,
+      time TEXT NOT NULL,
+      frequency TEXT,
+      suggestion TEXT,
+      status TEXT DEFAULT 'ACTIVE',
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (user_id) REFERENCES users(id)
+    )
+EXECUTING SQL: CREATE TABLE IF NOT EXISTS subscriptions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER,
+      medicine_name TEXT,
+      frequency_days INTEGER,
+      next_refill_date DATETIME,
+      plan_name TEXT,
+      price REAL,
+      status TEXT DEFAULT 'ACTIVE',
+      start_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+      end_date DATETIME,
+      FOREIGN KEY (user_id) REFERENCES users(id)
+    )
+EXECUTING SQL: CREATE TABLE IF NOT EXISTS notifications (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER,
+      type TEXT DEFAULT 'info',
+      title TEXT NOT NULL,
+      message TEXT NOT NULL,
+      read BOOLEAN DEFAULT 0,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (user_id) REFERENCES users(id)
+    )
+EXECUTING SQL: INSERT OR IGNORE INTO medicines (name, composition, price, stock, category, description) VALUES (?, ?, ?, ?, ?, ?)
+EXECUTING SQL: INSERT OR IGNORE INTO medicines (name, composition, price, stock, category, description) VALUES (?, ?, ?, ?, ?, ?)
+EXECUTING SQL: INSERT OR IGNORE INTO medicines (name, composition, price, stock, category, description) VALUES (?, ?, ?, ?, ?, ?)
+EXECUTING SQL: INSERT OR IGNORE INTO medicines (name, composition, price, stock, category, description) VALUES (?, ?, ?, ?, ?, ?)
+EXECUTING SQL: INSERT OR IGNORE INTO users (name, email, password, role) VALUES (?, ?, ?, ?)
+Database initialized successfully.
+EXECUTING SQL: ALTER TABLE orders ADD COLUMN is_emergency BOOLEAN DEFAULT 0
+EXECUTING SQL: ALTER TABLE orders ADD COLUMN deliveryLocation TEXT
+EXECUTING SQL: ALTER TABLE users ADD COLUMN points INTEGER DEFAULT 0
+◇ injected env (2) from .env // tip: ⌘ enable debugging { debug: true }
+◇ injected env (0) from .env // tip: ◈ encrypted .env [www.dotenvx.com]
+Server running on port 5005
+Connected to the SQLite database.
+[2026-04-26T08:50:36.899Z] GET /api/medicines
+EXECUTING SQL: SELECT * FROM medicines WHERE 1=1
+[0mGET /api/medicines [32m200[0m 20.163 ms - 7164[0m
+[2026-04-26T08:51:12.720Z] POST /api/orders
+EXECUTING SQL: INSERT INTO orders (user_id, total_amount, address, payment_status, is_emergency, status, deliveryLocation) VALUES (?, ?, ?, ?, ?, ?, ?)
+EXECUTING SQL: INSERT INTO order_status_history (order_id, status) VALUES (?, ?)
+EXECUTING SQL: INSERT INTO order_items (order_id, medicine_id, quantity, price_at_time) VALUES (?, ?, ?, ?)
+EXECUTING SQL: UPDATE medicines SET stock = stock - ? WHERE id = ?
+EXECUTING SQL: INSERT INTO order_items (order_id, medicine_id, quantity, price_at_time) VALUES (?, ?, ?, ?)
+EXECUTING SQL: UPDATE medicines SET stock = stock - ? WHERE id = ?
+EXECUTING SQL: INSERT INTO order_items (order_id, medicine_id, quantity, price_at_time) VALUES (?, ?, ?, ?)
+EXECUTING SQL: UPDATE medicines SET stock = stock - ? WHERE id = ?
+EXECUTING SQL: INSERT INTO notifications (user_id, type, title, message) VALUES (?, ?, ?, ?)
+[0mPOST /api/orders [32m201[0m 2680.919 ms - 46[0m
+[2026-04-26T08:51:27.059Z] GET /api/track/
+[0mGET /api/track/ [33m404[0m 7.708 ms - 149[0m
+[2026-04-26T08:51:32.773Z] GET /api/notifications
+EXECUTING SQL: SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC
+[0mGET /api/notifications [32m200[0m 8.525 ms - 349[0m
+[2026-04-26T08:51:32.784Z] GET /api/notifications
+EXECUTING SQL: SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC
+[0mGET /api/notifications [36m304[0m 6.599 ms - -[0m
+[2026-04-26T08:51:34.268Z] GET /api/orders/7
+EXECUTING SQL: SELECT o.*, u.name as user_name FROM orders o JOIN users u ON o.user_id = u.id WHERE o.id = ?
+EXECUTING SQL: SELECT oi.*, m.name as medicine_name FROM order_items oi JOIN medicines m ON oi.medicine_id = m.id WHERE oi.order_id = ?
+EXECUTING SQL: SELECT status, created_at AS timestamp FROM order_status_history WHERE order_id = ? ORDER BY created_at ASC
+[0mGET /api/orders/7 [32m200[0m 10.078 ms - 293[0m
