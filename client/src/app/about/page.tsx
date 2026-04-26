@@ -1,82 +1,113 @@
 'use client';
-import { Heart, ShieldCheck, Zap, Users, Award, Target, Pill, ArrowRight } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Heart, ShieldCheck, Zap, Users, Award, Clock, Truck, Pill, Star, ArrowRight, MapPin, Phone } from 'lucide-react';
 import Link from 'next/link';
 
 export default function About() {
   return (
-    <div className="min-h-screen bg-slate-50 pt-6 px-6 pb-20">
-      <div className="max-w-7xl mx-auto">
-        <header className="text-center mb-32">
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="w-24 h-24 bg-green-600 rounded-[2.5rem] flex items-center justify-center text-white mx-auto mb-10 shadow-2xl shadow-green-200"
-          >
-            <Pill className="w-12 h-12" />
-          </motion.div>
-          <h1 className="text-6xl font-black text-slate-900 tracking-tight mb-8">Revolutionizing <span className="text-green-600">Healthcare</span></h1>
-          <p className="text-xl text-slate-500 font-medium max-w-3xl mx-auto leading-relaxed">We combine cutting-edge AI technology with compassionate care to ensure you never miss a dose and always have access to the medication you need.</p>
-        </header>
+    <div className="min-h-screen bg-[#f5f7fa]">
+      {/* Hero */}
+      <section className="section-blue py-16">
+        <div className="max-w-7xl mx-auto px-4 text-center">
+          <p className="text-green-400 font-semibold text-sm mb-3">About Us</p>
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">Your Trusted Neighborhood Pharmacy</h1>
+          <p className="text-blue-200 max-w-2xl mx-auto">
+            We are committed to providing genuine medicines, expert advice and reliable delivery services since 2018. Your health is our priority.
+          </p>
+        </div>
+      </section>
 
-        <div className="grid md:grid-cols-2 gap-20 items-center mb-32">
-          <motion.div 
-            initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            className="space-y-8"
-          >
-            <h2 className="text-4xl font-black text-slate-900 leading-tight">Our Mission is to make <span className="text-green-600">Health Management</span> effortless for everyone.</h2>
-            <p className="text-lg text-slate-500 font-medium leading-relaxed">MedsRemind started with a simple observation: managing multiple medications is stressful and error-prone. We built a platform that takes the cognitive load off patients, allowing them to focus on recovery and wellness.</p>
-            <div className="grid grid-cols-2 gap-8 pt-8">
-              <div className="space-y-2">
-                <p className="text-4xl font-black text-slate-900">10M+</p>
-                <p className="text-xs font-black uppercase tracking-widest text-slate-400">Doses Tracked</p>
+      {/* Mission + Stats */}
+      <section className="py-16">
+        <div className="max-w-7xl mx-auto px-4 grid lg:grid-cols-2 gap-16 items-center">
+          <div className="space-y-6">
+            <h2 className="text-3xl font-bold text-gray-900">
+              Our Mission is to make <span className="text-green-600">Healthcare Accessible</span> for everyone.
+            </h2>
+            <p className="text-gray-500 leading-relaxed">
+              MedsRemind started with a simple observation: finding the right medicines at the right time is stressful. We built a pharmacy that combines technology with care — offering online ordering, prescription uploads, and lightning-fast delivery so you can focus on getting better.
+            </p>
+            <p className="text-gray-500 leading-relaxed">
+              Our trained pharmacists verify every prescription, ensure safe packaging, and provide expert guidance whenever you need it. Whether you order through our website or WhatsApp, we treat every order with the same care.
+            </p>
+            <div className="grid grid-cols-2 gap-6 pt-4">
+              <div className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">
+                <p className="text-3xl font-black text-green-600">500+</p>
+                <p className="text-sm text-gray-500 font-medium">Happy Customers</p>
               </div>
-              <div className="space-y-2">
-                <p className="text-4xl font-black text-slate-900">500k</p>
-                <p className="text-xs font-black uppercase tracking-widest text-slate-400">Active Users</p>
+              <div className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">
+                <p className="text-3xl font-black text-green-600">10K+</p>
+                <p className="text-sm text-gray-500 font-medium">Orders Delivered</p>
+              </div>
+              <div className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">
+                <p className="text-3xl font-black text-green-600">5000+</p>
+                <p className="text-sm text-gray-500 font-medium">Medicines Available</p>
+              </div>
+              <div className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">
+                <p className="text-3xl font-black text-green-600">4.9/5</p>
+                <p className="text-sm text-gray-500 font-medium">Google Rating</p>
               </div>
             </div>
-          </motion.div>
-          <div className="relative">
-            <div className="absolute inset-0 bg-green-200 blur-[100px] opacity-30 rounded-full"></div>
-            <div className="relative bg-white p-12 rounded-[5rem] shadow-2xl border border-slate-100 grid grid-cols-2 gap-8">
+          </div>
+          <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
+            <div className="grid grid-cols-2 gap-6">
               {[
-                { icon: ShieldCheck, label: 'Secure', color: 'text-blue-600' },
-                { icon: Zap, label: 'Fast', color: 'text-orange-600' },
-                { icon: Heart, label: 'Caring', color: 'text-red-600' },
-                { icon: Award, label: 'Trusted', color: 'text-green-600' }
+                { icon: ShieldCheck, label: 'Genuine Medicines', color: 'bg-green-50 text-green-600' },
+                { icon: Truck, label: '60 Min Delivery', color: 'bg-blue-50 text-blue-600' },
+                { icon: Award, label: 'Licensed Pharmacy', color: 'bg-yellow-50 text-yellow-600' },
+                { icon: Heart, label: 'Patient Care', color: 'bg-red-50 text-red-600' },
+                { icon: Clock, label: 'Mon-Sat 8AM-9PM', color: 'bg-purple-50 text-purple-600' },
+                { icon: Zap, label: 'Express Service', color: 'bg-orange-50 text-orange-600' },
               ].map((item, i) => (
-                <div key={i} className="flex flex-col items-center text-center gap-4">
-                  <div className="w-16 h-16 bg-slate-50 rounded-[1.5rem] flex items-center justify-center">
-                    <item.icon className={`w-8 h-8 ${item.color}`} />
+                <div key={i} className="flex items-center gap-4 p-4 rounded-xl hover:bg-gray-50 transition-colors">
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${item.color}`}>
+                    <item.icon className="w-6 h-6" />
                   </div>
-                  <p className="font-black uppercase tracking-widest text-xs text-slate-900">{item.label}</p>
+                  <span className="font-semibold text-gray-800 text-sm">{item.label}</span>
                 </div>
               ))}
             </div>
           </div>
         </div>
+      </section>
 
-        <section className="bg-slate-900 rounded-[5rem] p-16 md:p-24 text-white text-center relative overflow-hidden mb-32">
-          <div className="absolute top-0 left-0 w-full h-full opacity-5 pointer-events-none">
-            <div className="absolute top-10 left-10 w-64 h-64 border-4 border-white rounded-full"></div>
-            <div className="absolute bottom-10 right-10 w-96 h-96 border-8 border-white rounded-full"></div>
+      {/* Our Values */}
+      <section className="py-14 bg-white">
+        <div className="max-w-7xl mx-auto px-4">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2 text-center">Our Core Values</h2>
+          <p className="text-gray-500 text-center mb-10">What drives us every day</p>
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              { title: 'Quality First', desc: 'We source medicines only from authorized distributors and maintain strict quality controls.', icon: ShieldCheck, color: 'text-green-600 bg-green-50' },
+              { title: 'Customer Care', desc: 'Our pharmacists are available for consultation via phone and WhatsApp to guide you properly.', icon: Users, color: 'text-blue-600 bg-blue-50' },
+              { title: 'Fast & Reliable', desc: 'We promise delivery within 60 minutes for all orders within our service area.', icon: Truck, color: 'text-orange-600 bg-orange-50' },
+            ].map((val, i) => (
+              <div key={i} className="p-8 rounded-xl border border-gray-100 hover:shadow-lg transition-all text-center">
+                <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5 ${val.color}`}>
+                  <val.icon className="w-8 h-8" />
+                </div>
+                <h3 className="font-bold text-gray-900 text-lg mb-2">{val.title}</h3>
+                <p className="text-gray-500 text-sm leading-relaxed">{val.desc}</p>
+              </div>
+            ))}
           </div>
-          <motion.h2 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            className="text-4xl md:text-5xl font-black mb-10 max-w-3xl mx-auto leading-tight"
-          >
-            Ready to experience the future of <span className="text-green-500">Personal Pharmacy?</span>
-          </motion.h2>
-          <div className="flex flex-wrap justify-center gap-6">
-            <Link href="/signup" className="px-12 py-6 bg-green-600 text-white rounded-[2rem] font-black hover:bg-green-700 transition-all shadow-xl shadow-green-900/50 flex items-center gap-3">
-              Join MedsRemind Now <ArrowRight className="w-6 h-6" />
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="section-green py-14">
+        <div className="max-w-4xl mx-auto px-4 text-center text-white">
+          <h2 className="text-3xl font-bold mb-4">Ready to experience our service?</h2>
+          <p className="text-green-100 mb-8">Join hundreds of satisfied customers who trust MedsRemind for their healthcare needs.</p>
+          <div className="flex flex-wrap justify-center gap-4">
+            <Link href="/shop" className="px-8 py-4 bg-white text-green-700 font-bold rounded-lg hover:bg-green-50 transition-all shadow-lg flex items-center gap-2">
+              Browse Medicines <ArrowRight className="w-4 h-4" />
+            </Link>
+            <Link href="/contact" className="px-8 py-4 bg-green-800 text-white font-bold rounded-lg hover:bg-green-900 transition-all shadow-lg">
+              Contact Us
             </Link>
           </div>
-        </section>
-      </div>
+        </div>
+      </section>
     </div>
   );
 }

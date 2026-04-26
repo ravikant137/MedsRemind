@@ -1,90 +1,129 @@
 'use client';
 import Link from 'next/link';
-import { Pill, Github, Twitter, Linkedin, Mail, ShieldCheck, Heart, MapPin, Phone } from 'lucide-react';
-import { useRouter, usePathname } from 'next/navigation';
+import { Phone, Mail, MapPin, Clock } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 
 export default function Footer() {
   const pathname = usePathname();
   const currentYear = new Date().getFullYear();
 
-  if (
-    pathname.startsWith('/admin') || 
-    pathname === '/login' || 
-    pathname === '/signup'
-  ) return null;
+  if (pathname.startsWith('/admin') || pathname === '/login' || pathname === '/signup') return null;
 
   return (
-    <footer className="bg-slate-900 text-slate-400 pt-24 pb-12 px-6">
-      <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-16 mb-20">
-          <div className="space-y-8">
-            <Link href="/" className="flex items-center gap-3 group">
-              <div className="w-12 h-12 bg-green-600 rounded-xl flex items-center justify-center shadow-2xl shadow-green-900/50 group-hover:rotate-12 transition-transform">
-                <Pill className="text-white w-7 h-7" />
-              </div>
-              <span className="text-2xl font-black text-white tracking-tighter uppercase">Meds<span className="text-green-600">Remind</span></span>
-            </Link>
-            <p className="text-sm leading-relaxed font-medium">
-              Empowering individuals to take control of their health through AI-driven medication management and seamless pharmacy integration. Your health, our priority.
+    <footer>
+      {/* Info Bar — About, Location, Working Hours */}
+      <div className="bg-green-50 border-t border-green-100">
+        <div className="max-w-7xl mx-auto px-4 py-12 grid md:grid-cols-3 gap-10">
+          <div>
+            <h4 className="font-bold text-gray-900 text-lg mb-3">About MedsRemind Pharmacy</h4>
+            <p className="text-gray-600 text-sm leading-relaxed mb-3">
+              We are committed to your health and well-being by providing genuine medicines, expert advice and reliable services since 2018.
             </p>
-            <div className="flex gap-4">
-              {[Twitter, Github, Linkedin, Mail].map((Icon, i) => (
-                <button key={i} className="w-10 h-10 rounded-xl border border-slate-800 flex items-center justify-center hover:bg-green-600 hover:border-green-600 hover:text-white transition-all group">
-                  <Icon className="w-5 h-5" />
-                </button>
-              ))}
+            <Link href="/about" className="text-green-700 font-semibold text-sm hover:underline">Read More →</Link>
+          </div>
+          <div>
+            <h4 className="font-bold text-gray-900 text-lg mb-3">Our Location</h4>
+            <p className="text-gray-600 text-sm leading-relaxed mb-1">Anganwadi, Karnataka - 585209</p>
+            <p className="text-gray-600 text-sm leading-relaxed mb-3">Near Bus Stand, Main Road</p>
+            <a 
+              href="https://maps.google.com/?q=Anganwadi+Karnataka+585209" 
+              target="_blank" 
+              className="text-green-700 font-semibold text-sm hover:underline flex items-center gap-1"
+            >
+              <MapPin className="w-4 h-4" /> View on Google Maps →
+            </a>
+          </div>
+          <div>
+            <h4 className="font-bold text-gray-900 text-lg mb-3">Working Hours</h4>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between text-gray-600">
+                <span>Mon - Sat</span>
+                <span className="font-semibold text-gray-900">8:00 AM - 9:00 PM</span>
+              </div>
+              <div className="flex justify-between text-gray-600">
+                <span>Sunday</span>
+                <span className="font-semibold text-gray-900">8:00 AM - 1:00 PM</span>
+              </div>
             </div>
+            <Link href="/contact" className="inline-block mt-4 px-5 py-2 bg-green-600 text-white text-sm font-bold rounded-lg hover:bg-green-700 transition-colors">
+              Open Now
+            </Link>
           </div>
+        </div>
+      </div>
 
-          <div>
-            <h4 className="text-white font-black uppercase tracking-widest text-xs mb-8">Platform</h4>
-            <ul className="space-y-4 font-bold text-sm">
-              <li><Link href="/shop" className="hover:text-green-500 transition-colors">Find Medicines</Link></li>
-              <li><Link href="/prescription" className="hover:text-green-500 transition-colors">AI RX Scan</Link></li>
-              <li><Link href="/reminders" className="hover:text-green-500 transition-colors">Schedule</Link></li>
-              <li><Link href="/track" className="hover:text-green-500 transition-colors">Order Tracking</Link></li>
-            </ul>
-          </div>
+      {/* Main Footer */}
+      <div className="section-blue text-white">
+        <div className="max-w-7xl mx-auto px-4 py-12">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-10">
+            {/* Logo & Tagline */}
+            <div className="col-span-2 md:col-span-1">
+              <Link href="/" className="flex items-center gap-2 mb-4">
+                <div className="w-9 h-9 bg-green-500 rounded-lg flex items-center justify-center">
+                  <span className="text-white text-lg font-black">M</span>
+                </div>
+                <div className="leading-tight">
+                  <span className="text-white text-base font-black block">MEDS<span className="text-green-400">REMIND</span></span>
+                  <span className="text-blue-300 text-[9px]">Trusted Medicines. Genuine Care.</span>
+                </div>
+              </Link>
+            </div>
 
-          <div>
-            <h4 className="text-white font-black uppercase tracking-widest text-xs mb-8">Company</h4>
-            <ul className="space-y-4 font-bold text-sm">
-              <li><Link href="/about" className="hover:text-green-500 transition-colors">About Us</Link></li>
-              <li><Link href="/discounts" className="hover:text-green-500 transition-colors">Health Rewards</Link></li>
-              <li><Link href="/privacy" className="hover:text-green-500 transition-colors">Data Privacy</Link></li>
-              <li><Link href="/contact" className="hover:text-green-500 transition-colors">Support Center</Link></li>
-            </ul>
-          </div>
+            {/* Quick Links */}
+            <div>
+              <h4 className="font-bold text-white text-sm mb-4">Quick Links</h4>
+              <ul className="space-y-2.5 text-blue-200 text-sm">
+                <li><Link href="/" className="hover:text-green-400 transition-colors">Home</Link></li>
+                <li><Link href="/shop" className="hover:text-green-400 transition-colors">Medicines</Link></li>
+                <li><Link href="/prescription" className="hover:text-green-400 transition-colors">Upload Prescription</Link></li>
+                <li><Link href="/shop" className="hover:text-green-400 transition-colors">Categories</Link></li>
+              </ul>
+            </div>
 
-          <div>
-            <h4 className="text-white font-black uppercase tracking-widest text-xs mb-8">Support</h4>
-            <div className="space-y-6">
-              <div className="flex gap-4">
-                <MapPin className="w-5 h-5 text-green-600 shrink-0" />
-                <p className="text-sm font-medium">123 Health Ave, Medical District, Delhi, India</p>
-              </div>
-              <div className="flex gap-4">
-                <Phone className="w-5 h-5 text-green-600 shrink-0" />
-                <p className="text-sm font-medium">+91 98765 43210</p>
-              </div>
-              <div className="bg-slate-800/50 p-6 rounded-2xl border border-slate-800">
-                <p className="text-xs text-slate-500 mb-2 font-black uppercase tracking-widest">Emergency Line</p>
-                <p className="text-white font-black text-lg">1800-MEDS-HELP</p>
-              </div>
+            {/* Information */}
+            <div>
+              <h4 className="font-bold text-white text-sm mb-4">Information</h4>
+              <ul className="space-y-2.5 text-blue-200 text-sm">
+                <li><Link href="/about" className="hover:text-green-400 transition-colors">About Us</Link></li>
+                <li><Link href="/privacy" className="hover:text-green-400 transition-colors">Privacy Policy</Link></li>
+                <li><Link href="/terms" className="hover:text-green-400 transition-colors">Terms & Conditions</Link></li>
+              </ul>
+            </div>
+
+            {/* Contact Us */}
+            <div>
+              <h4 className="font-bold text-white text-sm mb-4">Contact Us</h4>
+              <ul className="space-y-2.5 text-blue-200 text-sm">
+                <li className="flex items-center gap-2"><Phone className="w-3.5 h-3.5 text-green-400" /> +91 98765 43210</li>
+                <li className="flex items-center gap-2"><Mail className="w-3.5 h-3.5 text-green-400" /> help@medsremind.com</li>
+                <li className="flex items-start gap-2"><MapPin className="w-3.5 h-3.5 text-green-400 mt-0.5 shrink-0" /> Anganwadi, Karnataka - 585209</li>
+              </ul>
+            </div>
+
+            {/* Need Help */}
+            <div>
+              <h4 className="font-bold text-white text-sm mb-4">Need Help?</h4>
+              <p className="text-blue-200 text-sm mb-3">Chat with us on WhatsApp</p>
+              <a 
+                href="https://wa.me/919876543210" 
+                target="_blank"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-green-500 text-white text-sm font-bold rounded-lg hover:bg-green-600 transition-colors"
+              >
+                💬 Order on WhatsApp
+              </a>
             </div>
           </div>
         </div>
 
-        <div className="pt-12 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-slate-500">
-            <ShieldCheck className="w-4 h-4 text-green-600" /> &copy; {currentYear} MedsRemind Inc. All rights reserved.
-          </div>
-          <div className="flex items-center gap-6 text-xs font-black uppercase tracking-widest text-slate-600">
-            <Link href="/terms" className="hover:text-white transition-colors">Terms</Link>
-            <Link href="/privacy" className="hover:text-white transition-colors">Privacy</Link>
-            <div className="flex items-center gap-2">
-              Made with <Heart className="w-3 h-3 text-red-500 fill-red-500" /> for your health
-            </div>
+        {/* Bottom Bar */}
+        <div className="border-t border-blue-800">
+          <div className="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-3">
+            <p className="text-blue-300 text-xs">
+              <strong>Disclaimer:</strong> Prescription medicines will be dispensed only against valid prescription.
+            </p>
+            <p className="text-blue-300 text-xs font-medium">
+              © {currentYear} MedsRemind Pharmacy. All Rights Reserved.
+            </p>
           </div>
         </div>
       </div>

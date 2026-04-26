@@ -1,22 +1,18 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800", "900"],
 });
 
 export const metadata: Metadata = {
-  title: "MedsRemind | Your Smart Health Companion",
-  description: "AI-powered medication reminders and smart pharmacy platform.",
+  title: "MedsRemind Pharmacy | Trusted Medicines. Genuine Care.",
+  description: "Order genuine medicines online. Fast delivery within 60 minutes. Upload prescriptions, search medicines, and get expert pharmacist support.",
 };
 
 export default function RootLayout({
@@ -25,13 +21,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased scroll-smooth`}
-    >
-      <body className="min-h-full flex flex-col bg-slate-50">
+    <html lang="en" className={`${inter.variable} h-full antialiased scroll-smooth`}>
+      <body className="min-h-full flex flex-col bg-[#f5f7fa]" style={{ fontFamily: "'Inter', sans-serif" }}>
         <Navbar />
-        <main className="flex-1 pt-12">
+        <main className="flex-1">
           {children}
         </main>
         <Footer />
