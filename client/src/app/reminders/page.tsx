@@ -100,13 +100,14 @@ export default function Reminders() {
   const completeReminder = async (id: number) => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.post(`${API_URL}/api/reminders/${id}/complete`, {}, {
+      const res = await axios.post(`/api/reminders/${id}/complete`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setPoints(prev => prev + res.data.pointsEarned);
-      alert('Amazing! You earned 10 Reward Points! 🏆');
-    } catch (err) {
-      alert('Failed to complete reminder');
+      setPoints(prev => prev + (res.data.pointsEarned || 0));
+      alert(`Amazing! You earned ${res.data.pointsEarned} Reward Points! 🏆`);
+    } catch (err: any) {
+      const errorMsg = err.response?.data?.error || err.message || 'Unknown error';
+      alert(`Completion Failed: ${errorMsg}`);
     }
   };
 
