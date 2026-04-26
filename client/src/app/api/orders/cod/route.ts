@@ -13,10 +13,14 @@ export async function POST(request: NextRequest) {
     const decoded: any = jwt.verify(token, JWT_SECRET);
     
     const { items, total_amount, address } = await request.json();
+    
+    // Generate a shorter, human-readable Order ID (e.g. ANJ-1234)
+    const shortId = `ANJ-${Math.floor(1000 + Math.random() * 9000)}`;
 
     const { data: order, error: orderError } = await supabase
       .from('orders')
       .insert({
+        id: shortId,
         user_id: decoded.id,
         user_name: decoded.name,
         total_amount,
