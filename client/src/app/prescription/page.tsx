@@ -49,9 +49,15 @@ export default function PrescriptionUpload() {
   };
 
   const handleSetReminders = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert('Your session has expired. Please login again.');
+      router.push('/login');
+      return;
+    }
+
     setIsSettingReminders(true);
     try {
-      const token = localStorage.getItem('token');
       await axios.post(`${API_URL}/api/reminders/bulk`, {
         medicines: result.medicines
       }, {
@@ -60,7 +66,7 @@ export default function PrescriptionUpload() {
       setRemindersSet(true);
       setTimeout(() => { router.push('/reminders'); }, 2000);
     } catch (err) {
-      alert('Failed to set reminders. Please login.');
+      alert('Failed to sync reminders. Please try logging in again.');
       router.push('/login');
     } finally {
       setIsSettingReminders(false);
@@ -201,52 +207,19 @@ export default function PrescriptionUpload() {
                            <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm shrink-0 border border-slate-50">
                               <Pill className="w-6 h-6 text-green-600" />
                            </div>
-                           <div className="flex-1 space-y-3">
-                              <input 
-                                value={m.name}
-                                onChange={(e) => {
-                                  const newMeds = [...result.medicines];
-                                  newMeds[i].name = e.target.value;
-                                  setResult({ ...result, medicines: newMeds });
-                                }}
-                                className="w-full bg-transparent font-black text-slate-900 border-none p-0 focus:ring-0 text-base"
-                              />
+                           <div className="flex-1">
+                              <h4 className="font-black text-slate-900 text-lg mb-2">{m.name}</h4>
                               <div className="flex flex-wrap gap-2">
                                 <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-xl border border-slate-100">
                                    <Activity className="w-3.5 h-3.5 text-blue-500" />
-                                   <input 
-                                     value={m.dosage}
-                                     onChange={(e) => {
-                                       const newMeds = [...result.medicines];
-                                       newMeds[i].dosage = e.target.value;
-                                       setResult({ ...result, medicines: newMeds });
-                                     }}
-                                     className="bg-transparent text-xs font-bold text-slate-500 border-none p-0 focus:ring-0 w-20"
-                                   />
+                                   <span className="text-xs font-bold text-slate-500">{m.dosage}</span>
                                 </div>
                                 <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-xl border border-slate-100">
                                    <Clock className="w-3.5 h-3.5 text-purple-500" />
-                                   <input 
-                                     value={m.duration || m.frequency}
-                                     onChange={(e) => {
-                                       const newMeds = [...result.medicines];
-                                       newMeds[i].duration = e.target.value;
-                                       setResult({ ...result, medicines: newMeds });
-                                     }}
-                                     className="bg-transparent text-xs font-bold text-slate-500 border-none p-0 focus:ring-0 w-24"
-                                   />
+                                   <span className="text-xs font-bold text-slate-500">{m.duration || m.frequency}</span>
                                 </div>
                               </div>
                            </div>
-                           <button 
-                             onClick={() => {
-                               const newMeds = result.medicines.filter((_: any, idx: number) => idx !== i);
-                               setResult({ ...result, medicines: newMeds });
-                             }}
-                             className="text-slate-300 hover:text-red-500 transition-colors"
-                           >
-                             <AlertCircle className="w-5 h-5" />
-                           </button>
                         </div>
                       </div>
                     ))}
