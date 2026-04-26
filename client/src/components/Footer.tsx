@@ -1,7 +1,8 @@
 'use client';
 import Link from 'next/link';
-import { Phone, Mail, MapPin } from 'lucide-react';
+import { Phone, Mail, MapPin, Facebook, Instagram, Twitter, MessageCircle } from 'lucide-react';
 import { usePathname } from 'next/navigation';
+import Logo from './Logo';
 
 export default function Footer() {
   const pathname = usePathname();
@@ -13,16 +14,16 @@ export default function Footer() {
     <footer>
       {/* ── Info Bar: About | Location | Working Hours ── */}
       <div style={{ background: '#e8f5e9', borderTop: '1px solid #c8e6c9' }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 grid md:grid-cols-3 gap-10">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 py-12 grid md:grid-cols-3 gap-10">
           <div>
-            <h4 className="font-bold text-lg mb-3" style={{ color: '#1a1a2e' }}>About Anjaneya Pharmacy</h4>
+            <h4 className="font-bold text-lg mb-3" style={{ color: '#003366' }}>About Anjaneya Pharmacy</h4>
             <p className="text-sm leading-relaxed mb-3" style={{ color: '#64748b' }}>
               We are committed to your health and well-being by providing genuine medicines, expert advice and reliable services since 2018.
             </p>
             <Link href="/about" className="text-sm font-semibold hover:underline" style={{ color: '#2e7d32' }}>Read More →</Link>
           </div>
           <div>
-            <h4 className="font-bold text-lg mb-3" style={{ color: '#1a1a2e' }}>Our Location</h4>
+            <h4 className="font-bold text-lg mb-3" style={{ color: '#003366' }}>Our Location</h4>
             <p className="text-sm leading-relaxed mb-1" style={{ color: '#64748b' }}>Anganwadi, Karnataka - 585209</p>
             <p className="text-sm leading-relaxed mb-3" style={{ color: '#64748b' }}>Near Bus Stand, Main Road</p>
             <a href="https://maps.google.com/?q=Anganwadi+Karnataka+585209" target="_blank"
@@ -31,7 +32,7 @@ export default function Footer() {
             </a>
           </div>
           <div>
-            <h4 className="font-bold text-lg mb-3" style={{ color: '#1a1a2e' }}>Working Hours</h4>
+            <h4 className="font-bold text-lg mb-3" style={{ color: '#003366' }}>Working Hours</h4>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between" style={{ color: '#64748b' }}>
                 <span>Mon - Sat</span>
@@ -51,21 +52,30 @@ export default function Footer() {
       </div>
 
       {/* ── Main Dark Footer ── */}
-      <div style={{ background: '#1a237e' }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12">
+      <div style={{ background: '#003366' }}>
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 py-12">
           <div className="grid grid-cols-2 md:grid-cols-5 gap-10">
             {/* Logo */}
-            <div className="col-span-2 md:col-span-1">
-              <Link href="/" className="flex items-center gap-2.5 mb-4">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: '#2e7d32' }}>
-                  <span className="text-white text-lg font-black">A</span>
-                </div>
-                <div className="leading-tight">
-                  <span className="text-white text-sm font-black block">ANJANEYA</span>
-                  <span className="font-black text-sm block" style={{ color: '#4caf50' }}>PHARMACY</span>
-                  <span className="text-[8px] block" style={{ color: '#93a5cf' }}>Trusted Medicines. Genuine Care.</span>
+            <div className="col-span-2 md:col-span-1 flex flex-col items-start">
+              <Link href="/" className="flex items-center gap-3 mb-6 bg-white/10 p-3 rounded-2xl w-full">
+                <Logo className="w-12 h-12 drop-shadow-md" />
+                <div className="leading-tight flex flex-col justify-center">
+                  <span className="text-white text-lg font-black tracking-tight block">ANJANEYA</span>
+                  <div className="flex items-center gap-1 -mt-0.5">
+                    <span className="h-[2px] w-3 bg-[#4CAF50]"></span>
+                    <span className="text-[#4CAF50] text-xs font-black tracking-widest block uppercase">PHARMACY</span>
+                    <span className="h-[2px] w-3 bg-[#4CAF50]"></span>
+                  </div>
+                  <span className="text-gray-300 text-[8px] font-bold tracking-wide mt-1">Fast Medicines. Trusted Care.</span>
                 </div>
               </Link>
+              
+              <div className="flex items-center gap-3">
+                <a href="https://wa.me/919876543210" className="w-8 h-8 rounded-full bg-[#25D366] flex items-center justify-center text-white hover:scale-110 transition-transform"><MessageCircle className="w-4 h-4" /></a>
+                <a href="#" className="w-8 h-8 rounded-full bg-[#1877F2] flex items-center justify-center text-white hover:scale-110 transition-transform"><Facebook className="w-4 h-4" /></a>
+                <a href="#" className="w-8 h-8 rounded-full bg-[#E4405F] flex items-center justify-center text-white hover:scale-110 transition-transform"><Instagram className="w-4 h-4" /></a>
+                <a href="#" className="w-8 h-8 rounded-full bg-[#1DA1F2] flex items-center justify-center text-white hover:scale-110 transition-transform"><Twitter className="w-4 h-4" /></a>
+              </div>
             </div>
 
             {/* Quick Links */}
