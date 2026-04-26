@@ -38,6 +38,19 @@ export default function Notifications() {
     fetchNotifications();
     const savedLang = localStorage.getItem('meds_lang') || 'en';
     setLanguage(savedLang);
+    
+    // AUTO-READ: Clear notifications as soon as the page is viewed
+    const autoRead = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (token) {
+          await axios.post(`${API_URL}/api/notifications/read`, {}, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+        }
+      } catch (err) {}
+    };
+    autoRead();
   }, []);
 
   const fetchNotifications = async () => {
@@ -70,10 +83,10 @@ export default function Notifications() {
   const markAllRead = async () => {
     try {
       const token = localStorage.getItem('token');
-      await axios.put(`${API_URL}/api/notifications/read-all`, {}, {
+      await axios.post(`${API_URL}/api/notifications/read`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setNotifications(prev => prev.map(n => ({ ...n, read: 1 })));
+      setNotifications(prev => prev.map(n => ({ ...n, read: true })));
     } catch (err) {
       console.error(err);
     }
