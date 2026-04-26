@@ -2,7 +2,7 @@
   "name": "medsremind-root",
   "version": "1.0.0",
   "scripts": {
-    "build": "cd client && npm install && npm run build",
+    "build": "if [ -d \"client\" ]; then cd client && npm install && npm run build; else npm run build; fi",
     "start": "concurrently \"cd server && npm start\" \"cd client && npm run dev\"",
     "start:all": "taskkill /F /IM node.exe || true && concurrently \"cd server && npm start\" \"cd client && npm run dev\"",
     "stop:all": "taskkill /F /IM node.exe || true",
