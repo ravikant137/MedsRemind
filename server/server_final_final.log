@@ -1,0 +1,43 @@
+
+> server@1.0.0 start
+> node init-db.js && node src/index.js
+
+◇ injected env (2) from .env // tip: ◈ encrypted .env [www.dotenvx.com]
+Initializing database...
+Connected to the SQLite database.
+Database initialized successfully.
+◇ injected env (2) from .env // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
+◇ injected env (0) from .env // tip: ⌘ enable debugging { debug: true }
+
+<--- Last few GCs --->
+
+[26072:000001B46DF7D370]      993 ms: Scavenge 8.5 (11.2) -> 6.9 (11.5) MB, 0.51 / 0.00 ms  (average mu = 1.000, current mu = 1.000) allocation failure; 
+[26072:000001B46DF7D370]     8722 ms: Mark-Compact (reduce) 7.0 (11.5) -> 5.7 (8.0) MB, 5.45 / 0.01 ms  (+ 5.2 ms in 17 steps since start of marking, biggest step 0.5 ms, walltime since start of marking 12 ms) (average mu = 1.000, current mu = 1.000) fina
+
+<--- JS stacktrace --->
+
+FATAL ERROR: Committing semi space failed. Allocation failed - JavaScript heap out of memory
+----- Native stack trace -----
+
+ 1: 00007FF74421A62B node::SetCppgcReference+19819
+ 2: 00007FF74418A468 v8::base::CPU::num_virtual_address_bits+93320
+ 3: 00007FF744C04991 v8::Isolate::ReportExternalAllocationLimitReached+65
+ 4: 00007FF744BEE0E8 v8::Function::Experimental_IsNopFunction+1336
+ 5: 00007FF744A4FAC0 v8::Platform::SystemClockTimeMillis+659328
+ 6: 00007FF744A078C3 v8::Platform::SystemClockTimeMillis+363907
+ 7: 00007FF744A59180 v8::Platform::SystemClockTimeMillis+697920
+ 8: 00007FF744A4C7E0 v8::Platform::SystemClockTimeMillis+646304
+ 9: 00007FF744A4FB42 v8::Platform::SystemClockTimeMillis+659458
+10: 00007FF744A44A1F v8::Platform::SystemClockTimeMillis+614111
+11: 00007FF744110903 X509_STORE_CTX_get_lookup_certs+4803
+12: 00007FF74410F2B6 node::TriggerNodeReport+83462
+13: 00007FF74428003B uv_update_time+491
+14: 00007FF74427FBB4 uv_run+900
+15: 00007FF744250AB5 node::SpinEventLoop+405
+16: 00007FF744134E5A X509_STORE_CTX_get_lookup_certs+153626
+17: 00007FF7441CDFED node::Start+4957
+18: 00007FF7441CCCC0 node::Start+48
+19: 00007FF743F7DBBC AES_cbc_encrypt+152044
+20: 00007FF74542C7AC inflateValidate+19196
+21: 00007FFB7007E8D7 BaseThreadInitThunk+23
+22: 00007FFB712AC3FC RtlUserThreadStart+44

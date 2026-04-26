@@ -111,10 +111,11 @@ app.post('/api/orders', auth, async (req, res) => {
     await db.query('INSERT INTO order_status_history (order_id, status) VALUES (?, ?)', [orderId, 'ORDER_PLACED']);
 
     
-    for (const item of items) {
+    for (let item of items) {
+      const medicineName = item.name || item.medicine_name || 'Prescription Medicine';
       await db.query(
-        'INSERT INTO order_items (order_id, medicine_id, quantity, price_at_time) VALUES (?, ?, ?, ?)',
-        [orderId, item.id, item.quantity, item.price]
+        'INSERT INTO order_items (order_id, medicine_id, medicine_name, quantity, price_at_time) VALUES (?, ?, ?, ?, ?)',
+        [orderId, item.id || null, medicineName, item.quantity, item.price]
       );
       await db.query('UPDATE medicines SET stock = stock - ? WHERE id = ?', [item.quantity, item.id]);
     }
@@ -133,11 +134,23 @@ app.post('/api/orders', auth, async (req, res) => {
 
 app.get('/api/orders', auth, async (req, res) => {
   try {
-    const result = await db.query(
+    const ordersResult = await db.query(
       'SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC',
       [req.user.id]
     );
-    res.json(result.rows);
+    
+    const orders = ordersResult.rows;
+    
+    // Fetch items for each order
+    for (let order of orders) {
+      const itemsResult = await db.query(
+        'SELECT oi.quantity, oi.price_at_time, COALESCE(oi.medicine_name, m.name, "Unknown Medicine") as medicine_name FROM order_items oi LEFT JOIN medicines m ON oi.medicine_id = m.id WHERE oi.order_id = ?',
+        [order.id]
+      );
+      order.items = itemsResult.rows;
+    }
+    
+    res.json(orders);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -166,7 +179,7 @@ app.get('/api/orders/:id', auth, async (req, res) => {
     }
 
     const itemsResult = await db.query(
-      'SELECT oi.*, m.name as medicine_name FROM order_items oi JOIN medicines m ON oi.medicine_id = m.id WHERE oi.order_id = ?',
+      'SELECT oi.quantity, oi.price_at_time, COALESCE(oi.medicine_name, m.name, "Unknown Medicine") as medicine_name FROM order_items oi LEFT JOIN medicines m ON oi.medicine_id = m.id WHERE oi.order_id = ?',
       [orderId]
     );
 
@@ -202,7 +215,7 @@ app.get('/api/track/:id', async (req, res) => {
     const order = orderResult.rows[0];
 
     const itemsResult = await db.query(
-      'SELECT oi.quantity, oi.price_at_time, m.name as medicine_name FROM order_items oi JOIN medicines m ON oi.medicine_id = m.id WHERE oi.order_id = ?',
+      'SELECT oi.quantity, oi.price_at_time, COALESCE(oi.medicine_name, m.name, "Medicine") as medicine_name FROM order_items oi LEFT JOIN medicines m ON oi.medicine_id = m.id WHERE oi.order_id = ?',
       [orderId]
     );
 

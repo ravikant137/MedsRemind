@@ -1,0 +1,7 @@
+
+> server@1.0.0 start
+> node init-db.js && node src/index.js
+
+◇ injected env (2) from .env // tip: ◈ secrets for agents [www.dotenvx.com]
+Initializing database...
+Connected to the SQLite database.

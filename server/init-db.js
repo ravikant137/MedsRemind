@@ -51,6 +51,7 @@ async function init() {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       order_id INTEGER,
       medicine_id INTEGER,
+      medicine_name TEXT,
       quantity INTEGER NOT NULL,
       price_at_time REAL NOT NULL,
       FOREIGN KEY (order_id) REFERENCES orders(id),
