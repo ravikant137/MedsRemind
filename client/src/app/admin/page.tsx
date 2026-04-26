@@ -409,7 +409,7 @@ export default function AdminDashboard() {
                       <span className="text-[10px] font-black uppercase tracking-widest text-green-500 bg-green-50 px-3 py-1 rounded-full">+12.5%</span>
                    </div>
                    <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Revenue Growth</p>
-                   <h4 className="text-3xl font-black text-slate-900 mt-2">₹{(stats.revenue * 0.8).toLocaleString()}</h4>
+                   <h4 className="text-3xl font-black text-slate-900 mt-2">₹{stats.revenue.toLocaleString()}</h4>
                    <div className="mt-8 flex gap-1 h-2">
                       {[40, 70, 45, 90, 65, 80, 50].map((h, i) => (
                         <div key={i} className="flex-1 bg-green-100 rounded-full relative overflow-hidden">
@@ -451,32 +451,34 @@ export default function AdminDashboard() {
                 <h3 className="text-2xl font-black mb-12 flex items-center gap-4"><PieChart className="text-green-500" /> Sales Distribution</h3>
                 <div className="grid md:grid-cols-2 gap-20 items-center">
                    <div className="space-y-8">
-                      {[
-                        { label: 'Antibiotics', val: '45%', color: 'bg-green-500' },
-                        { label: 'Pain Relief', val: '25%', color: 'bg-blue-500' },
-                        { label: 'Vitamins', val: '20%', color: 'bg-purple-500' },
-                        { label: 'Others', val: '10%', color: 'bg-orange-500' }
-                      ].map((item, i) => (
-                        <div key={i} className="space-y-2">
-                           <div className="flex justify-between text-sm font-bold">
-                               <span>{item.label}</span>
-                               <span className="text-slate-400">{item.val}</span>
+                       {Object.keys(stats.categoryDistribution).length > 0 ? Object.entries(stats.categoryDistribution).map(([category, count]: [string, any], i) => {
+                         const total = Object.values(stats.categoryDistribution).reduce((a: any, b: any) => a + b, 0) as number;
+                         const percentage = total > 0 ? Math.round((count / total) * 100) : 0;
+                         const colors = ['bg-green-500', 'bg-blue-500', 'bg-purple-500', 'bg-orange-500', 'bg-red-500'];
+                         return (
+                           <div key={i} className="space-y-2">
+                              <div className="flex justify-between text-sm font-bold text-white">
+                                  <span>{category}</span>
+                                  <span className="text-slate-400">{percentage}%</span>
+                              </div>
+                              <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                                 <div className={`h-full ${colors[i % colors.length]}`} style={{ width: `${percentage}%` }}></div>
+                              </div>
                            </div>
-                           <div className="h-2 bg-white/10 rounded-full overflow-hidden">
-                              <div className={`h-full ${item.color}`} style={{ width: item.val }}></div>
-                           </div>
-                        </div>
-                      ))}
-                   </div>
-                   <div className="flex items-center justify-center">
-                      <div className="w-64 h-64 rounded-full border-[20px] border-white/5 flex items-center justify-center relative">
-                         <div className="absolute inset-0 border-[20px] border-green-500 rounded-full" style={{ clipPath: 'polygon(50% 50%, 50% 0, 100% 0, 100% 100%, 0 100%, 0 50%)' }}></div>
-                         <div className="text-center">
-                            <p className="text-4xl font-black">₹{stats.revenue.toLocaleString()}</p>
-                            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Total Sales</p>
-                         </div>
-                      </div>
-                   </div>
+                         );
+                       }) : (
+                         <div className="text-slate-400 font-bold">No sales data for this period</div>
+                       )}
+                    </div>
+                    <div className="flex items-center justify-center">
+                       <div className="w-64 h-64 rounded-full border-[20px] border-white/5 flex items-center justify-center relative">
+                          <div className="absolute inset-0 border-[20px] border-green-500 rounded-full" style={{ clipPath: 'polygon(50% 50%, 50% 0, 100% 0, 100% 100%, 0 100%, 0 50%)' }}></div>
+                          <div className="text-center">
+                             <h4 className="text-4xl font-black text-white mb-2">₹{stats.revenue.toLocaleString()}</h4>
+                             <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Total Sales</p>
+                          </div>
+                       </div>
+                    </div>
                 </div>
              </div>
           </motion.div>
