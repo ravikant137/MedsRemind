@@ -92,7 +92,7 @@ export default function MyOrders() {
                      </div>
                      <div>
                        <div className="flex items-center gap-4 mb-2">
-                         <p className="text-xs font-black text-slate-400 tracking-[0.2em] uppercase">ORDER #ORD-{order.id}</p>
+                         <p className="text-xs font-black text-slate-400 tracking-[0.2em] uppercase">ORDER #{order.id.startsWith('ANJ-') ? order.id : `ORD-${order.id}`}</p>
                          <span className={`text-[9px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest ${getStatusColor(order.status || 'ORDER_PLACED')}`}>
                            {formatStatus(order.status || 'ORDER_PLACED')}
                          </span>

@@ -58,22 +58,12 @@ export default function Notifications() {
     }
   };
 
-  const viewOrderDetails = async (notif: any) => {
-    const match = notif.message.match(/#ORD-(\d+)/);
+  const viewOrderDetails = (notif: any) => {
+    // Recognize both old numeric IDs and new ANJ-XXXX IDs
+    const match = notif.message.match(/ANJ-\d+|#ORD-(\d+)/);
     if (match) {
-      const orderId = match[1];
-      setOrderLoading(true);
-      try {
-        const token = localStorage.getItem('token');
-        const res = await axios.get(`${API_URL}/api/orders/${orderId}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setSelectedOrder(res.data);
-      } catch (err) {
-        alert('Could not fetch order details');
-      } finally {
-        setOrderLoading(false);
-      }
+      const orderId = match[0].startsWith('ANJ-') ? match[0] : match[1];
+      router.push(`/track?id=${orderId}`);
     }
   };
 
