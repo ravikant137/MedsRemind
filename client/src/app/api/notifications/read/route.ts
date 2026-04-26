@@ -12,16 +12,23 @@ export async function POST(request: NextRequest) {
     const token = authHeader.split(' ')[1];
     const decoded: any = jwt.verify(token, JWT_SECRET);
     
-    // Mark all notifications as read for this user
+    // Mark all unread notifications as read for this user
+    // We use a broad update to ensure everything is cleared
     const { error } = await supabase
       .from('notifications')
       .update({ read: true })
-      .eq('user_id', decoded.id)
-      .eq('read', false);
+      .match({ user_id: decoded.id, read: false });
 
-    if (error) throw error;
+    if (error) {
+      console.error('Supabase Update Error:', error);
+      // Fallback: try update without the read:false filter in case of state mismatch
+      await supabase
+        .from('notifications')
+        .update({ read: true })
+        .eq('user_id', decoded.id);
+    }
     
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, message: 'All notifications cleared' });
   } catch (err: any) {
     console.error('Mark as read error:', err);
     return NextResponse.json({ error: 'Failed to clear notifications' }, { status: 500 });

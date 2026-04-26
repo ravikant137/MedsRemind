@@ -3,7 +3,6 @@ import { supabaseAdmin as supabase } from '@/lib/supabase';
 
 export async function GET() {
   try {
-    // 1. Fetch medicines
     const { data: medicines, error } = await supabase
       .from('medicines')
       .select('*')
@@ -11,7 +10,6 @@ export async function GET() {
       
     if (error) throw error;
 
-    // 2. Fetch global discount settings
     const { data: discountSetting } = await supabase
       .from('settings')
       .select('value')
@@ -20,21 +18,24 @@ export async function GET() {
 
     const discount = discountSetting?.value || { enabled: false, percentage: 0 };
 
-    // 3. Apply discount if enabled
     const discountedMedicines = medicines.map(med => {
+      const originalPrice = parseFloat(med.price) || 0;
       if (discount.enabled && discount.percentage > 0) {
-        const originalPrice = parseFloat(med.price);
         const discountAmount = (originalPrice * discount.percentage) / 100;
         return {
           ...med,
           original_price: originalPrice,
-          price: (originalPrice - discountAmount).toFixed(2),
+          price: Number((originalPrice - discountAmount).toFixed(2)), // Convert back to Number to avoid frontend crash
           discount_active: true,
           discount_percentage: discount.percentage,
           discount_message: discount.message
         };
       }
-      return { ...med, discount_active: false };
+      return { 
+        ...med, 
+        price: originalPrice, // Ensure it's a number
+        discount_active: false 
+      };
     });
     
     return NextResponse.json(discountedMedicines);
