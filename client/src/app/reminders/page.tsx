@@ -236,9 +236,18 @@ export default function Reminders() {
                            </button>
                             <button 
                               onClick={() => completeReminder(reminder.id)}
-                              className="px-6 py-4 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-green-600 transition-all flex items-center gap-2"
+                              disabled={reminder.status === 'TAKEN'}
+                              className={`px-6 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all flex items-center gap-2 ${
+                                reminder.status === 'TAKEN' 
+                                ? 'bg-green-100 text-green-600 cursor-not-allowed' 
+                                : 'bg-slate-900 text-white hover:bg-green-600'
+                              }`}
                             >
-                               <CheckCircle className="w-4 h-4" /> {t.takeDose}
+                               {reminder.status === 'TAKEN' ? (
+                                 <><CheckCircle className="w-4 h-4" /> Dose Taken ✓</>
+                               ) : (
+                                 <><CheckCircle className="w-4 h-4" /> {t.takeDose}</>
+                               )}
                             </button>
                            <button 
                              onClick={() => deleteReminder(reminder.id)}
