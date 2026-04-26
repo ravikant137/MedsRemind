@@ -1,22 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
-import Groq from 'groq-sdk';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
-// Cloud-based Open Source AI Engine
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY || '' });
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
 export async function POST(request: NextRequest) {
   try {
     const { image } = await request.json(); // base64 image
     
-    if (!process.env.GROQ_API_KEY) {
+    if (!process.env.GEMINI_API_KEY) {
       return NextResponse.json({ 
-        error: 'Cloud AI Error: Missing GROQ_API_KEY.',
-        instructions: 'For Cloud-based Open Source AI, a key is required. 1. Get a free key at console.groq.com 2. Add it to your .env file as GROQ_API_KEY.',
+        error: 'AI Analysis Configuration Error: Missing GEMINI_API_KEY. Please add it to your environment variables.',
         missing_key: true
       }, { status: 500 });
     }
 
-    // Clean image data for Cloud transmission
+    // High-Accuracy Production Model
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+
+    // Clean image data
     let base64Data = image;
     if (image.includes(';base64,')) {
       base64Data = image.split(';base64,')[1];
@@ -42,53 +43,39 @@ export async function POST(request: NextRequest) {
     }
     
     Important: 
-    1. If handwriting is unclear, suggest the most likely medicine name based on context.
-    2. Return ONLY valid JSON. No conversational text.`;
+    1. If handwriting is unclear, use your medical knowledge to suggest the most likely medicine name based on context.
+    2. Be extremely precise with the 1-0-1 (Morning-Afternoon-Night) schedule if visible.
+    Return ONLY valid JSON.`;
 
-    // Cloud-based Inference (Llama 3.2 Vision)
-    const chatCompletion = await groq.chat.completions.create({
-      "messages": [
-        {
-          "role": "user",
-          "content": [
-            {
-              "type": "text",
-              "text": prompt
-            },
-            {
-              "type": "image_url",
-              "image_url": {
-                "url": `data:image/jpeg;base64,${base64Data}`
-              }
-            }
-          ]
+    const result = await model.generateContent([
+      prompt,
+      {
+        inlineData: {
+          data: base64Data,
+          mimeType: "image/jpeg"
         }
-      ],
-      "model": "llava-v1.5-7b-4096-preview",
-      "temperature": 0.1,
-      "max_tokens": 1024,
-      "top_p": 1,
-      "stream": false,
-      "response_format": { "type": "json_object" },
-      "stop": null
-    });
+      }
+    ]);
 
-    const result = chatCompletion.choices[0].message.content;
+    const response = await result.response;
+    const text = response.text();
     
     try {
-      const data = JSON.parse(result || '{}');
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) throw new Error("No JSON found in AI response");
+      const data = JSON.parse(jsonMatch[0]);
       return NextResponse.json(data);
     } catch (parseErr: any) {
-      console.error('Cloud Llama Response:', result);
+      console.error('Gemini Response Text:', text);
       return NextResponse.json({ 
-        error: `Cloud Processing Error: ${parseErr.message}`,
-        raw: result?.substring(0, 100)
+        error: `AI Processing Failed: ${parseErr.message}`,
+        raw: text.substring(0, 100)
       }, { status: 500 });
     }
   } catch (error: any) {
-    console.error('Cloud AI Error:', error);
+    console.error('Gemini Analysis Error:', error);
     return NextResponse.json({ 
-      error: `Cloud Engine Error: ${error.message || 'Unknown failure'}`,
+      error: `Gemini Pro Error: ${error.message || 'Unknown failure during analysis'}`,
     }, { status: 500 });
   }
 }
