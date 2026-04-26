@@ -12,6 +12,9 @@ export default function Checkout() {
   const [paymentMethod, setPaymentMethod] = useState('UPI');
   const router = useRouter();
 
+  const [points, setPoints] = useState(0);
+  const [usePoints, setUsePoints] = useState(false);
+
   useEffect(() => {
     const savedCart = localStorage.getItem('meds_cart');
     if (savedCart) setCart(JSON.parse(savedCart));
@@ -19,21 +22,31 @@ export default function Checkout() {
     
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     if (user.address) setAddress(user.address);
+
+    const fetchPoints = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const res = await axios.get('/api/user/points', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setPoints(res.data.points);
+      } catch (err) {}
+    };
+    fetchPoints();
   }, [router]);
 
-  const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const discountAmount = usePoints ? Math.min(subtotal, (points / 10) * 2) : 0;
+  const total = subtotal - discountAmount;
 
   const handleCOD = async () => {
     const token = localStorage.getItem('token');
-    if (!token) {
-      alert('Please login to continue.');
-      return router.push('/login');
-    }
+    if (!token) return router.push('/login');
 
     setLoading(true);
     try {
       const res = await axios.post(`${API_URL}/api/orders/cod`, {
-        items: cart, total_amount: total, address: address
+        items: cart, total_amount: total, address: address, discount_applied: discountAmount
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -42,7 +55,7 @@ export default function Checkout() {
         router.push(`/track?id=${res.data.orderId}`);
       }
     } catch (err: any) {
-      alert(err.response?.data?.error || 'Order failed. Please check your connection.');
+      alert(err.response?.data?.error || 'Order failed.');
     } finally {
       setLoading(false);
     }
@@ -50,10 +63,7 @@ export default function Checkout() {
 
   const handleRazorpayPayment = async () => {
     const token = localStorage.getItem('token');
-    if (!token) {
-      alert('Please login to continue.');
-      return router.push('/login');
-    }
+    if (!token) return router.push('/login');
 
     setLoading(true);
     try {
@@ -71,7 +81,7 @@ export default function Checkout() {
         handler: async (response: any) => {
           const verifyRes = await axios.post(`${API_URL}/api/payments/verify`, {
             ...response,
-            orderDetails: { items: cart, total_amount: total, address }
+            orderDetails: { items: cart, total_amount: total, address, discount_applied: discountAmount }
           }, {
             headers: { Authorization: `Bearer ${token}` }
           });
@@ -85,7 +95,7 @@ export default function Checkout() {
       const rzp = (window as any).Razorpay(options);
       rzp.open();
     } catch (err: any) {
-      alert('Payment failed to initialize. Please check your network.');
+      alert('Payment failed to initialize.');
     } finally {
       setLoading(false);
     }
@@ -112,6 +122,24 @@ export default function Checkout() {
                 placeholder="Enter full address..."
               />
             </div>
+
+            {points > 0 && (
+              <div className="bg-[#4CAF50] p-8 rounded-3xl text-white shadow-lg relative overflow-hidden group">
+                <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:scale-110 transition-transform">
+                   <CheckCircle className="w-24 h-24" />
+                </div>
+                <div className="relative z-10">
+                  <p className="text-xs font-black uppercase tracking-widest opacity-80 mb-2">Health Rewards Available</p>
+                  <h3 className="text-2xl font-black mb-4">{points} Coins = ₹{(points/10*2).toFixed(2)} Discount</h3>
+                  <button 
+                    onClick={() => setUsePoints(!usePoints)}
+                    className={`px-8 py-3 rounded-xl font-black text-xs uppercase tracking-widest transition-all ${usePoints ? 'bg-white text-[#4CAF50]' : 'bg-[#003366] text-white'}`}
+                  >
+                    {usePoints ? 'DISCOUNT APPLIED ✓' : 'USE MY COINS FOR DISCOUNT'}
+                  </button>
+                </div>
+              </div>
+            )}
 
             <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm">
               <h3 className="text-xl font-bold mb-6 flex items-center gap-2"><CreditCard className="text-[#4CAF50]" /> Payment Method</h3>
@@ -150,6 +178,12 @@ export default function Checkout() {
                   <span>₹{(item.price * item.quantity).toFixed(2)}</span>
                 </div>
               ))}
+              {usePoints && (
+                <div className="flex justify-between text-sm text-[#4CAF50] font-bold border-t border-white/10 pt-4">
+                  <span>Health Reward Discount</span>
+                  <span>-₹{discountAmount.toFixed(2)}</span>
+                </div>
+              )}
             </div>
             <div className="border-t border-white/10 pt-6 space-y-4">
               <div className="flex justify-between text-2xl font-black text-[#4CAF50]">

@@ -16,31 +16,60 @@ export async function POST(
     const user = await verifyToken(token);
     if (!user) return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
 
-    // 1. Calculate Reward (5 to 10 coins)
-    const coinsEarned = Math.floor(Math.random() * 6) + 5; // Random between 5 and 10
-
-    // 2. Update the user's reward_coins in the database
-    const { data: userData, error: fetchError } = await supabase
-      .from('users')
-      .select('reward_coins')
-      .eq('id', user.id)
+    // 1. Fetch the reminder to check scheduled time
+    const { data: reminder, error: rError } = await supabase
+      .from('reminders')
+      .select('*')
+      .eq('id', reminderId)
       .single();
 
-    if (fetchError) throw fetchError;
+    if (rError) throw rError;
 
-    const newBalance = (userData.reward_coins || 0) + coinsEarned;
+    // 2. TIME-WINDOW LOGIC
+    // Check if the current time is within +/- 1 hour of the remind_at time
+    const now = new Date();
+    const [hours, minutes] = (reminder.remind_at || '08:00:00').split(':');
+    const scheduledTime = new Date();
+    scheduledTime.setHours(parseInt(hours), parseInt(minutes), 0);
 
-    const { error: updateError } = await supabase
-      .from('users')
-      .update({ reward_coins: newBalance })
-      .eq('id', user.id);
+    const diffInMinutes = Math.abs(now.getTime() - scheduledTime.getTime()) / (1000 * 60);
+    
+    // Reward Window: 60 minutes
+    const isWithinWindow = diffInMinutes <= 60;
+    const coinsEarned = isWithinWindow ? 10 : 0;
 
-    if (updateError) throw updateError;
+    // 3. Update the user's reward_coins
+    if (coinsEarned > 0) {
+      const { data: userData, error: fetchError } = await supabase
+        .from('users')
+        .select('reward_coins')
+        .eq('id', user.id)
+        .single();
+
+      if (!fetchError) {
+        const newBalance = (userData.reward_coins || 0) + coinsEarned;
+        await supabase
+          .from('users')
+          .update({ reward_coins: newBalance })
+          .eq('id', user.id);
+      }
+    }
+
+    // 4. Update reminder status
+    await supabase
+      .from('reminders')
+      .update({ 
+        status: 'TAKEN', 
+        taken_at: now.toISOString(),
+        earned_reward: coinsEarned
+      })
+      .eq('id', reminderId);
 
     return NextResponse.json({ 
       success: true, 
       pointsEarned: coinsEarned,
-      newBalance: newBalance
+      isLate: !isWithinWindow,
+      message: isWithinWindow ? 'Perfect timing! You earned 10 coins!' : 'Medicine taken, but late. No coins earned this time.'
     });
   } catch (err: any) {
     console.error('Complete reminder error:', err);
