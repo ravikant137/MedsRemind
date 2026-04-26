@@ -46,6 +46,22 @@ export async function POST(request: NextRequest) {
       type: 'order'
     });
 
+    // Notify all ADMINS about the new order
+    const { data: admins } = await supabase
+      .from('users')
+      .select('id')
+      .eq('role', 'ADMIN');
+
+    if (admins && admins.length > 0) {
+      const adminNotifications = admins.map(admin => ({
+        user_id: admin.id,
+        title: 'New Order Received! 🚨',
+        message: `A new order (${order.id}) has been placed by ${decoded.name || 'a customer'} for ₹${total_amount}.`,
+        type: 'order'
+      }));
+      await supabase.from('notifications').insert(adminNotifications);
+    }
+
     return NextResponse.json({ success: true, orderId: order.id });
   } catch (err: any) {
     console.error('COD Order Error:', err);
