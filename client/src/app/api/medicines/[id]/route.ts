@@ -1,9 +1,10 @@
+// VERCEL_DEPLOY_VERIFICATION_V3
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 
 export async function DELETE(
   request: NextRequest,
-  context: { params: Promise<{ id: string }> }
+  context: any
 ) {
   try {
     const { id } = await context.params;
@@ -24,7 +25,7 @@ export async function DELETE(
 
 export async function PATCH(
   request: NextRequest,
-  context: { params: Promise<{ id: string }> }
+  context: any
 ) {
   try {
     const { id } = await context.params;
