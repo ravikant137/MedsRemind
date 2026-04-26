@@ -15,6 +15,7 @@ export default function PrescriptionUpload() {
   const [isSettingReminders, setIsSettingReminders] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [remindersSet, setRemindersSet] = useState(false);
+  const [lastProcessedImage, setLastProcessedImage] = useState<string | null>(null);
   const router = useRouter();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -29,6 +30,13 @@ export default function PrescriptionUpload() {
 
   const handleUpload = async () => {
     if (!file || !preview) return;
+    
+    // CREDIT SAVER: If this image was just processed, don't call the API again
+    if (preview === lastProcessedImage && result) {
+      console.log('Using cached scan results to save credits');
+      return;
+    }
+
     setIsProcessing(true);
     try {
       const res = await axios.post('/api/analyze-prescription', {
@@ -39,6 +47,7 @@ export default function PrescriptionUpload() {
         medicines: res.data.medicines || [],
         confidence: 99
       });
+      setLastProcessedImage(preview); // Remember this image
     } catch (err: any) {
       console.error('Prescription Analysis Error:', err);
       const serverError = err.response?.data?.error || 'Failed to analyze prescription. Please ensure the image is clear.';
