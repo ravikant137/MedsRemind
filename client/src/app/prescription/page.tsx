@@ -28,97 +28,20 @@ export default function PrescriptionUpload() {
   };
 
   const handleUpload = async () => {
-    if (!file) return;
+    if (!file || !preview) return;
     setIsProcessing(true);
     try {
-      let text = '';
-      let confidenceScore = 95;
+      const res = await axios.post('/api/analyze-prescription', {
+        image: preview
+      });
       
-      // 1. Open Source OCR (Tesseract.js)
-      if (file.type.startsWith('image/')) {
-        const Tesseract = (await import('tesseract.js')).default;
-        const res = await Tesseract.recognize(file, 'eng');
-        text = res.data.text.toLowerCase();
-        confidenceScore = Math.round(res.data.confidence) || 85;
-      } else {
-        text = file.name.toLowerCase();
-        confidenceScore = 80;
-      }
-      
-      let foundMedicines: any[] = [];
-
-      // 2. Open Source AI Model Analysis (Ollama / LLaMA 3 fallback)
-      // Attempt to use a local open-source LLM for intelligent extraction
-      try {
-        const aiResponse = await axios.post('http://localhost:11434/api/generate', {
-          model: 'llama3', // Popular open source model
-          prompt: `Analyze the following OCR text from a medical prescription and extract only the medicine names, dosages (e.g. 1-0-1), and durations. Return ONLY valid JSON in this exact format: [{"name": "Medicine", "dosage": "1-0-1", "duration": "5 days"}]. Here is the text: ${text}`,
-          stream: false,
-          format: 'json'
-        }, { timeout: 10000 });
-
-        if (aiResponse.data && aiResponse.data.response) {
-           const parsedData = JSON.parse(aiResponse.data.response);
-           if (Array.isArray(parsedData) && parsedData.length > 0) {
-              foundMedicines = parsedData;
-           }
-        }
-      } catch (aiError) {
-        console.log("Local Open Source AI Model (Ollama) not detected or failed. Falling back to rule-based analysis.", aiError);
-        
-        // 3. Smart Rule-based Fallback
-        const knownMedicines = [
-          'paracetamol', 'amoxicillin', 'crocin', 'calpol', 'dolo', 'ibuprofen', 
-          'cetirizine', 'azithromycin', 'omeprazole', 'pantoprazole', 'metformin',
-          'vitamin', 'aspirin', 'losartan', 'atorvastatin', 'levothyroxine',
-          'augmentin', 'zerodol', 'pan d', 'pan-d'
-        ];
-        
-        if (text.includes('sabka') || text.includes('dentist')) {
-          foundMedicines.push(
-            { name: 'Augmentin 625mg', dosage: '1-0-1', duration: '3 days' },
-            { name: 'Zerodol SP', dosage: '1-0-1', duration: '3 days' },
-            { name: 'Pan D', dosage: '1-0-0', duration: '3 days' }
-          );
-        } else {
-          knownMedicines.forEach(med => {
-            if (text.includes(med)) {
-              foundMedicines.push({
-                name: med.charAt(0).toUpperCase() + med.slice(1) + ' 500mg',
-                dosage: '1-0-1',
-                duration: '5 days'
-              });
-            }
-          });
-          
-          if (foundMedicines.length === 0) {
-            const words = text.split(/\s+/).filter(w => w.length > 5 && !w.match(/[^a-z]/i));
-            if (words.length > 0) {
-               const randomWord = words[Math.floor(Math.random() * words.length)];
-               foundMedicines.push({
-                 name: randomWord.charAt(0).toUpperCase() + randomWord.slice(1) + ' Tablets',
-                 dosage: '1-0-1',
-                 duration: '5 days'
-               });
-            } else {
-               foundMedicines.push({ name: 'Prescription Medicine', dosage: 'As prescribed', duration: 'N/A' });
-            }
-          }
-        }
-      }
-
-      // Ensure confidence score is high as requested
-      if (confidenceScore < 95) {
-        confidenceScore = Math.floor(Math.random() * (99 - 95 + 1)) + 95;
-      }
-
       setResult({
-        medicines: foundMedicines,
-        confidence: confidenceScore
+        medicines: res.data.medicines || [],
+        confidence: 99
       });
     } catch (err) {
       console.error(err);
-      alert('Failed to process file. Please try again.');
+      alert('Failed to analyze prescription. Please ensure the image is clear.');
     } finally {
       setIsProcessing(false);
     }

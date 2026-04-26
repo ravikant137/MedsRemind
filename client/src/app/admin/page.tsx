@@ -184,6 +184,23 @@ export default function AdminDashboard() {
               <div className="bg-slate-900 rounded-[3rem] p-10 text-white relative overflow-hidden">
                  <h3 className="text-xl font-black mb-6 relative z-10">Quick Actions</h3>
                  <div className="space-y-4 relative z-10">
+                    <button onClick={async () => {
+                       const commonMeds = [
+                         { name: 'Paracetamol', composition: 'Acetaminophen 500mg', price: '40', stock: '100', category: 'Fever', description: 'Common pain reliever and fever reducer.' },
+                         { name: 'Amoxicillin', composition: 'Amoxicillin 250mg', price: '120', stock: '50', category: 'Antibiotic', description: 'Used to treat bacterial infections.' },
+                         { name: 'Crocin Pain Relief', composition: 'Paracetamol & Caffeine', price: '65', stock: '80', category: 'Pain Relief', description: 'Fast acting pain relief for headaches.' },
+                         { name: 'Cetirizine', composition: 'Cetirizine Hydrochloride', price: '35', stock: '120', category: 'Allergy', description: 'Relieves allergy symptoms like sneezing.' }
+                       ];
+                       const config = { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } };
+                       for (const med of commonMeds) {
+                         await axios.post(`${API_URL}/api/medicines`, med, config);
+                       }
+                       alert('Inventory seeded successfully!');
+                       fetchData();
+                    }} className="w-full p-4 bg-green-600/20 hover:bg-green-600/30 rounded-2xl flex items-center justify-between group transition-all">
+                       <span className="font-bold text-green-500">Seed Demo Inventory</span>
+                       <CheckCircle className="w-5 h-5" />
+                    </button>
                     <button onClick={() => { setActiveTab('Inventory'); setShowAddModal(true); }} className="w-full p-4 bg-white/5 hover:bg-white/10 rounded-2xl flex items-center justify-between group transition-all">
                        <span className="font-bold">Add New Product</span>
                        <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform" />

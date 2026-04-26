@@ -29,7 +29,12 @@ export default function Dashboard() {
       router.push('/login');
       return;
     }
-    setUser(JSON.parse(userData));
+    const parsedUser = JSON.parse(userData);
+    if (parsedUser.role === 'ADMIN') {
+      router.push('/admin');
+      return;
+    }
+    setUser(parsedUser);
     fetchData();
     fetchPoints();
     fetchNotifications();
