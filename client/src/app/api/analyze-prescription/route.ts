@@ -21,23 +21,29 @@ export async function POST(request: NextRequest) {
       base64Data = image.split(',')[1];
     }
 
-    const prompt = `You are a medical OCR and prescription analysis expert. 
-    Analyze this prescription image with 100% accuracy. 
-    Return a structured JSON object in this format:
+    const prompt = `You are an expert Medical Pharmacist and OCR Specialist. 
+    Analyze this prescription image with extreme precision. 
+    
+    RULES:
+    1. EXTRACT MEDICINES: Use your vast medical knowledge to correctly identify medicine names even if handwriting is messy. Cross-reference characters with known drug names.
+    2. DOSAGE & SCHEDULE: Strictly identify schedules like "1-0-1" (Morning-Afternoon-Night) or "Twice daily". 
+    3. TIMING: Note if it is "Before Food" (AC) or "After Food" (PC).
+    
+    Return a structured JSON object:
     {
       "patient_name": "string",
       "medicines": [
         {
-          "name": "string",
-          "dosage": "string",
-          "frequency": "string (e.g. 1-0-1)",
-          "duration": "string",
-          "timing": "string"
+          "name": "Full Scientific Name",
+          "dosage": "e.g. 500mg",
+          "frequency": "e.g. 1-0-1",
+          "duration": "e.g. 5 Days",
+          "timing": "e.g. After Food",
+          "instructions": "e.g. Swallow whole"
         }
       ],
-      "advice": "string"
+      "advice": "General medical advice from the prescription"
     }
-    If handwriting is messy, use medical context to determine the correct medicine name.
     RETURN ONLY JSON.`;
 
     const response = await openai.chat.completions.create({
