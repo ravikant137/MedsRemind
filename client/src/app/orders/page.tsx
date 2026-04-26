@@ -50,12 +50,27 @@ export default function MyOrders() {
     return status ? status.replace(/_/g, ' ') : 'PENDING';
   };
 
+   const groupOrders = (ordList: any[]) => {
+    const groups: any = {};
+    ordList.forEach(o => {
+      const d = new Date(o.created_at + ' UTC').toDateString();
+      const today = new Date().toDateString();
+      const yesterday = new Date(Date.now() - 86400000).toDateString();
+      let label = d === today ? 'Today' : d === yesterday ? 'Yesterday' : new Date(o.created_at + ' UTC').toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+      if (!groups[label]) groups[label] = [];
+      groups[label].push(o);
+    });
+    return groups;
+  };
+
+  const grouped = groupOrders(orders);
+
   return (
     <div className="min-h-screen bg-slate-50 pt-10 px-6 pb-20">
       <div className="max-w-5xl mx-auto">
         <header className="mb-16">
-          <h1 className="text-5xl font-black text-slate-900 tracking-tight">My Orders</h1>
-          <p className="text-slate-500 font-medium mt-2">Track and manage your pharmacy orders</p>
+          <h1 className="text-5xl font-black text-slate-900 tracking-tight">Order History</h1>
+          <p className="text-slate-500 font-medium mt-2">Historically tracking your pharmacy journey</p>
         </header>
 
         {loading ? (
@@ -76,15 +91,21 @@ export default function MyOrders() {
             </Link>
           </div>
         ) : (
-          <div className="space-y-10">
-            {orders.map((order, index) => (
-              <motion.div 
-                key={order.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-                className="bg-white rounded-[3.5rem] shadow-xl hover:shadow-2xl transition-all border border-slate-100 overflow-hidden group"
-              >
+          <div className="space-y-16">
+            {Object.keys(grouped).map((label) => (
+              <div key={label} className="space-y-8">
+                <div className="flex items-center gap-4 px-4">
+                  <span className="text-xs font-black uppercase tracking-widest text-slate-400">{label}</span>
+                  <div className="h-[1px] bg-slate-200 flex-1"></div>
+                </div>
+                {grouped[label].map((order: any, index: number) => (
+                  <motion.div 
+                    key={order.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    className="bg-white rounded-[3.5rem] shadow-xl hover:shadow-2xl transition-all border border-slate-100 overflow-hidden group"
+                  >
                 <div className="p-10 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8 border-b border-slate-50">
                   <div className="flex items-center gap-8">
                      <div className="w-20 h-20 bg-slate-50 rounded-[2rem] flex items-center justify-center group-hover:bg-green-50 transition-colors">
@@ -149,7 +170,9 @@ export default function MyOrders() {
                     );
                   })()}
                 </div>
-              </motion.div>
+                  </motion.div>
+                ))}
+              </div>
             ))}
           </div>
         )}
