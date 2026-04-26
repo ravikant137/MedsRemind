@@ -17,6 +17,7 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('Dashboard');
   const [timeRange, setTimeRange] = useState('ALL');
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
   const [stats, setStats] = useState({ 
     revenue: 0, 
     orders: 0, 
@@ -671,15 +672,19 @@ export default function AdminDashboard() {
         )}
       </AnimatePresence>
 
-      <aside className={`${isCollapsed ? 'w-24' : 'w-80'} bg-slate-900 text-white hidden lg:flex flex-col p-10 fixed h-full z-10 transition-all duration-300`}>
+      <aside 
+        onMouseEnter={() => isCollapsed && setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        className={`${(isCollapsed && !isHovered) ? 'w-24' : 'w-80'} bg-slate-900 text-white hidden lg:flex flex-col p-10 fixed h-full z-[60] transition-all duration-300 shadow-2xl shadow-black/50`}
+      >
         <div className="flex items-center justify-between mb-16">
-           <div className={`flex items-center gap-5 ${isCollapsed ? 'hidden' : 'flex'}`}>
+           <div className={`flex items-center gap-5 ${(isCollapsed && !isHovered) ? 'hidden' : 'flex'}`}>
               <Logo className="w-12 h-12" />
               <span className="text-2xl font-black tracking-tighter text-white">Admin <span className="text-green-500">Panel</span></span>
            </div>
            <button 
-             onClick={() => setIsCollapsed(!isCollapsed)}
-             className={`p-3 bg-white/5 hover:bg-green-600 rounded-xl transition-all text-white ${isCollapsed ? 'mx-auto' : ''}`}
+             onClick={() => { setIsCollapsed(!isCollapsed); setIsHovered(false); }}
+             className={`p-3 bg-white/5 hover:bg-green-600 rounded-xl transition-all text-white ${(isCollapsed && !isHovered) ? 'mx-auto' : ''}`}
            >
               {isCollapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
            </button>
@@ -697,23 +702,23 @@ export default function AdminDashboard() {
             <button 
               key={item.name} 
               onClick={() => setActiveTab(item.name)}
-              className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'gap-5'} px-6 py-4 rounded-2xl transition-all ${activeTab === item.name ? 'bg-green-600 text-white shadow-xl shadow-green-600/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
-              title={isCollapsed ? item.name : ''}
+              className={`w-full flex items-center ${(isCollapsed && !isHovered) ? 'justify-center' : 'gap-5'} px-6 py-4 rounded-2xl transition-all ${activeTab === item.name ? 'bg-green-600 text-white shadow-xl shadow-green-600/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
+              title={(isCollapsed && !isHovered) ? item.name : ''}
             >
                <item.icon className="w-6 h-6 flex-shrink-0" />
-               {!isCollapsed && <span className="font-black tracking-wide">{item.name}</span>}
+               {!(isCollapsed && !isHovered) && <span className="font-black tracking-wide">{item.name}</span>}
             </button>
           ))}
         </nav>
 
         <div className="pt-8 border-t border-white/5 space-y-4">
-          <Link href="/" className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'gap-5'} px-6 py-4 rounded-2xl text-slate-400 hover:text-white hover:bg-white/5 transition-all`} title={isCollapsed ? 'Exit' : ''}>
+          <Link href="/" className={`w-full flex items-center ${(isCollapsed && !isHovered) ? 'justify-center' : 'gap-5'} px-6 py-4 rounded-2xl text-slate-400 hover:text-white hover:bg-white/5 transition-all`} title={(isCollapsed && !isHovered) ? 'Exit' : ''}>
              <ArrowLeft className="w-6 h-6 flex-shrink-0" />
-             {!isCollapsed && <span className="font-black tracking-wide">Exit to Site</span>}
+             {!(isCollapsed && !isHovered) && <span className="font-black tracking-wide">Exit to Site</span>}
           </Link>
-          <button onClick={() => { localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.href='/login'; }} className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'gap-5'} px-6 py-4 rounded-2xl text-red-400 hover:text-white hover:bg-red-600 transition-all`} title={isCollapsed ? 'Logout' : ''}>
+          <button onClick={() => { localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.href='/login'; }} className={`w-full flex items-center ${(isCollapsed && !isHovered) ? 'justify-center' : 'gap-5'} px-6 py-4 rounded-2xl text-red-400 hover:text-white hover:bg-red-600 transition-all`} title={(isCollapsed && !isHovered) ? 'Logout' : ''}>
              <LogOut className="w-6 h-6 flex-shrink-0" />
-             {!isCollapsed && <span className="font-black tracking-wide">Logout</span>}
+             {!(isCollapsed && !isHovered) && <span className="font-black tracking-wide">Logout</span>}
           </button>
         </div>
       </aside>
