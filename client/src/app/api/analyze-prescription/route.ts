@@ -1,20 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import Groq from 'groq-sdk';
-
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY || '' });
+import axios from 'axios';
 
 export async function POST(request: NextRequest) {
   try {
     const { image } = await request.json(); // base64 image
     
-    if (!process.env.GROQ_API_KEY) {
-      return NextResponse.json({ 
-        error: 'Open Source AI Error: Missing GROQ_API_KEY. Please add it to your .env file to use Llama 3.2 Vision.',
-        missing_key: true
-      }, { status: 500 });
-    }
-
-    // Prepare the image for Llama 3.2 Vision
+    // Prepare the image for Ollama (Local AI)
     let base64Data = image;
     if (image.includes(';base64,')) {
       base64Data = image.split(';base64,')[1];
@@ -41,52 +32,39 @@ export async function POST(request: NextRequest) {
     
     Important: 
     1. If handwriting is unclear, suggest the most likely medicine name based on context.
-    2. Return ONLY valid JSON. No conversational text.`;
+    2. Return ONLY the JSON object. No other text.`;
 
-    const chatCompletion = await groq.chat.completions.create({
-      "messages": [
-        {
-          "role": "user",
-          "content": [
-            {
-              "type": "text",
-              "text": prompt
-            },
-            {
-              "type": "image_url",
-              "image_url": {
-                "url": `data:image/jpeg;base64,${base64Data}`
-              }
-            }
-          ]
-        }
-      ],
-      "model": "llama-3.2-11b-vision-preview",
-      "temperature": 0.1,
-      "max_tokens": 1024,
-      "top_p": 1,
-      "stream": false,
-      "response_format": { "type": "json_object" },
-      "stop": null
-    });
-
-    const result = chatCompletion.choices[0].message.content;
-    
     try {
-      const data = JSON.parse(result || '{}');
+      // Talking to local Ollama instance
+      const ollamaResponse = await axios.post('http://localhost:11434/api/generate', {
+        model: "llama3.2-vision", // or "llava"
+        prompt: prompt,
+        images: [base64Data],
+        stream: false,
+        format: "json"
+      }, {
+        timeout: 60000 // 60 seconds for local processing
+      });
+
+      const result = ollamaResponse.data.response;
+      const data = JSON.parse(result);
       return NextResponse.json(data);
-    } catch (parseErr: any) {
-      console.error('Llama Response Text:', result);
+      
+    } catch (ollamaErr: any) {
+      console.error('Ollama Error:', ollamaErr.message);
+      
+      // If Ollama is not running, provide a helpful guide
       return NextResponse.json({ 
-        error: `Llama Processing Failed: ${parseErr.message}`,
-        raw: result?.substring(0, 100)
-      }, { status: 500 });
+        error: 'Local AI (Ollama) not detected.',
+        instructions: 'To use without a key, please: 1. Install Ollama (ollama.com) 2. Run "ollama run llama3.2-vision" in your terminal 3. Keep Ollama running while using the app.',
+        is_local_error: true
+      }, { status: 503 });
     }
+
   } catch (error: any) {
-    console.error('Open Source AI Error:', error);
+    console.error('Prescription Analysis Error:', error);
     return NextResponse.json({ 
-      error: `Open Source Engine Error: ${error.message || 'Unknown failure'}`,
-      details: error.stack?.substring(0, 50)
+      error: `Processing Error: ${error.message || 'Unknown failure'}`,
     }, { status: 500 });
   }
 }
