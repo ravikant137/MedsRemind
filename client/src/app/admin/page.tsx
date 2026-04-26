@@ -276,8 +276,28 @@ export default function AdminDashboard() {
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
              <div className="bg-white rounded-[3rem] p-10 border border-slate-100 shadow-xl overflow-hidden">
                 <h3 className="text-2xl font-black mb-10">Order Registry</h3>
+                
+                {/* Status Tabs */}
+                <div className="flex flex-wrap gap-4 mb-10 pb-4 border-b border-slate-50">
+                   {['ALL', 'ORDER_PLACED', 'CONFIRMED', 'PACKED', 'OUT_FOR_DELIVERY', 'DELIVERED', 'CANCELLED'].map((s) => (
+                     <button 
+                       key={s}
+                       onClick={() => setSearch(s === 'ALL' ? '' : s)}
+                       className={`px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all ${
+                         (search === s || (s === 'ALL' && search === '')) 
+                         ? 'bg-green-600 text-white shadow-lg' 
+                         : 'bg-slate-50 text-slate-400 hover:bg-slate-100'
+                       }`}
+                     >
+                       {s.replace(/_/g, ' ')}
+                     </button>
+                   ))}
+                </div>
+
                 <div className="space-y-4">
-                   {orders.map((order: any) => (
+                   {orders
+                     .filter((o: any) => !search || search === 'ALL' || o.status === search)
+                     .map((order: any) => (
                      <div key={order.id} className={`p-6 border rounded-[2rem] flex flex-wrap items-center justify-between gap-6 hover:shadow-md transition-all ${order.is_emergency ? 'bg-red-50 border-red-200' : 'bg-white border-slate-50'}`}>
                         <div className="flex items-center gap-5">
                            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-black ${order.is_emergency ? 'bg-red-600 text-white' : 'bg-slate-900 text-white'}`}>#{order.id}</div>

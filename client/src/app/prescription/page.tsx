@@ -39,9 +39,10 @@ export default function PrescriptionUpload() {
         medicines: res.data.medicines || [],
         confidence: 99
       });
-    } catch (err) {
-      console.error(err);
-      alert('Failed to analyze prescription. Please ensure the image is clear.');
+    } catch (err: any) {
+      console.error('Prescription Analysis Error:', err);
+      const serverError = err.response?.data?.error || 'Failed to analyze prescription. Please ensure the image is clear.';
+      alert(serverError);
     } finally {
       setIsProcessing(false);
     }
