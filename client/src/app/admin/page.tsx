@@ -16,9 +16,9 @@ import Logo from '@/components/Logo';
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('Dashboard');
   const [stats, setStats] = useState({ revenue: 0, orders: 0, users: 0, medicines: 0 });
-  const [medicines, setMedicines] = useState([]);
-  const [orders, setOrders] = useState([]);
-  const [customers, setCustomers] = useState([]);
+  const [medicines, setMedicines] = useState<any[]>([]);
+  const [orders, setOrders] = useState<any[]>([]);
+  const [customers, setCustomers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [search, setSearch] = useState('');
@@ -118,12 +118,22 @@ export default function AdminDashboard() {
     }
   };
 
-  const updateOrderStatus = async (id: number, status: string) => {
+  const updateOrderStatus = async (id: string, status: string) => {
     try {
       const config = { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } };
       await axios.patch(`${API_URL}/api/orders/${id}/status`, { status }, config);
+      
+      // Also add a notification for the user when status changes
+      await axios.post(`${API_URL}/api/notifications`, {
+        user_id: orders.find((o: any) => o.id === id)?.user_id,
+        title: `Order Update: ${status.replace(/_/g, ' ')}`,
+        message: `Your order ${id} status has been updated to ${status.replace(/_/g, ' ')}.`,
+        type: 'order'
+      }, config);
+
       fetchData();
     } catch (err) {
+      console.error(err);
       alert('Failed to update order status');
     }
   };

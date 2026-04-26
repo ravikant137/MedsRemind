@@ -24,3 +24,21 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to fetch notifications' }, { status: 500 });
   }
 }
+
+export async function POST(request: NextRequest) {
+  try {
+    const { user_id, title, message, type } = await request.json();
+    
+    const { data, error } = await supabase
+      .from('notifications')
+      .insert({ user_id, title, message, type })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return NextResponse.json(data);
+  } catch (err: any) {
+    console.error('Notification Error:', err);
+    return NextResponse.json({ error: 'Failed to create notification' }, { status: 500 });
+  }
+}
