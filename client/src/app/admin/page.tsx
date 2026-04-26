@@ -617,7 +617,21 @@ export default function AdminDashboard() {
                  />
               </div>
 
-              <Link href="/notifications" className="relative w-16 h-16 bg-white rounded-2xl flex items-center justify-center border border-slate-100 shadow-xl shadow-slate-100/50 hover:bg-slate-50 transition-all group">
+              <Link 
+                href="/notifications" 
+                className="relative w-16 h-16 bg-white rounded-2xl flex items-center justify-center border border-slate-100 shadow-xl shadow-slate-100/50 hover:bg-slate-50 transition-all group"
+                onClick={async () => {
+                  try {
+                    const token = localStorage.getItem('token');
+                    if (token) {
+                      await axios.post(`${API_URL}/api/notifications/read`, {}, {
+                        headers: { Authorization: `Bearer ${token}` }
+                      });
+                      setNotifCount(0);
+                    }
+                  } catch (e) {}
+                }}
+              >
                  <Bell className="w-6 h-6 text-slate-400 group-hover:text-green-600" />
                  {notifCount > 0 && (
                    <span className="absolute -top-2 -right-2 w-7 h-7 bg-red-600 text-white text-[10px] font-black rounded-full flex items-center justify-center border-4 border-slate-50 shadow-lg animate-bounce">

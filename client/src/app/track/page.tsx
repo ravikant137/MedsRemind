@@ -70,7 +70,8 @@ function OrderTrackingContent() {
          return { status: label, time: isCompleted ? 'Success' : 'Pending', completed: isCompleted, isCurrent };
       });
 
-      const deliveryTime = order.status === 'DELIVERED' 
+      const isReallyDelivered = order.status === 'DELIVERED';
+      const deliveryTime = isReallyDelivered
         ? parseDate(order.updated_at || order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         : estDelivery.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
@@ -83,7 +84,7 @@ function OrderTrackingContent() {
         total_amount: order.total_amount || 0,
         items: Array.isArray(parsedItems) ? parsedItems : [],
         estimated_delivery: deliveryTime,
-        isDelivered: order.status === 'DELIVERED',
+        isDelivered: isReallyDelivered,
         steps: mappedSteps
       });
       setIsLive(order.status !== 'DELIVERED' && order.status !== 'CANCELLED');
