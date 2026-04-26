@@ -14,8 +14,13 @@ export async function POST(request: NextRequest) {
       }, { status: 500 });
     }
 
-    // High-Accuracy Production Model
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+    // High-Accuracy Production Model (with self-healing fallback)
+    let model;
+    try {
+      model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+    } catch (e) {
+      model = genAI.getGenerativeModel({ model: "gemini-1.5-pro-latest" });
+    }
 
     // Clean image data
     let base64Data = image;
