@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
           ]
         }
       ],
-      "model": "llama-3.2-90b-vision-preview",
+      "model": "llava-v1.5-7b-4096-preview",
       "temperature": 0.1,
       "max_tokens": 1024,
       "top_p": 1,
