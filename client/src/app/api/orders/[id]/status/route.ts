@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin as supabase } from '@/lib/supabase';
 
+import jwt from 'jsonwebtoken';
+
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -8,6 +12,15 @@ export async function PATCH(
   try {
     const { id } = await params;
     const { status } = await request.json();
+
+    // SECURITY FIX: Verify Admin Token
+    const token = request.headers.get('Authorization')?.split(' ')[1];
+    if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    
+    const decoded = jwt.verify(token, JWT_SECRET) as any;
+    if (decoded.role !== 'ADMIN') {
+      return NextResponse.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
+    }
 
     const { data, error } = await supabase
       .from('orders')

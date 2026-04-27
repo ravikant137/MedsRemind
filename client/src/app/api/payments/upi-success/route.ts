@@ -22,14 +22,34 @@ export async function POST(request: NextRequest) {
     // 1. Generate a shorter, human-readable Order ID (e.g. ANJ-1234)
     const shortId = `ANJ-${Math.floor(1000 + Math.random() * 9000)}`;
 
-    // 2. Create the Order
+    // 2. Security Check: Verify Prices & Recalculate Total
+    let calculatedTotal = 0;
+    for (const item of items) {
+      const { data: med } = await supabase
+        .from('medicines')
+        .select('price, stock')
+        .eq('id', item.id)
+        .single();
+      
+      if (!med) return NextResponse.json({ error: `Medicine ${item.id} not found` }, { status: 400 });
+      if (med.stock < item.quantity) return NextResponse.json({ error: `Insufficient stock for ${item.name}` }, { status: 400 });
+      
+      calculatedTotal += med.price * item.quantity;
+    }
+
+    // Allow for a tiny rounding difference (0.01)
+    if (Math.abs(calculatedTotal - total_amount) > 0.1) {
+      return NextResponse.json({ error: 'Security Alert: Price mismatch detected!' }, { status: 403 });
+    }
+
+    // 3. Create Order
     const { data: order, error: orderError } = await supabase
       .from('orders')
       .insert({
         id: shortId,
         user_id: decoded.id,
         user_name: decoded.name,
-        total_amount,
+        total_amount: calculatedTotal, // Use our calculated total for security
         address,
         status: 'CONFIRMED',
         items: JSON.stringify(items)
@@ -42,21 +62,14 @@ export async function POST(request: NextRequest) {
       throw orderError;
     }
 
-    // 3. Decrease Stock
-    try {
-      for (const item of items) {
-        if (item.id) {
-          const { data: med } = await supabase.from('medicines').select('stock').eq('id', item.id).single();
-          if (med) {
-            const newStock = Math.max(0, med.stock - (item.quantity || 1));
-            await supabase.from('medicines').update({ stock: newStock }).eq('id', item.id);
-          }
-        }
-      }
-    } catch (stockErr) {
-      console.error('Stock Update Error:', stockErr);
+    // 4. Atomic Stock Reduction
+    for (const item of items) {
+      await supabase.rpc('decrement_stock', { 
+        med_id: item.id, 
+        qty: item.quantity 
+      });
     }
-
+    
     // 4. Create initial status history
     await supabase.from('order_status_history').insert([
       { order_id: order.id, status: 'ORDER_PLACED' },
