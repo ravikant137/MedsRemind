@@ -61,7 +61,7 @@ const InstallPrompt = () => {
           initial={{ y: 100, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 100, opacity: 0 }}
-          className="fixed bottom-[calc(6.5rem+env(safe-area-inset-bottom))] left-4 right-4 z-[1000] bg-slate-900 text-white p-4 rounded-2xl shadow-2xl flex items-center justify-between md:hidden border border-slate-700"
+          className="fixed bottom-[calc(8rem+env(safe-area-inset-bottom))] left-4 right-4 z-[1000] bg-slate-900/95 backdrop-blur-lg text-white p-4 rounded-[2rem] shadow-2xl flex items-center justify-between md:hidden border border-white/10"
         >
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-green-600 rounded-xl flex items-center justify-center shrink-0">

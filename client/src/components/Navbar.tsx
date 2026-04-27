@@ -84,9 +84,9 @@ export default function Navbar() {
   if (pathname === '/login' || pathname === '/signup' || pathname?.startsWith('/admin')) return null;
 
   return (
-    <header className="w-full sticky top-0 z-50 bg-white">
+    <header className="w-full sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-gray-100">
       {/* 1. Green Top Bar */}
-      <div className="bg-[#2e7d32] text-white py-2 pt-[calc(0.5rem+env(safe-area-inset-top))] text-[10px] sm:text-xs font-bold tracking-wide border-b border-white/10">
+      <div className="bg-[#2e7d32] text-white py-1.5 pt-[env(safe-area-inset-top)] text-[10px] sm:text-xs font-bold tracking-wide border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 flex items-center justify-center gap-3">
           <span>🚚 Free Delivery on Orders Above ₹499 | Fast Delivery Within 60 Minutes</span>
         </div>
