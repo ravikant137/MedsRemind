@@ -65,6 +65,7 @@ export default function Notifications() {
   };
 
   const groupNotifications = (notifs: any[]) => {
+    if (!Array.isArray(notifs)) return {};
     const groups: any = {};
     const today = new Date().toDateString();
     const yesterday = new Date(Date.now() - 86400000).toDateString();

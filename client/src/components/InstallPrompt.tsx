@@ -11,8 +11,6 @@ const InstallPrompt = () => {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [isIOS, setIsIOS] = useState(false);
 
-  if (pathname?.startsWith('/admin')) return null;
-
   useEffect(() => {
     // Detect iOS
     const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
@@ -35,6 +33,8 @@ const InstallPrompt = () => {
     window.addEventListener("beforeinstallprompt", handler);
     return () => window.removeEventListener("beforeinstallprompt", handler);
   }, []);
+
+  if (pathname?.startsWith('/admin')) return null;
 
   const handleInstall = async () => {
     if (isIOS) {

@@ -55,8 +55,10 @@ export default function Navbar() {
       const res = await axios.get(`${API_URL}/api/notifications`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      const unread = res.data.filter((n: any) => !n.read).length;
-      setNotifCount(unread);
+      if (Array.isArray(res.data)) {
+        const unread = res.data.filter((n: any) => !n.read).length;
+        setNotifCount(unread);
+      }
     } catch (err) {
       console.error(err);
     }

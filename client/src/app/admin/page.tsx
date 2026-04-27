@@ -81,8 +81,10 @@ export default function AdminDashboard() {
       
       // Fetch notifications unread count
       const notifRes = await axios.get(`${API_URL}/api/notifications`, config);
-      const unread = notifRes.data.filter((n: any) => !n.read).length;
-      setNotifCount(unread);
+      if (Array.isArray(notifRes.data)) {
+        const unread = notifRes.data.filter((n: any) => !n.read).length;
+        setNotifCount(unread);
+      }
 
       if (activeTab === 'Dashboard' || activeTab === 'Analytics') {
         const statsRange = activeTab === 'Dashboard' ? 'ALL' : timeRange;
