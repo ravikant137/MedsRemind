@@ -26,8 +26,8 @@ export async function POST(request: NextRequest) {
     Analyze this prescription image with extreme precision. 
     
     RULES:
-    1. EXTRACT MEDICINES: Use your vast medical knowledge to correctly identify medicine names even if handwriting is messy. Cross-reference characters with known drug names.
-    2. DOSAGE & SCHEDULE: Strictly identify schedules like "1-0-1" (Morning-Afternoon-Night) or "Twice daily" for EVERY medicine. If not clearly written, use your medical knowledge to suggest the most common standard schedule for that drug.
+    1. EXTRACT MEDICINES: Use your vast medical knowledge to correctly identify medicine names. If dosage is NOT mentioned, strictly return "sp" as the dosage value.
+    2. DOSAGE & SCHEDULE: Strictly identify schedules like "1-0-1" for EVERY medicine.
     3. TIMING & DURATION: Note if it is "Before Food" or "After Food" AND exactly how many days it should be taken.
     
     Return a structured JSON object:
@@ -39,6 +39,8 @@ export async function POST(request: NextRequest) {
           "dosage": "e.g. 500mg",
           "frequency": "e.g. 1-0-1",
           "duration": "e.g. 5 Days",
+          "total_days": 5,
+          "doses_per_day": 3,
           "timing": "e.g. After Food",
           "instructions": "e.g. Swallow whole"
         }
@@ -85,7 +87,7 @@ export async function POST(request: NextRequest) {
           validated: !!match,
           inventory_id: match ? match.id : null,
           price: match ? match.price : null,
-          confidence_score: match ? 98 : 75 // Rule-based confidence simulation
+          confidence_score: match ? 98 : 75
         };
       });
     }

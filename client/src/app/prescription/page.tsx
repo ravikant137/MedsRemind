@@ -223,7 +223,7 @@ export default function PrescriptionUpload() {
                               <div className="flex flex-wrap items-center gap-2 mt-3">
                                 <div className="flex items-center gap-2 bg-white px-2.5 py-1.5 rounded-xl border border-slate-100 shadow-sm">
                                    <Activity className="w-3 h-3 text-blue-500" />
-                                   <span className="text-[10px] font-bold text-slate-600 truncate max-w-[80px]">{m.dosage}</span>
+                                   <span className="text-[10px] font-bold text-slate-600 truncate max-w-[80px]">{m.dosage || 'sp'}</span>
                                 </div>
                                 <div className="flex items-center gap-2 bg-white px-2.5 py-1.5 rounded-xl border border-slate-100 shadow-sm">
                                    <Clock className="w-3 h-3 text-purple-500" />
