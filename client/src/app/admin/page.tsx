@@ -4,7 +4,7 @@ import {
   LayoutDashboard, Package, ShoppingBag, Users, TrendingUp, 
   AlertTriangle, Search, Plus, ExternalLink, Trash2, 
   Edit3, CheckCircle, Clock, XCircle, ChevronRight, ChevronLeft, Loader2, X, Menu,
-  BarChart3, PieChart, Activity, DollarSign, Calendar, ArrowLeft, LogOut, Camera, ShieldAlert, Bell
+  BarChart3, PieChart, Activity, DollarSign, Calendar, ArrowLeft, LogOut, Camera, ShieldAlert, Bell, ChevronDown, MapPin
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
@@ -336,56 +336,113 @@ export default function AdminDashboard() {
                                o.id.toString().toLowerCase().includes(s) ||
                                `ORD-${o.id}`.toLowerCase() === s || 
                                o.user_name?.toLowerCase().includes(s);
-                     })
-                     .map((order: any) => (
-                     <div key={order.id} className={`p-6 border rounded-[2rem] flex flex-wrap items-center justify-between gap-6 hover:shadow-md transition-all ${order.is_emergency ? 'bg-red-50 border-red-200' : 'bg-white border-slate-50'}`}>
-                        <div className="flex items-center gap-5">
-                           <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-black ${order.is_emergency ? 'bg-red-600 text-white' : 'bg-slate-900 text-white'}`}>#{order.id}</div>
-                           <div>
-                              <div className="flex items-center gap-2">
-                                <p className="font-black text-slate-900">{order.user_name}</p>
-                                {order.is_emergency === 1 && (
-                                  <span className="px-3 py-1 bg-red-600 text-white text-[10px] font-black uppercase tracking-widest rounded-full animate-pulse flex items-center gap-1">
-                                    <ShieldAlert className="w-3 h-3" /> PRIORITY 10M
-                                  </span>
-                                )}
-                              </div>
-                              <p className="text-xs text-slate-400 font-medium">{order.address}</p>
-                           </div>
-                        </div>
-                        <div className="flex items-center gap-10">
-                           <div className="text-center">
-                              <p className="text-xs text-slate-400 font-black uppercase tracking-widest">Amount</p>
-                              <p className="font-black text-green-600 text-lg">₹{order.total_amount}</p>
-                           </div>
-                           <div className="text-center min-w-[100px]">
-                              <p className="text-xs text-slate-400 font-black uppercase tracking-widest">Payment</p>
-                              <p className={`font-black text-[10px] ${order.payment_status === 'PAID' ? 'text-green-600' : 'text-orange-600'}`}>
-                                {order.payment_status || 'COD'}
-                              </p>
-                              {order.payment_id && <p className="text-[8px] text-slate-400 font-mono mt-1">{order.payment_id}</p>}
-                           </div>
-                           <div className="text-center">
-                              <p className="text-xs text-slate-400 font-black uppercase tracking-widest">Status</p>
-                              <select 
-                                value={order.status || 'ORDER_PLACED'} 
-                                onChange={(e) => updateOrderStatus(order.id, e.target.value)}
-                                className="mt-1 block w-full text-xs font-bold bg-slate-50 border-none rounded-lg focus:ring-green-500"
-                              >
-                                <option value="ORDER_PLACED">Order Placed</option>
-                                <option value="CONFIRMED">Confirmed</option>
-                                <option value="PACKED">Packed</option>
-                                <option value="OUT_FOR_DELIVERY">Out for Delivery</option>
-                                <option value="DELIVERED">Delivered</option>
-                                <option value="CANCELLED">Cancelled</option>
-                              </select>
-                           </div>
-                           <Link href={`/track?id=${order.id}`} target="_blank" className="p-4 bg-slate-50 text-slate-400 rounded-2xl hover:bg-green-600 hover:text-white transition-all">
-                              <ExternalLink className="w-5 h-5" />
-                           </Link>
-                        </div>
-                     </div>
-                   ))}
+                      })
+                      .map((order: any) => (
+                      <motion.div 
+                        key={order.id} 
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className={`group p-8 border rounded-[2.5rem] flex flex-col md:flex-row items-center justify-between gap-8 hover:shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] transition-all duration-500 relative overflow-hidden ${
+                          order.is_emergency ? 'bg-gradient-to-br from-red-50 to-white border-red-100' : 'bg-white border-slate-100'
+                        }`}
+                      >
+                         {/* Order Identifier */}
+                         <div className="flex items-center gap-6 w-full md:w-auto">
+                            <div className="relative">
+                               <div className={`w-20 h-20 rounded-[1.8rem] flex flex-col items-center justify-center shadow-lg transition-transform group-hover:scale-105 duration-300 ${
+                                 order.is_emergency ? 'bg-red-600 text-white shadow-red-200' : 'bg-slate-900 text-white shadow-slate-200'
+                               }`}>
+                                  <span className="text-[10px] font-black opacity-60 uppercase tracking-tighter">Order</span>
+                                  <span className="text-xl font-black">#{order.id.toString().replace('ANJ-', '')}</span>
+                               </div>
+                               {order.is_emergency === 1 && (
+                                 <div className="absolute -top-3 -right-3 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-md">
+                                    <AlertTriangle className="w-5 h-5 text-red-600 animate-pulse" />
+                                 </div>
+                               )}
+                            </div>
+                            
+                            <div className="flex-1 min-w-0">
+                               <div className="flex items-center gap-3 mb-1">
+                                 <h4 className="font-black text-xl text-slate-900 truncate">{order.user_name || 'Anonymous Guest'}</h4>
+                                 {order.is_emergency === 1 && (
+                                   <span className="px-4 py-1.5 bg-red-600 text-white text-[9px] font-black uppercase tracking-[0.2em] rounded-full shadow-lg shadow-red-100 flex items-center gap-2">
+                                     <ShieldAlert className="w-3 h-3" /> Emergency
+                                   </span>
+                                 )}
+                               </div>
+                               <div className="flex items-center gap-2 text-slate-400">
+                                 <MapPin className="w-4 h-4 shrink-0" />
+                                 <p className="text-xs font-bold truncate max-w-[200px]">{order.address}</p>
+                               </div>
+                               <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest mt-2">
+                                 Placed on {new Date(order.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                               </p>
+                            </div>
+                         </div>
+
+                         {/* Financials & Status */}
+                         <div className="flex flex-wrap items-center justify-end gap-12 w-full md:w-auto">
+                            <div className="text-right">
+                               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Amount</p>
+                               <div className="flex items-baseline gap-1">
+                                 <span className="text-sm font-black text-green-600">₹</span>
+                                 <span className="text-3xl font-black text-slate-900 tracking-tight">{order.total_amount}</span>
+                               </div>
+                            </div>
+
+                            <div className="min-w-[120px]">
+                               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Payment Status</p>
+                               <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest ${
+                                 order.payment_status === 'PAID' 
+                                   ? 'bg-green-50 text-green-600 border border-green-100' 
+                                   : 'bg-orange-50 text-orange-600 border border-orange-100'
+                               }`}>
+                                 <div className={`w-1.5 h-1.5 rounded-full ${order.payment_status === 'PAID' ? 'bg-green-600' : 'bg-orange-600'}`}></div>
+                                 {order.payment_status || 'COD PENDING'}
+                               </div>
+                               {order.payment_id && <p className="text-[9px] text-slate-300 font-mono mt-2 truncate max-w-[120px]">{order.payment_id}</p>}
+                            </div>
+
+                            <div className="min-w-[180px]">
+                               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Delivery Progress</p>
+                               <div className="relative group/select">
+                                 <select 
+                                   value={order.status || 'ORDER_PLACED'} 
+                                   onChange={(e) => updateOrderStatus(order.id, e.target.value)}
+                                   className={`w-full appearance-none pl-5 pr-10 py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest border-none transition-all cursor-pointer shadow-sm hover:shadow-md ${
+                                     order.status === 'DELIVERED' ? 'bg-green-600 text-white' :
+                                     order.status === 'CANCELLED' ? 'bg-red-500 text-white' :
+                                     order.status === 'OUT_FOR_DELIVERY' ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-700'
+                                   }`}
+                                 >
+                                   <option value="ORDER_PLACED">Order Placed</option>
+                                   <option value="CONFIRMED">Confirmed</option>
+                                   <option value="PACKED">Order Packed</option>
+                                   <option value="OUT_FOR_DELIVERY">Out for Delivery</option>
+                                   <option value="DELIVERED">Delivered</option>
+                                   <option value="CANCELLED">Cancelled</option>
+                                 </select>
+                                 <div className={`absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none ${
+                                   ['DELIVERED', 'CANCELLED', 'OUT_FOR_DELIVERY'].includes(order.status) ? 'text-white' : 'text-slate-400'
+                                 }`}>
+                                   <ChevronDown className="w-4 h-4" />
+                                 </div>
+                               </div>
+                            </div>
+
+                            <div className="flex gap-3">
+                               <Link 
+                                 href={`/track?id=${order.id}`} 
+                                 target="_blank" 
+                                 className="w-14 h-14 bg-slate-50 text-slate-400 rounded-2xl flex items-center justify-center hover:bg-green-600 hover:text-white transition-all duration-300 shadow-sm border border-slate-100"
+                               >
+                                  <ExternalLink className="w-5 h-5" />
+                               </Link>
+                            </div>
+                         </div>
+                      </motion.div>
+                    ))}
                 </div>
              </div>
           </motion.div>
