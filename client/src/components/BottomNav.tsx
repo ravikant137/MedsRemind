@@ -21,7 +21,7 @@ const BottomNav = () => {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-[999] block md:hidden bg-white/90 backdrop-blur-lg border-t border-gray-200 shadow-[0_-5px_20px_rgba(0,0,0,0,05)]">
+    <nav className="fixed bottom-0 left-0 right-0 z-[999] block md:hidden bg-white/90 backdrop-blur-lg border-t border-gray-200 shadow-[0_-5px_20px_rgba(0,0,0,0,05)] pb-[env(safe-area-inset-bottom)]">
       <div className="flex items-center justify-around h-20 px-2">
         {navItems.map((item) => {
           const isActive = pathname === item.href;

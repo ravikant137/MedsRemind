@@ -50,7 +50,9 @@ export default function PrescriptionUpload() {
       setLastProcessedImage(preview); // Remember this image
     } catch (err: any) {
       console.error('Prescription Analysis Error:', err);
-      const serverError = err.response?.data?.error || 'Failed to analyze prescription. Please ensure the image is clear.';
+      const serverError = err.response?.data?.error 
+        ? (typeof err.response.data.error === 'string' ? err.response.data.error : JSON.stringify(err.response.data.error))
+        : 'Failed to analyze prescription. Please ensure the image is clear.';
       alert(serverError);
     } finally {
       setIsProcessing(false);

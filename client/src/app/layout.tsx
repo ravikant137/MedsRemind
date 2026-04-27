@@ -39,7 +39,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-[#f5f7fa] overscroll-none overflow-x-hidden selection:bg-green-100" style={{ fontFamily: "'Inter', sans-serif", touchAction: 'pan-y' }}>
         <AuthProvider>
           <Navbar />
-          <main className="flex-1 pb-20 md:pb-0">
+          <main className="flex-1 pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-0">
             {children}
           </main>
           <BottomNav />
