@@ -19,51 +19,60 @@ export async function POST(request: NextRequest) {
 
     const { items, total_amount, address, discount_amount, upi_id } = await request.json();
 
-    // 1. Create the Order
+    // 1. Generate a shorter, human-readable Order ID (e.g. ANJ-1234)
+    const shortId = `ANJ-${Math.floor(1000 + Math.random() * 9000)}`;
+
+    // 2. Create the Order
     const { data: order, error: orderError } = await supabase
       .from('orders')
       .insert({
+        id: shortId,
         user_id: decoded.id,
+        user_name: decoded.name,
         total_amount,
         address,
         status: 'CONFIRMED', // UPI payments are confirmed immediately
         payment_method: 'UPI',
         upi_id: upi_id,
         discount_applied: discount_amount || 0,
-        payment_status: 'PAID'
+        payment_status: 'PAID',
+        items: JSON.stringify(items)
       })
       .select()
       .single();
 
-    if (orderError) throw orderError;
+    if (orderError) {
+      console.error('UPI Order Error:', orderError);
+      throw orderError;
+    }
 
-    // 2. Create Order Items
-    const orderItems = items.map((item: any) => ({
-      order_id: order.id,
-      medicine_id: item.id,
-      medicine_name: item.name,
-      quantity: item.quantity,
-      price_at_time: item.price
-    }));
+    // 3. Decrease Stock
+    try {
+      for (const item of items) {
+        if (item.id) {
+          const { data: med } = await supabase.from('medicines').select('stock').eq('id', item.id).single();
+          if (med) {
+            const newStock = Math.max(0, med.stock - (item.quantity || 1));
+            await supabase.from('medicines').update({ stock: newStock }).eq('id', item.id);
+          }
+        }
+      }
+    } catch (stockErr) {
+      console.error('Stock Update Error:', stockErr);
+    }
 
-    const { error: itemsError } = await supabase
-      .from('order_items')
-      .insert(orderItems);
-
-    if (itemsError) throw itemsError;
-
-    // 3. Create initial status history
+    // 4. Create initial status history
     await supabase.from('order_status_history').insert([
       { order_id: order.id, status: 'ORDER_PLACED' },
       { order_id: order.id, status: 'CONFIRMED' }
     ]);
 
-    // 4. Create notification for the user
+    // 5. Create notifications
     await supabase.from('notifications').insert({
       user_id: decoded.id,
       title: 'Order Confirmed! 🚀',
-      message: `Your order ANJ-${order.id} has been successfully placed via UPI.`,
-      type: 'ORDER_STATUS'
+      message: `Your order ${order.id} has been successfully placed via UPI.`,
+      type: 'order'
     });
 
     return NextResponse.json({ 
