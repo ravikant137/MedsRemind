@@ -200,6 +200,35 @@ function OrderTrackingContent() {
           </motion.div>
         )}
 
+        {trackingData && (
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-12 bg-white p-2 rounded-[3.5rem] border border-slate-100 shadow-2xl overflow-hidden relative"
+          >
+            <div className="h-[400px] w-full rounded-[3rem] overflow-hidden relative bg-slate-100">
+              <iframe 
+                width="100%" 
+                height="100%" 
+                frameBorder="0" 
+                scrolling="no" 
+                marginHeight={0} 
+                marginWidth={0} 
+                src={`https://www.openstreetmap.org/export/embed.html?bbox=${trackingData.location.lng-0.01}%2C${trackingData.location.lat-0.01}%2C${trackingData.location.lng+0.01}%2C${trackingData.location.lat+0.01}&layer=mapnik&marker=${trackingData.location.lat}%2C${trackingData.location.lng}`}
+                className="filter contrast-125 saturate-150"
+              ></iframe>
+              <div className="absolute top-8 left-8 bg-white/90 backdrop-blur-md px-6 py-3 rounded-2xl shadow-xl border border-white flex items-center gap-3">
+                 <div className="w-3 h-3 bg-green-500 rounded-full animate-ping"></div>
+                 <span className="text-xs font-black text-slate-900 uppercase tracking-widest">Live Location</span>
+              </div>
+              <div className="absolute bottom-8 right-8 bg-slate-900 text-white px-6 py-3 rounded-2xl shadow-xl flex items-center gap-3">
+                 <Navigation className="w-4 h-4 text-green-500" />
+                 <span className="text-xs font-black uppercase tracking-widest">Tracking Active</span>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
