@@ -32,6 +32,7 @@ export default function AdminDashboard() {
   const [orders, setOrders] = useState<any[]>([]);
   const [customers, setCustomers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [discountConfig, setDiscountConfig] = useState({ enabled: false, percentage: 0, message: '' });
   const [savingDiscount, setSavingDiscount] = useState(false);
@@ -110,8 +111,9 @@ export default function AdminDashboard() {
         const res = await axios.get(`${API_URL}/api/admin/discounts`, config);
         setDiscountConfig(res.data);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error fetching admin data:', err);
+      setFetchError(err.response?.data?.error || err.message || 'Failed to connect to server');
     } finally {
       setLoading(false);
     }
@@ -770,8 +772,8 @@ export default function AdminDashboard() {
              <LogOut className="w-6 h-6 flex-shrink-0" />
              {(!((isCollapsed && !isHovered)) || isMobileMenuOpen) && <span className="font-black tracking-wide">Logout</span>}
           </button>
-        </div>
-      </aside>
+         </div>
+       </aside>
 
       <main className={`flex-1 ${isCollapsed ? 'lg:ml-24' : 'lg:ml-80'} p-6 md:p-12 transition-all duration-300`}>
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-16 gap-8">
@@ -779,6 +781,7 @@ export default function AdminDashboard() {
               <h1 className="text-4xl font-black text-slate-900 tracking-tight">{activeTab}</h1>
               <p className="text-slate-500 font-medium">Managing Ecosystem in ₹ INR</p>
            </div>
+        
            <div className="flex items-center gap-6">
               <div className="relative group">
                  <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-green-600 w-5 h-5 transition-colors" />
@@ -908,7 +911,28 @@ export default function AdminDashboard() {
                 </AnimatePresence>
               </div>
            </div>
-        </header>
+         </header>
+
+         {fetchError && (
+           <div className="mb-12 p-8 bg-red-50 border border-red-100 rounded-[2rem] text-red-600 shadow-xl shadow-red-100/20 relative overflow-hidden group">
+             <div className="absolute top-0 left-0 w-2 h-full bg-red-500"></div>
+             <div className="flex flex-col md:flex-row items-center gap-6">
+               <div className="w-16 h-16 bg-red-100 rounded-2xl flex items-center justify-center flex-shrink-0">
+                 <ShieldAlert className="w-8 h-8 text-red-600" />
+               </div>
+               <div className="flex-1 text-center md:text-left">
+                 <h4 className="text-xl font-black mb-1">Database Connectivity Issue</h4>
+                 <p className="font-bold opacity-80">{fetchError}. Please ensure the server is running on the correct port (default: 5010).</p>
+               </div>
+               <button 
+                onClick={() => { setFetchError(null); fetchData(); }}
+                className="px-8 py-4 bg-red-600 text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-red-700 transition-all shadow-lg shadow-red-200"
+               >
+                 Retry Connection
+               </button>
+             </div>
+           </div>
+         )}
 
         <AnimatePresence mode="wait">
           {renderContent()}

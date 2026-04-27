@@ -138,6 +138,44 @@ async function init() {
       ['Admin', 'admin@smartpharmacy.com', hashedPassword, 'ADMIN']
     );
 
+    // Seed Sample Orders if empty
+    const orderCount = await db.query("SELECT count(*) as count FROM orders");
+    if (orderCount.rows[0].count === 0) {
+      console.log('Seeding sample orders...');
+      const userRes = await db.query("SELECT id FROM users LIMIT 1");
+      const userId = userRes.rows[0]?.id || 1;
+      
+      const medicinesRes = await db.query("SELECT id, price FROM medicines LIMIT 2");
+      if (medicinesRes.rows.length > 0) {
+        // Create 5 sample orders with different statuses
+        const statuses = ['ORDER_PLACED', 'CONFIRMED', 'PACKED', 'OUT_FOR_DELIVERY', 'DELIVERED'];
+        for (let i = 0; i < 5; i++) {
+          const status = statuses[i % statuses.length];
+          const total = medicinesRes.rows.reduce((sum, m) => sum + m.price, 0);
+          
+          const orderRes = await db.query(
+            "INSERT INTO orders (user_id, total_amount, status, address, payment_method, payment_id) VALUES (?, ?, ?, ?, ?, ?)",
+            [userId, total, status, '123 Pharma St, Biotech City', 'COD', `SAMPLE-${Date.now()}-${i}`]
+          );
+          
+          const orderId = orderRes.lastID;
+          for (const med of medicinesRes.rows) {
+            await db.query(
+              "INSERT INTO order_items (order_id, medicine_id, quantity, price_at_time) VALUES (?, ?, ?, ?)",
+              [orderId, med.id, 1, med.price]
+            );
+          }
+          
+          // Add history
+          await db.query(
+            "INSERT INTO order_status_history (order_id, status) VALUES (?, ?)",
+            [orderId, status]
+          );
+        }
+        console.log('Sample orders seeded.');
+      }
+    }
+
     console.log('Database initialized successfully.');
 
     // Attempt to alter table if columns are missing (safe to fail if they exist)

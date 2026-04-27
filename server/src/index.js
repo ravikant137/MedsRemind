@@ -268,10 +268,13 @@ app.post('/api/orders/cod', auth, async (req, res) => {
 // --- ADMIN APIs ---
 app.get('/api/admin/orders', auth, async (req, res) => {
   if (req.user.role !== 'ADMIN') return res.status(403).json({ error: 'Unauthorized' });
+  console.log('[ADMIN] Fetching orders...');
   try {
     const result = await db.query('SELECT o.*, u.name as user_name FROM orders o LEFT JOIN users u ON o.user_id = u.id ORDER BY created_at DESC');
+    console.log(`[ADMIN] Found ${result.rows.length} orders`);
     res.json(result.rows);
   } catch (err) {
+    console.error('[ADMIN] Error fetching orders:', err);
     res.status(500).json({ error: err.message });
   }
 });
