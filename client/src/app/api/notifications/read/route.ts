@@ -20,20 +20,27 @@ export async function POST(request: NextRequest) {
     const userId = decoded.id;
 
     // Mark all notifications for this user as read
-    const { error } = await supabase
+    const { data, error, count } = await supabase
       .from('notifications')
       .update({ read: true })
       .eq('user_id', userId)
-      .eq('read', false); // Only update unread ones
+      .eq('read', false)
+      .select();
+
+    console.log(`Cleared ${count || (data ? data.length : 0)} notifications for user ${userId}`);
 
     if (error) {
-      console.error('Mark as read error:', error);
-      throw error;
+      console.error('Database error clearing notifications:', error);
+      return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json({ success: true, message: 'All notifications marked as read' });
+    return NextResponse.json({ 
+      success: true, 
+      count: count || (data ? data.length : 0),
+      message: 'Notifications marked as read' 
+    });
   } catch (err: any) {
-    console.error('Clear notifications error:', err);
-    return NextResponse.json({ error: 'Failed to clear notifications' }, { status: 500 });
+    console.error('Notification clear crash:', err);
+    return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
