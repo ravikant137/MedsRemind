@@ -69,27 +69,29 @@ function ShopContent() {
   return (
     <div className="min-h-screen" style={{ background: '#f5f7fa' }}>
       {/* Header */}
-      <section className="py-10" style={{ background: '#1a237e' }}>
+      <section className="py-6 md:py-10 bg-slate-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <h1 className="text-3xl font-bold text-white mb-2">Search Medicines</h1>
-          <p className="text-sm" style={{ color: '#93a5cf' }}>Browse our wide range of genuine medicines and health products.</p>
-          <div className="mt-6 max-w-2xl">
-            <div className="flex items-center bg-white rounded-full overflow-hidden border-2 shadow-sm" style={{ borderColor: '#e2e8f0' }}>
-              <Search className="w-5 h-5 ml-5" style={{ color: '#94a3b8' }} />
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div>
+              <h1 className="text-2xl md:text-3xl font-black text-white mb-1">Search Medicines</h1>
+              <p className="text-[10px] md:text-sm font-bold text-slate-400 uppercase tracking-widest">Genuine medicines • Fast delivery</p>
+            </div>
+          </div>
+          <div className="mt-6 max-w-2xl relative">
+            <div className="flex items-center bg-white rounded-2xl overflow-hidden shadow-2xl border-2 border-slate-100">
+              <Search className="w-5 h-5 ml-4 md:ml-5 text-slate-400" />
               <input 
                 type="text" 
-                placeholder="Search by medicine name, composition..."
+                placeholder="Search medicines..."
                 value={search}
                 onChange={(e) => {
                   setSearch(e.target.value);
                   fetchMedicines(e.target.value);
                 }}
-                className="flex-1 px-4 py-4 text-sm focus:outline-none bg-transparent"
-                style={{ color: '#1a1a2e' }}
+                className="flex-1 px-4 py-4 md:py-5 text-sm md:text-base focus:outline-none bg-transparent font-bold text-slate-900"
               />
-              <button onClick={() => fetchMedicines(search)} className="mr-2 px-6 py-2.5 rounded-full text-sm flex items-center gap-2 font-bold text-white"
-                      style={{ background: '#2e7d32' }}>
-                <Search className="w-4 h-4" /> Search
+              <button onClick={() => fetchMedicines(search)} className="hidden md:flex mr-2 px-6 py-3 rounded-xl text-sm items-center gap-2 font-black text-white bg-green-600 hover:bg-green-700 transition-all">
+                Search
               </button>
             </div>
           </div>
@@ -99,31 +101,30 @@ function ShopContent() {
       <section className="py-10">
         <div className="max-w-7xl mx-auto px-4 flex flex-col lg:flex-row gap-8">
           {/* Sidebar */}
+          {/* Categories - Horizontal on Mobile, Sidebar on Desktop */}
           <aside className="w-full lg:w-64 shrink-0">
-            <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100 sticky top-24">
-              <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
-                <Filter className="w-5 h-5 text-green-600" /> Categories
+            <div className="bg-white p-4 md:p-6 rounded-2xl shadow-md border border-gray-100 md:sticky md:top-24">
+              <h3 className="font-black text-slate-900 text-xs md:text-sm uppercase tracking-widest mb-4 flex items-center gap-2">
+                <Filter className="w-4 h-4 text-green-600" /> Categories
               </h3>
-              <div className="space-y-3">
+              <div className="flex lg:flex-col gap-2 overflow-x-auto pb-2 lg:pb-0 scrollbar-hide">
                 {allCategories.map(c => (
-                  <label key={c} className="flex items-center gap-3 cursor-pointer group">
-                    <input 
-                      type="checkbox" 
-                      checked={selectedCategories.includes(c)}
-                      onChange={() => toggleCategory(c)}
-                      className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
-                    />
-                    <span className={`text-sm font-medium transition-colors ${
-                      selectedCategories.includes(c) ? 'text-green-600 font-semibold' : 'text-gray-600 group-hover:text-gray-900'
-                    }`}>
-                      {c}
-                    </span>
-                  </label>
+                  <button 
+                    key={c}
+                    onClick={() => toggleCategory(c)}
+                    className={`whitespace-nowrap px-4 py-2.5 rounded-xl text-xs font-black border transition-all ${
+                      selectedCategories.includes(c) 
+                        ? 'bg-green-600 text-white border-green-600 shadow-lg shadow-green-200' 
+                        : 'bg-slate-50 text-slate-600 border-slate-100 hover:bg-slate-100'
+                    }`}
+                  >
+                    {c}
+                  </button>
                 ))}
               </div>
               {selectedCategories.length > 0 && (
-                <button onClick={() => setSelectedCategories([])} className="mt-5 text-xs font-bold text-red-500 hover:underline">
-                  Clear All Filters
+                <button onClick={() => setSelectedCategories([])} className="mt-4 text-[10px] font-black text-red-500 uppercase tracking-widest hover:underline">
+                  Clear All
                 </button>
               )}
             </div>
@@ -214,21 +215,21 @@ function ShopContent() {
 
       {/* Floating Cart Button */}
       {cartCount > 0 && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-full px-6 max-w-lg">
+        <div className="fixed bottom-20 md:bottom-10 left-1/2 -translate-x-1/2 z-50 w-full px-4 md:px-6 max-w-lg">
           <button 
             onClick={handleCheckout}
-            className="w-full bg-green-600 text-white px-8 py-5 rounded-2xl font-bold flex items-center justify-between shadow-2xl hover:bg-green-700 transition-all border-2 border-green-500"
+            className="w-full bg-slate-900 text-white px-6 py-4 rounded-2xl font-black flex items-center justify-between shadow-2xl hover:bg-green-600 transition-all border border-slate-800"
           >
-            <div className="flex items-center gap-4">
-              <div className="relative">
-                <ShoppingCart className="w-6 h-6" />
-                <span className="absolute -top-2 -right-2 w-5 h-5 bg-white text-green-700 rounded-full text-[10px] font-black flex items-center justify-center">{cartCount}</span>
+            <div className="flex items-center gap-3">
+              <div className="relative w-10 h-10 bg-green-600 rounded-xl flex items-center justify-center">
+                <ShoppingCart className="w-5 h-5" />
+                <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-white text-slate-900 rounded-full text-[10px] font-black flex items-center justify-center shadow-lg">{cartCount}</span>
               </div>
-              <span>Items in Cart</span>
+              <span className="text-xs uppercase tracking-widest">Cart Total</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-sm">Checkout</span>
-              <ArrowRight className="w-5 h-5" />
+              <span className="text-xs font-black uppercase tracking-widest">Checkout</span>
+              <ArrowRight className="w-4 h-4" />
             </div>
           </button>
         </div>

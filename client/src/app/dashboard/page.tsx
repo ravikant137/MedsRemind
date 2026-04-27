@@ -145,7 +145,7 @@ export default function Dashboard() {
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white p-6 md:p-10 rounded-[2rem] md:rounded-[3rem] shadow-xl shadow-slate-200/50 mb-8 relative overflow-hidden group border border-white"
+          className="bg-white p-6 md:p-10 rounded-[2rem] md:rounded-[3rem] shadow-xl shadow-slate-200/50 mb-6 md:mb-8 relative overflow-hidden group border border-white"
         >
            <div className="absolute top-0 right-0 p-10 opacity-5 group-hover:scale-110 transition-transform duration-700">
               <Pill className="w-64 h-64 text-slate-900" />
@@ -184,7 +184,7 @@ export default function Dashboard() {
         </motion.div>
 
         {/* Quick Stats Grid */}
-        <div className="grid md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6 mb-8">
            {stats.map((stat, i) => (
              <motion.div 
                key={i}
@@ -192,7 +192,7 @@ export default function Dashboard() {
                animate={{ opacity: 1, y: 0 }}
                transition={{ delay: i * 0.1 }}
                 whileHover={{ y: -5 }}
-                className="bg-white p-6 md:p-8 rounded-[2rem] md:rounded-[3rem] shadow-xl shadow-slate-100/50 border border-slate-50 flex items-center gap-4 md:gap-6"
+                className="bg-white p-5 md:p-8 rounded-2xl md:rounded-[3rem] shadow-lg shadow-slate-100/50 border border-slate-50 flex items-center gap-4 md:gap-6"
               >
                 <div className={`w-16 h-16 rounded-2xl flex items-center justify-center ${stat.color}`}>
                    <stat.icon className="w-8 h-8" />
@@ -229,25 +229,25 @@ export default function Dashboard() {
                  ) : (
                     <div className="space-y-6">
                        {reminders.map((rem, i) => (
-                         <div key={i} className="flex items-center gap-6 p-6 bg-slate-50 rounded-[2.5rem] hover:bg-white hover:shadow-xl transition-all border border-transparent hover:border-green-100 group">
-                            <div className="w-16 h-16 bg-white rounded-2xl flex flex-col items-center justify-center font-black text-slate-900 shadow-sm group-hover:bg-green-600 group-hover:text-white transition-all">
-                               <Clock className="w-5 h-5 mb-1 opacity-50 group-hover:opacity-100" />
-                               <span className="text-xs">{rem.time}</span>
+                         <div key={i} className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 p-5 sm:p-6 bg-slate-50 rounded-2xl sm:rounded-[2.5rem] hover:bg-white hover:shadow-xl transition-all border border-transparent hover:border-green-100 group">
+                            <div className="flex items-center gap-4 sm:flex-col sm:w-16 sm:h-16 sm:bg-white sm:rounded-2xl sm:flex sm:items-center sm:justify-center font-black text-slate-900 sm:shadow-sm group-hover:bg-green-600 group-hover:text-white transition-all">
+                               <Clock className="w-5 h-5 opacity-50 group-hover:opacity-100" />
+                               <span className="text-sm sm:text-xs">{rem.time}</span>
                             </div>
                             <div className="flex-1">
-                               <h4 className="text-xl font-black text-slate-900">{rem.medicine_name}</h4>
-                               <p className="text-sm text-slate-400 font-bold">{rem.dosage} • {rem.frequency}</p>
+                               <h4 className="text-lg sm:text-xl font-black text-slate-900">{rem.medicine_name}</h4>
+                               <p className="text-xs sm:text-sm text-slate-400 font-bold">{rem.dosage} • {rem.frequency}</p>
                             </div>
-                            <div className="flex flex-col sm:flex-row items-center gap-3">
+                            <div className="flex items-center gap-2 mt-2 sm:mt-0">
                                <button 
                                  onClick={() => playVoiceReminder(rem)}
-                                 className="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center hover:bg-blue-100"
+                                 className="flex-1 sm:flex-none h-12 w-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center hover:bg-blue-100"
                                >
                                   <Volume2 className="w-5 h-5" />
                                </button>
                                <button 
                                  onClick={() => completeReminder(rem.id)}
-                                 className="px-6 py-3 bg-slate-900 text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-green-600 transition-colors shadow-lg"
+                                 className="flex-[3] sm:flex-none h-12 px-6 bg-slate-900 text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-green-600 transition-colors shadow-lg"
                                >
                                   Take Dose
                                </button>

@@ -183,62 +183,25 @@ export default function Navbar() {
             </div>
           </div>
 
-          {/* Mobile Menu Toggle */}
-          <button 
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="xl:hidden w-10 h-10 text-gray-600 flex items-center justify-center rounded-lg hover:bg-gray-100"
-          >
-            {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
+          {/* Mobile Actions (Notifications) - Hidden on Desktop */}
+          <div className="flex xl:hidden items-center gap-4">
+            {user && (
+              <Link 
+                href="/notifications" 
+                className="relative p-2 text-gray-400 hover:text-[#003366] transition-colors"
+              >
+                <Bell className="w-6 h-6" />
+                {notifCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-600 text-white text-[10px] font-black rounded-full flex items-center justify-center border-2 border-white shadow-lg">
+                    {notifCount}
+                  </span>
+                )}
+              </Link>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Mobile Menu */}
-      {isMenuOpen && (
-        <div className="xl:hidden fixed inset-0 top-[135px] bg-white z-40 overflow-y-auto">
-          <div className="px-4 py-6 space-y-1">
-            {navLinks.map((link) => (
-              <Link
-                key={link.name}
-                href={link.href}
-                onClick={() => setIsMenuOpen(false)}
-                className={`block px-5 py-4 text-sm font-black rounded-xl transition-colors ${
-                  pathname === link.href
-                    ? 'bg-[#e8f5e9] text-[#2e7d32]'
-                    : 'text-gray-700 hover:bg-gray-50'
-                }`}
-              >
-                {link.name}
-              </Link>
-            ))}
-            <div className="pt-6 mt-6 border-t border-gray-100 space-y-4 px-5">
-              {!user ? (
-                <div className="flex flex-col gap-3">
-                  <Link href="/login" onClick={() => setIsMenuOpen(false)} className="w-full py-4 text-center border-2 border-[#003366] text-[#003366] rounded-xl font-black text-sm">Login</Link>
-                  <Link href="/signup" onClick={() => setIsMenuOpen(false)} className="w-full py-4 text-center bg-[#003366] text-white rounded-xl font-black text-sm shadow-lg">Sign Up</Link>
-                </div>
-              ) : (
-                <div className="flex flex-col gap-3">
-                  <Link href="/admin" onClick={() => setIsMenuOpen(false)} className="w-full py-4 text-center bg-green-600 text-white rounded-xl font-black text-sm shadow-lg">Admin Panel</Link>
-                  <button onClick={() => { handleLogout(); setIsMenuOpen(false); }} className="w-full py-4 text-center bg-red-50 text-red-600 rounded-xl font-black text-sm border border-red-100">Logout</button>
-                </div>
-              )}
-              
-              <div className="pt-4 flex flex-col gap-4">
-                <a href="tel:+919876543210" className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center border border-gray-100">
-                    <Phone className="w-5 h-5 text-[#2e7d32]" />
-                  </div>
-                  <span className="font-black text-[#003366]">+91 98765 43210</span>
-                </a>
-                <a href="https://wa.me/919876543210" target="_blank" className="block w-full text-center py-4 text-white rounded-xl font-black text-sm shadow-lg" style={{ background: '#25d366' }}>
-                  💬 Order on WhatsApp
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </header>
   );
 }

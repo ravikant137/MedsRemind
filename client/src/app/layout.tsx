@@ -3,6 +3,8 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import BottomNav from "@/components/BottomNav";
+import InstallPrompt from "@/components/InstallPrompt";
 import { AuthProvider } from "@/context/AuthContext";
 import Script from "next/script";
 
@@ -25,14 +27,22 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} h-full antialiased scroll-smooth`}>
       <head>
+        <link rel="manifest" href="/manifest.webmanifest" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="Anjaneya" />
+        <meta name="theme-color" content="#2563eb" />
+        <link rel="apple-touch-icon" href="/icon-192x192.png" />
         <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="beforeInteractive" />
       </head>
       <body className="min-h-full flex flex-col bg-[#f5f7fa]" style={{ fontFamily: "'Inter', sans-serif" }}>
         <AuthProvider>
           <Navbar />
-          <main className="flex-1">
+          <main className="flex-1 pb-16 md:pb-0">
             {children}
           </main>
+          <BottomNav />
+          <InstallPrompt />
           <Footer />
         </AuthProvider>
       </body>

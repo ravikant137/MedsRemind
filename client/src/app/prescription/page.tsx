@@ -115,17 +115,22 @@ export default function PrescriptionUpload() {
       </section>
 
       {/* How it works */}
-      <section className="py-8 bg-white border-b border-gray-100">
-        <div className="max-w-5xl mx-auto px-4">
+      <section className="py-8 bg-white border-b border-gray-100 overflow-x-auto">
+        <div className="max-w-5xl mx-auto px-4 min-w-[600px] md:min-w-0">
           <div className="grid grid-cols-3 gap-6 text-center">
             {[
-              { step: 1, text: 'Upload your prescription image or PDF' },
-              { step: 2, text: 'We verify medicines and availability' },
-              { step: 3, text: 'Get medicines delivered to your door' },
+              { step: 1, text: 'Upload your prescription image or PDF', icon: Upload },
+              { step: 2, text: 'We verify medicines and availability', icon: ShieldCheck },
+              { step: 3, text: 'Get medicines delivered to your door', icon: ShoppingBag },
             ].map(s => (
               <div key={s.step} className="flex flex-col items-center">
-                <div className="w-10 h-10 bg-green-600 text-white rounded-full flex items-center justify-center font-bold mb-2 text-sm">{s.step}</div>
-                <p className="text-xs text-gray-500 font-medium">{s.text}</p>
+                <div className="w-12 h-12 bg-green-50 text-green-600 rounded-2xl flex items-center justify-center font-black mb-3 text-sm shadow-inner relative">
+                  <s.icon className="w-5 h-5" />
+                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-slate-900 text-white rounded-full flex items-center justify-center text-[10px] font-black border-2 border-white">
+                    {s.step}
+                  </div>
+                </div>
+                <p className="text-[11px] text-slate-500 font-bold leading-tight max-w-[120px]">{s.text}</p>
               </div>
             ))}
           </div>
