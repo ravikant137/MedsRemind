@@ -2,13 +2,12 @@
   "name": "medsremind-root",
   "version": "1.0.0",
   "scripts": {
-    "build": "if [ -d \"client\" ]; then cd client && npm install && npm run build; else npm run build; fi",
-    "start": "concurrently \"cd server && npm start\" \"cd client && npm run dev\"",
-    "start:all": "taskkill /F /IM node.exe || true && concurrently \"cd server && npm start\" \"cd client && npm run dev\"",
-    "stop:all": "taskkill /F /IM node.exe || true",
+    "build": "cd client && npm install && npm run build",
+    "dev": "concurrently \"cd server && npm start\" \"cd client && npm run dev\"",
+    "start": "npm run dev",
     "init:db": "cd server && node init-db.js"
   },
-  "devDependencies": {
+  "dependencies": {
     "concurrently": "^8.2.2"
   }
 }
