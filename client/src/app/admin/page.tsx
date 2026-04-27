@@ -114,7 +114,8 @@ export default function AdminDashboard() {
       }
     } catch (err: any) {
       console.error('Error fetching admin data:', err);
-      setFetchError(err.response?.data?.error || err.message || 'Failed to connect to server');
+      const errorMsg = err.response?.data?.error || err.message || 'Failed to connect to server';
+      setFetchError(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -1009,8 +1010,8 @@ export default function AdminDashboard() {
                  <ShieldAlert className="w-8 h-8 text-red-600" />
                </div>
                <div className="flex-1 text-center md:text-left">
-                 <h4 className="text-xl font-black mb-1">Database Connectivity Issue</h4>
-                 <p className="font-bold opacity-80">{fetchError}. Please ensure the server is running on the correct port (default: 5010).</p>
+                 <h4 className="text-xl font-black mb-1">Production Sync Issue</h4>
+                 <p className="font-bold opacity-80">{fetchError}. Please verify your Supabase environment variables in Vercel settings.</p>
                </div>
                <button 
                 onClick={() => { setFetchError(null); fetchData(); }}
