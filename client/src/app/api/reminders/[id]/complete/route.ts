@@ -50,7 +50,7 @@ export async function POST(
           .update({ reward_coins: newBalance })
           .eq('id', user.id);
 
-        // 4. ADD REWARD NOTIFICATION
+        // 4. SYNC WITH WALLET & ADD NOTIFICATION
         await supabase
           .from('notifications')
           .insert({
