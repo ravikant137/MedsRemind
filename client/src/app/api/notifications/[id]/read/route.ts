@@ -6,9 +6,10 @@ const JWT_SECRET = process.env.JWT_SECRET || process.env.SUPABASE_JWT_SECRET || 
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const authHeader = request.headers.get('Authorization');
     if (!authHeader) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     
@@ -19,7 +20,7 @@ export async function PATCH(
     const { error } = await supabase
       .from('notifications')
       .update({ read: true })
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('user_id', userId);
 
     if (error) throw error;

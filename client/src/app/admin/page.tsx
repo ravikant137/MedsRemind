@@ -754,12 +754,12 @@ export default function AdminDashboard() {
       </AnimatePresence>
 
       {/* Mobile Menu Toggle Button */}
-      <button 
-        onClick={() => setIsMobileMenuOpen(true)}
-        className="lg:hidden fixed bottom-8 right-8 z-[70] w-16 h-16 bg-green-600 text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-all active:scale-95"
-      >
-        <Menu className="w-8 h-8" />
-      </button>
+       <button 
+         onClick={() => setIsMobileMenuOpen(true)}
+         className="lg:hidden fixed bottom-8 right-8 z-[70] w-16 h-16 bg-green-600 text-white rounded-full shadow-2xl flex items-center justify-center active-haptic"
+       >
+         <Menu className="w-8 h-8" />
+       </button>
 
       {/* Sidebar Overlay for Mobile */}
       <AnimatePresence>
@@ -775,10 +775,10 @@ export default function AdminDashboard() {
       </AnimatePresence>
 
       <aside 
-        onMouseEnter={() => isCollapsed && setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-        className={`${(isCollapsed && !isHovered) ? 'w-24' : 'w-80'} bg-slate-900 text-white fixed lg:flex flex-col p-10 h-full z-[60] transition-all duration-300 shadow-2xl shadow-black/50 ${isMobileMenuOpen ? 'flex left-0' : 'hidden lg:flex -left-full lg:left-0'}`}
-      >
+         onMouseEnter={() => isCollapsed && setIsHovered(true)}
+         onMouseLeave={() => setIsHovered(false)}
+         className={`${(isCollapsed && !isHovered) ? 'w-24' : 'w-80'} bg-slate-900 text-white fixed lg:flex flex-col p-10 h-full z-[60] transition-all duration-300 shadow-2xl shadow-black/50 safe-area-pt safe-area-pb ${isMobileMenuOpen ? 'flex left-0' : 'hidden lg:flex -left-full lg:left-0'}`}
+       >
         <div className="flex items-center justify-between mb-16">
            <div className={`flex items-center gap-5 ${(isCollapsed && !isHovered) && !isMobileMenuOpen ? 'hidden' : 'flex'}`}>
               <Logo className="w-12 h-12" />
@@ -833,11 +833,11 @@ export default function AdminDashboard() {
          </div>
        </aside>
 
-      <main className={`flex-1 ${isCollapsed ? 'lg:ml-24' : 'lg:ml-80'} p-6 md:p-12 transition-all duration-300`}>
-        <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-16 gap-8">
+      <main className={`flex-1 ${isCollapsed ? 'lg:ml-24' : 'lg:ml-80'} p-6 md:p-12 transition-all duration-300 safe-area-pt`}>
+        <header className="sticky top-0 z-[40] bg-slate-50/80 backdrop-blur-md -mx-6 md:-mx-12 px-6 md:px-12 py-6 mb-12 flex flex-col md:flex-row justify-between items-start md:items-center gap-8 border-b border-slate-100">
            <div>
-              <h1 className="text-4xl font-black text-slate-900 tracking-tight">{activeTab}</h1>
-              <p className="text-slate-500 font-medium">Managing Ecosystem in ₹ INR</p>
+              <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight">{activeTab}</h1>
+              <p className="text-slate-500 font-medium text-sm">Managing Ecosystem in ₹ INR</p>
            </div>
         
            <div className="flex items-center gap-6">

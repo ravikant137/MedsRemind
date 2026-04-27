@@ -254,6 +254,44 @@ body {
   100% { transform: translateX(-50%); }
 }
 
+/* Mobile Optimization */
+@supports (padding: env(safe-area-inset-bottom)) {
+  .safe-area-pb {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .safe-area-pt {
+    padding-top: env(safe-area-inset-top);
+  }
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.active-haptic:active {
+  transform: scale(0.96);
+  transition: transform 0.1s ease;
+}
+
+.mobile-card-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+@media (max-width: 768px) {
+  .admin-grid {
+    grid-template-columns: 1fr;
+  }
+  .card-padding {
+    padding: 1.5rem;
+  }
+}
+
 /* Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
