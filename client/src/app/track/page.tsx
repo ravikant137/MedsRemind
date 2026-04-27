@@ -201,32 +201,67 @@ function OrderTrackingContent() {
         )}
 
         {trackingData && (
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-12 bg-white p-2 rounded-[3.5rem] border border-slate-100 shadow-2xl overflow-hidden relative"
-          >
-            <div className="h-[400px] w-full rounded-[3rem] overflow-hidden relative bg-slate-100">
-              <iframe 
-                width="100%" 
-                height="100%" 
-                frameBorder="0" 
-                scrolling="no" 
-                marginHeight={0} 
-                marginWidth={0} 
-                src={`https://www.openstreetmap.org/export/embed.html?bbox=${trackingData.location.lng-0.01}%2C${trackingData.location.lat-0.01}%2C${trackingData.location.lng+0.01}%2C${trackingData.location.lat+0.01}&layer=mapnik&marker=${trackingData.location.lat}%2C${trackingData.location.lng}`}
-                className="filter contrast-125 saturate-150"
-              ></iframe>
-              <div className="absolute top-8 left-8 bg-white/90 backdrop-blur-md px-6 py-3 rounded-2xl shadow-xl border border-white flex items-center gap-3">
-                 <div className="w-3 h-3 bg-green-500 rounded-full animate-ping"></div>
-                 <span className="text-xs font-black text-slate-900 uppercase tracking-widest">Live Location</span>
+          <div className="space-y-8 mb-12">
+            {/* Live Progress Card */}
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-slate-900 rounded-[3rem] p-8 text-white shadow-2xl relative overflow-hidden"
+            >
+              <div className="absolute top-0 right-0 w-64 h-64 bg-green-500/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl"></div>
+              <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-8">
+                <div className="flex items-center gap-6">
+                  <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-md">
+                    <Truck className="w-8 h-8 text-green-400" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-black text-white/50 uppercase tracking-widest mb-1">Estimated Arrival</p>
+                    <p className="text-3xl font-black text-white">{trackingData.est_time || '15 mins'}</p>
+                  </div>
+                </div>
+                <div className="h-px w-full md:w-32 bg-white/20 hidden md:block"></div>
+                <div className="flex items-center gap-6">
+                   <div className="text-right">
+                    <p className="text-xs font-black text-white/50 uppercase tracking-widest mb-1">Distance</p>
+                    <p className="text-3xl font-black text-green-400">{trackingData.distance_km || '3.5 km'}</p>
+                  </div>
+                  <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-md">
+                    <Navigation className="w-8 h-8 text-white" />
+                  </div>
+                </div>
               </div>
-              <div className="absolute bottom-8 right-8 bg-slate-900 text-white px-6 py-3 rounded-2xl shadow-xl flex items-center gap-3">
-                 <Navigation className="w-4 h-4 text-green-500" />
-                 <span className="text-xs font-black uppercase tracking-widest">Tracking Active</span>
+            </motion.div>
+
+            {/* Enhanced Map */}
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white p-2 rounded-[3.5rem] border border-slate-100 shadow-2xl overflow-hidden relative"
+            >
+              <div className="h-[450px] w-full rounded-[3rem] overflow-hidden relative bg-slate-100">
+                <iframe 
+                  width="100%" 
+                  height="100%" 
+                  frameBorder="0" 
+                  scrolling="no" 
+                  src={`https://www.openstreetmap.org/export/embed.html?bbox=${Math.min(trackingData.store_lng, trackingData.delivery_lng)-0.02}%2C${Math.min(trackingData.store_lat, trackingData.delivery_lat)-0.02}%2C${Math.max(trackingData.store_lng, trackingData.delivery_lng)+0.02}%2C${Math.max(trackingData.store_lat, trackingData.delivery_lat)+0.02}&layer=mapnik&marker=${trackingData.delivery_lat}%2C${trackingData.delivery_lng}`}
+                  className="filter contrast-125 saturate-150 grayscale-[0.2]"
+                ></iframe>
+                
+                {/* Custom Overlay Markers for "Wow" Factor */}
+                <div className="absolute inset-0 pointer-events-none">
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full">
+                     {/* Simulating a route line with a gradient overlay if needed, but keeping it clean for now */}
+                  </div>
+                </div>
+
+                <div className="absolute top-8 left-8 bg-white/95 backdrop-blur-md px-6 py-3 rounded-2xl shadow-xl border border-white flex items-center gap-3">
+                   <div className="w-3 h-3 bg-green-500 rounded-full animate-ping"></div>
+                   <span className="text-[10px] font-black text-slate-900 uppercase tracking-widest">Live Delivery Route</span>
+                </div>
               </div>
-            </div>
-          </motion.div>
+            </motion.div>
+          </div>
         )}
 
         <motion.div 

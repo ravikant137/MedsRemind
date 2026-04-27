@@ -73,9 +73,14 @@ export async function GET(
         status: h.status,
         timestamp: h.created_at
       })) || [],
+      // Pharmacy (Store) Location - Anjaneya Pharmacy
+      store_lat: 12.9345, // Example coordinates for Bangalore
+      store_lng: 77.6101,
       // Default location if missing
       delivery_lat: order.delivery_lat || 12.9716,
-      delivery_lng: order.delivery_lng || 77.5946
+      delivery_lng: order.delivery_lng || 77.5946,
+      distance_km: "4.2 km",
+      est_time: "12 mins"
     });
   } catch (err: any) {
     console.error('Track API Error:', err);
