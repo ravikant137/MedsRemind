@@ -10,31 +10,30 @@ export async function POST(request: NextRequest) {
     if (!authHeader) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     
     const token = authHeader.split(' ')[1];
-    const decoded: any = jwt.verify(token, JWT_SECRET);
+    let decoded: any;
+    try {
+      decoded = jwt.verify(token, JWT_SECRET);
+    } catch (e) {
+      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+    }
+
     const userId = decoded.id;
-    
-    // Mark all unread notifications as read for this user
-    const { data, error } = await supabase
+
+    // Mark all notifications for this user as read
+    const { error } = await supabase
       .from('notifications')
       .update({ read: true })
       .eq('user_id', userId)
-      .eq('read', false)
-      .select();
-
-    console.log(`Marked ${data?.length || 0} notifications as read for user ${userId}`);
+      .eq('read', false); // Only update unread ones
 
     if (error) {
-      console.error('Supabase Update Error:', error);
-      // Fallback
-      await supabase
-        .from('notifications')
-        .update({ read: true })
-        .eq('user_id', userId);
+      console.error('Mark as read error:', error);
+      throw error;
     }
-    
-    return NextResponse.json({ success: true, message: 'All notifications cleared' });
+
+    return NextResponse.json({ success: true, message: 'All notifications marked as read' });
   } catch (err: any) {
-    console.error('Mark as read error:', err);
+    console.error('Clear notifications error:', err);
     return NextResponse.json({ error: 'Failed to clear notifications' }, { status: 500 });
   }
 }

@@ -207,10 +207,21 @@ export default function Navbar() {
                 <Link 
                   href="/notifications" 
                   className="relative p-2 text-gray-400 hover:text-[#003366] transition-colors"
+                  onClick={async () => {
+                    try {
+                      const token = localStorage.getItem('token');
+                      if (token) {
+                        await axios.post(`${API_URL}/api/notifications/read`, {}, {
+                          headers: { Authorization: `Bearer ${token}` }
+                        });
+                        setNotifCount(0);
+                      }
+                    } catch (e) {}
+                  }}
                 >
                   <Bell className="w-6 h-6" />
                   {notifCount > 0 && (
-                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-600 text-white text-[10px] font-black rounded-full flex items-center justify-center border-2 border-white shadow-lg">
+                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-600 text-white text-[10px] font-black rounded-full flex items-center justify-center border-2 border-white shadow-lg animate-bounce">
                       {notifCount}
                     </span>
                   )}
