@@ -9,9 +9,12 @@ export async function POST(request: Request) {
   try {
     const { email, password } = await request.json();
     
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || '';
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_PUBLISHABLE_KEY || '';
+
+    if (!supabaseUrl || !supabaseAnonKey) {
       return NextResponse.json({ 
-        error: 'Database connection failed: Missing Supabase Environment Variables in Vercel settings.' 
+        error: 'Database connection failed: Missing Supabase URL or Anon Key. Please check your Vercel settings.' 
       }, { status: 500 });
     }
 
