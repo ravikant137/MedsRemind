@@ -1,59 +1,14 @@
+nohup: ignoring input
+read failed 9: Bad file descriptor
+read failed 9: Bad file descriptor
 
 > medsremind-root@1.0.0 dev
 > concurrently "cd server && npm start" "cd client && npm run dev"
 
-[0] 
-[0] > server@1.0.0 start
-[0] > node init-db.js && node src/index.js
-[0] 
-[1] 
-[1] > client@0.1.0 dev
-[1] > next dev
-[1] 
-[0] /mnt/d/workspace/MedsRemind/server/node_modules/bindings/bindings.js:121
-[0]         throw e;
-[0]         ^
-[0] 
-[0] Error: /mnt/d/workspace/MedsRemind/server/node_modules/sqlite3/build/Release/node_sqlite3.node: invalid ELF header
-[0]     at Module._extensions..node (node:internal/modules/cjs/loader:1661:18)
-[0]     at Module.load (node:internal/modules/cjs/loader:1266:32)
-[0]     at Module._load (node:internal/modules/cjs/loader:1091:12)
-[0]     at Module.require (node:internal/modules/cjs/loader:1289:19)
-[0]     at require (node:internal/modules/helpers:182:18)
-[0]     at bindings (/mnt/d/workspace/MedsRemind/server/node_modules/bindings/bindings.js:112:48)
-[0]     at Object.<anonymous> (/mnt/d/workspace/MedsRemind/server/node_modules/sqlite3/lib/sqlite3-binding.js:1:37)
-[0]     at Module._compile (node:internal/modules/cjs/loader:1521:14)
-[0]     at Module._extensions..js (node:internal/modules/cjs/loader:1623:10)
-[0]     at Module.load (node:internal/modules/cjs/loader:1266:32) {
-[0]   code: 'ERR_DLOPEN_FAILED'
-[0] }
-[0] 
-[0] Node.js v20.20.2
+'\\wsl.localhost\Ubuntu-22.04\home\ravikant\projects\workspace\MedsRemind'
+CMD.EXE was started with the above path as the current directory.
+UNC paths are not supported.  Defaulting to Windows directory.
+[0] The system cannot find the path specified.
 [0] cd server && npm start exited with code 1
-[1] ▲ Next.js 16.2.4 (Turbopack)
-[1] - Local:         http://localhost:3000
-[1] - Network:       http://10.255.255.254:3000
-[1] ✓ Ready in 42s
-[1] ⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
-[1]  We detected multiple lockfiles and selected the directory of /mnt/d/package-lock.json as the root directory.
-[1]  To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
-[1]    See https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack#root-directory for more information.
-[1]  Detected additional lockfiles: 
-[1]    * /mnt/d/workspace/MedsRemind/client/package-lock.json
-[1]    * /mnt/d/workspace/MedsRemind/package-lock.json
-[1] 
-[1] Attention: Next.js now collects completely anonymous telemetry regarding usage.
-[1] This information is used to shape Next.js' roadmap and prioritize features.
-[1] You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
-[1] https://nextjs.org/telemetry
-[1] 
-[1] ⨯ Another next dev server is already running.
-[1] 
-[1] - Local:        http://localhost:3001
-[1] - PID:          56112
-[1] - Dir:          /mnt/d/workspace/MedsRemind/client
-[1] - Log:          .next/dev/logs/next-development.log
-[1] 
-[1] Run kill 56112 to stop it.
-[1] [?25h
+[1] The system cannot find the path specified.
 [1] cd client && npm run dev exited with code 1

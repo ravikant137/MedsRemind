@@ -13,10 +13,10 @@ const BottomNav = () => {
   if (!user || pathname?.startsWith('/admin')) return null;
 
   const navItems = [
-    { name: "Home", href: "/dashboard", icon: Home },
+    { name: "Home", href: "/", icon: Home },
     { name: "Prescription", href: "/prescription", icon: ClipboardList },
     { name: "Orders", href: "/orders", icon: ShoppingCart },
-    { name: "Reminders", href: "/reminders", icon: Bell },
+    { name: "Notifications", href: "/notifications", icon: Bell },
     { name: "Profile", href: "/profile", icon: User },
   ];
 
@@ -32,10 +32,10 @@ const BottomNav = () => {
               key={item.name}
               href={item.href}
               className={`flex flex-col items-center justify-center w-full h-full transition-all relative ${
-                isActive ? "text-blue-600 scale-105" : "text-gray-400 hover:text-blue-500"
+                isActive ? "text-green-600 scale-105" : "text-gray-400 hover:text-green-500"
               }`}
             >
-              <div className={`p-2 rounded-xl transition-all ${isActive ? "bg-blue-50" : ""}`}>
+              <div className={`p-2 rounded-xl transition-all ${isActive ? "bg-green-50" : ""}`}>
                 <Icon className="w-6 h-6" />
               </div>
               <span className={`text-[10px] mt-1 font-black uppercase tracking-tighter ${isActive ? "opacity-100" : "opacity-60"}`}>
@@ -44,7 +44,7 @@ const BottomNav = () => {
               {isActive && (
                 <motion.div 
                   layoutId="activeTab"
-                  className="absolute -top-[1px] w-12 h-1 bg-blue-600 rounded-b-full shadow-[0_2px_10px_rgba(37,99,235,0.4)]" 
+                  className="absolute -top-[1px] w-12 h-1 bg-green-600 rounded-b-full shadow-[0_2px_10px_rgba(34,197,94,0.4)]" 
                 />
               )}
             </Link>
