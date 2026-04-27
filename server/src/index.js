@@ -160,7 +160,21 @@ app.post('/api/payments/verify', auth, async (req, res) => {
         [req.user.id, 'order_placed', 'Order Placed Successfully', `Your order #ORD-${orderId} has been received.`]
       );
 
-      // Real-time Notification
+      // Notify Admins
+      const adminsRes = await db.query('SELECT id FROM users WHERE role = "ADMIN"');
+      for (let admin of adminsRes.rows) {
+        await db.query(
+          'INSERT INTO notifications (user_id, type, title, message) VALUES (?, ?, ?, ?)',
+          [admin.id, 'order', 'New Order Received', `Order #ORD-${orderId} has been placed by ${req.user.name}.`]
+        );
+        io.to(`user_${admin.id}`).emit('new_notification', {
+          title: 'New Order Received',
+          message: `Order #ORD-${orderId} has been placed by ${req.user.name}.`,
+          type: 'order'
+        });
+      }
+
+      // Real-time Notification for User
       io.to(`user_${req.user.id}`).emit('new_notification', {
         title: 'Order Placed Successfully',
         message: `Your order #ORD-${orderId} has been received.`
@@ -188,7 +202,7 @@ app.get('/api/track/:id', async (req, res) => {
   try {
     const orderId = req.params.id;
     const orderResult = await db.query(
-      'SELECT o.*, u.name as user_name FROM orders o JOIN users u ON o.user_id = u.id WHERE o.id = ?',
+      'SELECT o.*, u.name as user_name FROM orders o LEFT JOIN users u ON o.user_id = u.id WHERE o.id = ?',
       [orderId]
     );
     if (orderResult.rows.length === 0) return res.status(404).json({ error: 'Order not found' });
@@ -218,7 +232,21 @@ app.post('/api/orders/cod', auth, async (req, res) => {
       [req.user.id, 'order_placed', 'Order Placed Successfully', `Your COD order #ORD-${orderId} has been received.`]
     );
 
-    // Real-time Notification
+    // Notify Admins
+    const adminsRes = await db.query('SELECT id FROM users WHERE role = "ADMIN"');
+    for (let admin of adminsRes.rows) {
+      await db.query(
+        'INSERT INTO notifications (user_id, type, title, message) VALUES (?, ?, ?, ?)',
+        [admin.id, 'order', 'New COD Order Received', `New COD Order #ORD-${orderId} from ${req.user.name}.`]
+      );
+      io.to(`user_${admin.id}`).emit('new_notification', {
+        title: 'New COD Order Received',
+        message: `New COD Order #ORD-${orderId} from ${req.user.name}.`,
+        type: 'order'
+      });
+    }
+
+    // Real-time Notification for User
     io.to(`user_${req.user.id}`).emit('new_notification', {
       title: 'Order Placed Successfully',
       message: `Your COD order #ORD-${orderId} has been received.`
@@ -241,7 +269,7 @@ app.post('/api/orders/cod', auth, async (req, res) => {
 app.get('/api/admin/orders', auth, async (req, res) => {
   if (req.user.role !== 'ADMIN') return res.status(403).json({ error: 'Unauthorized' });
   try {
-    const result = await db.query('SELECT o.*, u.name as user_name FROM orders o JOIN users u ON o.user_id = u.id ORDER BY created_at DESC');
+    const result = await db.query('SELECT o.*, u.name as user_name FROM orders o LEFT JOIN users u ON o.user_id = u.id ORDER BY created_at DESC');
     res.json(result.rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
