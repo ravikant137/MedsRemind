@@ -115,28 +115,50 @@ export default function Notifications() {
                      <span className="text-xs font-black uppercase tracking-widest text-slate-400">{label}</span>
                      <div className="h-[1px] bg-slate-200 flex-1"></div>
                   </div>
-                  {grouped[label].map((notif: any) => (
-                    <motion.div 
-                      key={notif.id}
-                      initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-                      className={`p-8 rounded-[3rem] shadow-xl border-2 flex gap-8 transition-all ${notif.read ? 'bg-white border-transparent' : 'bg-white border-green-500'}`}
-                    >
-                       <div className={`w-16 h-16 rounded-[1.5rem] flex items-center justify-center shrink-0 text-3xl ${
-                         notif.type === 'REWARD' ? 'bg-yellow-50' : notif.type === 'order' ? 'bg-blue-50' : 'bg-green-50'
-                       }`}>
-                          {notif.type === 'REWARD' ? '🪙' : notif.type === 'order' ? '📦' : '💊'}
-                       </div>
-                       <div className="flex-1">
-                          <div className="flex justify-between items-start mb-2">
-                             <h3 className="text-xl font-black text-slate-900">{notif.title}</h3>
-                             <span className="text-[10px] font-black text-slate-400 bg-slate-50 px-3 py-1 rounded-full">
-                                {new Date(notif.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                             </span>
-                          </div>
-                          <p className="text-slate-500 font-bold leading-relaxed">{notif.message}</p>
-                       </div>
-                    </motion.div>
-                  ))}
+                  {grouped[label].map((notif: any) => {
+                    const orderIdMatch = notif.message.match(/#ORD-(\d+)/);
+                    const orderId = orderIdMatch ? orderIdMatch[1] : null;
+                    const isOrder = notif.type?.includes('order');
+
+                    return (
+                      <motion.div 
+                        key={notif.id}
+                        initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+                        className={`p-8 rounded-[3rem] shadow-xl border-2 flex flex-col md:flex-row gap-8 transition-all relative overflow-hidden group ${
+                          notif.read ? 'bg-white border-transparent' : 'bg-white border-green-500'
+                        }`}
+                      >
+                         <div className={`w-16 h-16 rounded-[1.5rem] flex items-center justify-center shrink-0 text-3xl ${
+                           notif.type === 'REWARD' ? 'bg-yellow-50' : isOrder ? 'bg-blue-50' : 'bg-green-50'
+                         }`}>
+                            {notif.type === 'REWARD' ? '🪙' : isOrder ? '📦' : '💊'}
+                         </div>
+                         <div className="flex-1">
+                            <div className="flex justify-between items-start mb-2">
+                               <div>
+                                  <h3 className="text-xl font-black text-slate-900">{notif.title}</h3>
+                                  <span className="text-[10px] font-black text-slate-400 bg-slate-50 px-3 py-1 rounded-full uppercase tracking-widest">
+                                    {notif.type.replace(/_/g, ' ')}
+                                  </span>
+                               </div>
+                               <span className="text-[10px] font-black text-slate-400 bg-slate-50 px-3 py-1 rounded-full whitespace-nowrap">
+                                  {new Date(notif.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                               </span>
+                            </div>
+                            <p className="text-slate-500 font-bold leading-relaxed mb-6">{notif.message}</p>
+                            
+                            {isOrder && orderId && (
+                              <button 
+                                onClick={() => router.push(`/track?id=${orderId}`)}
+                                className="flex items-center gap-3 px-6 py-3 bg-slate-900 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-green-600 transition-all shadow-lg"
+                              >
+                                 <ShoppingBag className="w-4 h-4" /> Track Order #{orderId}
+                              </button>
+                            )}
+                         </div>
+                      </motion.div>
+                    );
+                  })}
                </div>
              ))}
           </div>
