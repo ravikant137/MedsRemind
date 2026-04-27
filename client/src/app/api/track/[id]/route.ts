@@ -11,11 +11,25 @@ export async function GET(
     const cleanId = String(id).replace(/#ORD-|ANJ-|ORD-/, '').trim();
 
     // 1. Fetch Order Details
-    const { data: order, error: orderError } = await supabase
+    // Smart Search: Try the ID as-is, and also try with the 'ANJ-' prefix if it's missing
+    let { data: order, error: orderError } = await supabase
       .from('orders')
       .select('*, users(name)')
-      .eq('id', cleanId)
+      .eq('id', id)
       .single();
+
+    if ((orderError || !order) && !id.startsWith('ANJ-')) {
+      const { data: altOrder, error: altError } = await supabase
+        .from('orders')
+        .select('*, users(name)')
+        .eq('id', `ANJ-${id}`)
+        .single();
+      
+      if (altOrder) {
+        order = altOrder;
+        orderError = null;
+      }
+    }
 
     if (orderError || !order) {
       return NextResponse.json({ error: 'Order not found' }, { status: 404 });
