@@ -76,6 +76,9 @@ async function init() {
       frequency TEXT,
       suggestion TEXT,
       status TEXT DEFAULT 'ACTIVE',
+      total_doses INTEGER DEFAULT 0,
+      remaining_doses INTEGER DEFAULT 0,
+      doses_per_day INTEGER DEFAULT 1,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (user_id) REFERENCES users(id)
     )`,
@@ -149,6 +152,11 @@ async function init() {
     } catch (e) {}
     try {
       await db.query("ALTER TABLE users ADD COLUMN points INTEGER DEFAULT 0");
+    } catch (e) {}
+    try {
+      await db.query("ALTER TABLE reminders ADD COLUMN total_doses INTEGER DEFAULT 0");
+      await db.query("ALTER TABLE reminders ADD COLUMN remaining_doses INTEGER DEFAULT 0");
+      await db.query("ALTER TABLE reminders ADD COLUMN doses_per_day INTEGER DEFAULT 1");
     } catch (e) {}
 
   } catch (err) {

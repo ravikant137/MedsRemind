@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { 
   Clock, CheckCircle2, XCircle, TrendingUp, Calendar, Pill, 
   Activity, ArrowRight, Loader2, User, ShieldCheck, 
-  Heart, ShoppingBag, Bell, History, Settings, HeartPulse, Award, Volume2, ShieldAlert
+  Heart, ShoppingBag, Bell, History, Settings, HeartPulse, Award, Volume2, ShieldAlert, AlertCircle
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';

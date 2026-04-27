@@ -24,7 +24,10 @@ export async function POST(request: NextRequest) {
       frequency: med.frequency || '1-0-1',
       timing: med.timing || 'After Food',
       duration: med.duration || '5 Days',
-      status: 'PENDING', // Standard status instead of is_active
+      total_doses: (med.total_days || 5) * (med.doses_per_day || 3),
+      remaining_doses: (med.total_days || 5) * (med.doses_per_day || 3),
+      doses_per_day: med.doses_per_day || 3,
+      status: 'ACTIVE',
       created_at: new Date().toISOString()
     }));
 

@@ -72,13 +72,15 @@ export async function POST(
         });
     }
 
-    // 5. Update reminder status
+    // 5. Update reminder status and decrement remaining doses
+    const newRemaining = Math.max(0, (reminder.remaining_doses || 1) - 1);
     await supabase
       .from('reminders')
       .update({ 
-        status: 'TAKEN', 
+        status: newRemaining === 0 ? 'COMPLETED' : 'ACTIVE', 
         taken_at: now.toISOString(),
-        earned_reward: coinsEarned
+        earned_reward: coinsEarned,
+        remaining_doses: newRemaining
       })
       .eq('id', reminderId);
 
