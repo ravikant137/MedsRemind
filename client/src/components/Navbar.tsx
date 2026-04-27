@@ -20,18 +20,24 @@ export default function Navbar() {
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 10);
-    window.addEventListener('scroll', handleScroll);
+    let interval: NodeJS.Timeout;
     try {
       const userData = localStorage.getItem('user');
       const token = localStorage.getItem('token');
       if (userData && userData !== 'undefined') {
         setUser(JSON.parse(userData));
         fetchNotifCount(token);
+        
+        // Polling for accuracy
+        interval = setInterval(() => fetchNotifCount(token), 20000);
       }
     } catch (e) {
       console.error('Failed to parse user data');
     }
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (interval) clearInterval(interval);
+    };
   }, [pathname]);
 
   const fetchNotifCount = async (token: string | null) => {

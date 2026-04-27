@@ -36,7 +36,7 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/icon-192x192.png" />
         <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="beforeInteractive" />
       </head>
-      <body className="min-h-full flex flex-col bg-[#f5f7fa] overscroll-none" style={{ fontFamily: "'Inter', sans-serif" }}>
+      <body className="min-h-full flex flex-col bg-[#f5f7fa] overscroll-none overflow-x-hidden selection:bg-green-100" style={{ fontFamily: "'Inter', sans-serif", touchAction: 'pan-y' }}>
         <AuthProvider>
           <Navbar />
           <main className="flex-1 pb-20 md:pb-0">

@@ -50,7 +50,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen" style={{ background: '#f5f7fa' }}>
+    <div className="min-h-screen overflow-x-hidden w-full relative" style={{ background: '#f5f7fa' }}>
 
       {/* ═══════════════════ HERO ═══════════════════ */}
       <section style={{ background: 'linear-gradient(135deg, #eef2ff 0%, #e8f5e9 30%, #ffffff 70%)' }}
