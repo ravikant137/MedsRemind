@@ -84,7 +84,8 @@ export default function Checkout() {
         router.push(`/track?id=${res.data.orderId}`);
       }
     } catch (err: any) {
-      alert('Payment processing failed.');
+      const errorMsg = err.response?.data?.error || err.message || 'Payment processing failed.';
+      alert(`Payment processing failed: ${errorMsg}`);
     } finally {
       setPaying(false);
     }
