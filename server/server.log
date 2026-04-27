@@ -2,11 +2,22 @@
 > server@1.0.0 start
 > node init-db.js && node src/index.js
 
-◇ injected env (2) from .env // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
-Initializing database...
-Connected to the SQLite database.
-Database initialized successfully.
-◇ injected env (2) from .env // tip: ⌘ override existing { override: true }
-◇ injected env (0) from .env // tip: ◈ encrypted .env [www.dotenvx.com]
-Server running on port 5000
-Connected to the SQLite database.
+/mnt/d/workspace/MedsRemind/server/node_modules/bindings/bindings.js:121
+        throw e;
+        ^
+
+Error: /mnt/d/workspace/MedsRemind/server/node_modules/sqlite3/build/Release/node_sqlite3.node: invalid ELF header
+    at Module._extensions..node (node:internal/modules/cjs/loader:1661:18)
+    at Module.load (node:internal/modules/cjs/loader:1266:32)
+    at Module._load (node:internal/modules/cjs/loader:1091:12)
+    at Module.require (node:internal/modules/cjs/loader:1289:19)
+    at require (node:internal/modules/helpers:182:18)
+    at bindings (/mnt/d/workspace/MedsRemind/server/node_modules/bindings/bindings.js:112:48)
+    at Object.<anonymous> (/mnt/d/workspace/MedsRemind/server/node_modules/sqlite3/lib/sqlite3-binding.js:1:37)
+    at Module._compile (node:internal/modules/cjs/loader:1521:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1623:10)
+    at Module.load (node:internal/modules/cjs/loader:1266:32) {
+  code: 'ERR_DLOPEN_FAILED'
+}
+
+Node.js v20.20.2

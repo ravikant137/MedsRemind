@@ -11,7 +11,6 @@ export default function Checkout() {
   const [address, setAddress] = useState('');
   const [loading, setLoading] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('UPI');
-  const [showUPIModal, setShowUPIModal] = useState(false);
   const [upiId, setUpiId] = useState('');
   const [paying, setPaying] = useState(false);
   const router = useRouter();
@@ -30,7 +29,7 @@ export default function Checkout() {
     const fetchPoints = async () => {
       try {
         const token = localStorage.getItem('token');
-        const res = await axios.get('/api/user/points', {
+        const res = await axios.get(`${API_URL}/api/user/points`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setPoints(res.data.points);
@@ -65,48 +64,10 @@ export default function Checkout() {
     }
   };
 
-  const handleRazorpayPayment = async () => {
-    const token = localStorage.getItem('token');
-    if (!token) return router.push('/login');
-
-    setLoading(true);
-    try {
-      const orderRes = await axios.post(`${API_URL}/api/payments/create-order`, { amount: total }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_placeholder',
-        amount: orderRes.data.amount,
-        currency: "INR",
-        name: "Anjaneya Pharmacy",
-        description: "Medicine Purchase",
-        order_id: orderRes.data.id,
-        handler: async (response: any) => {
-          const verifyRes = await axios.post(`${API_URL}/api/payments/verify`, {
-            ...response,
-            orderDetails: { items: cart, total_amount: total, address, discount_applied: discountAmount }
-          }, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-          if (verifyRes.data.success) {
-            localStorage.removeItem('meds_cart');
-            router.push(`/track?id=${verifyRes.data.orderId}`);
-          }
-        },
-        theme: { color: "#003366" }
-      };
-      const rzp = (window as any).Razorpay(options);
-      rzp.open();
-    } catch (err: any) {
-      alert('Payment failed to initialize.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleUPISuccess = async (finalUpiId: string) => {
     const token = localStorage.getItem('token');
+    if (!token) return router.push('/login');
+    
     setPaying(true);
     try {
       const res = await axios.post(`${API_URL}/api/payments/upi-success`, {
@@ -126,7 +87,6 @@ export default function Checkout() {
       alert('Payment processing failed.');
     } finally {
       setPaying(false);
-      setShowUPIModal(false);
     }
   };
 
@@ -134,35 +94,36 @@ export default function Checkout() {
     e.preventDefault();
     if (!address) return alert('Please enter your delivery address.');
     if (paymentMethod === 'COD') handleCOD();
-    else setShowUPIModal(true);
+    else if (upiId) handleUPISuccess(upiId);
+    else alert('Please enter or select a UPI ID');
   };
 
   return (
     <div className="min-h-screen bg-slate-50 pt-32 px-6 pb-20">
       <div className="max-w-6xl mx-auto">
-        <h1 className="text-4xl font-black text-[#003366] mb-12">Checkout</h1>
+        <h1 className="text-4xl font-black text-[#003366] mb-12 text-center lg:text-left">Checkout</h1>
         <div className="grid lg:grid-cols-3 gap-10">
           <div className="lg:col-span-2 space-y-8">
-            <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm">
-              <h3 className="text-xl font-bold mb-6 flex items-center gap-2"><MapPin className="text-[#4CAF50]" /> Delivery Address</h3>
+            <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
+              <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-[#003366]"><MapPin className="text-[#4CAF50]" /> Delivery Address</h3>
               <textarea 
                 required value={address} onChange={(e) => setAddress(e.target.value)}
-                className="w-full p-6 bg-slate-50 rounded-2xl border-none focus:ring-2 focus:ring-[#4CAF50] font-bold h-32"
+                className="w-full p-6 bg-slate-50 rounded-2xl border-none focus:ring-2 focus:ring-[#4CAF50] font-bold h-32 text-slate-700"
                 placeholder="Enter full address..."
               />
             </div>
 
             {points > 0 && (
-              <div className="bg-[#4CAF50] p-8 rounded-3xl text-white shadow-lg relative overflow-hidden group">
+              <div className="bg-gradient-to-br from-[#4CAF50] to-[#388E3C] p-8 rounded-[2.5rem] text-white shadow-lg relative overflow-hidden group">
                 <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:scale-110 transition-transform">
-                   <CheckCircle className="w-24 h-24" />
+                   <ShieldCheck className="w-24 h-24" />
                 </div>
                 <div className="relative z-10">
-                  <p className="text-xs font-black uppercase tracking-widest opacity-80 mb-2">Health Rewards Available</p>
+                  <p className="text-[10px] font-black uppercase tracking-widest opacity-80 mb-2">Health Rewards Available</p>
                   <h3 className="text-2xl font-black mb-4">{points} Coins = ₹{(points/10*2).toFixed(2)} Discount</h3>
                   <button 
                     onClick={() => setUsePoints(!usePoints)}
-                    className={`px-8 py-3 rounded-xl font-black text-xs uppercase tracking-widest transition-all ${usePoints ? 'bg-white text-[#4CAF50]' : 'bg-[#003366] text-white'}`}
+                    className={`px-8 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all ${usePoints ? 'bg-[#003366] text-white' : 'bg-white text-[#4CAF50]'}`}
                   >
                     {usePoints ? 'DISCOUNT APPLIED ✓' : 'USE MY COINS FOR DISCOUNT'}
                   </button>
@@ -170,144 +131,159 @@ export default function Checkout() {
               </div>
             )}
 
-            <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm">
-              <h3 className="text-xl font-bold mb-6 flex items-center gap-2"><CreditCard className="text-[#4CAF50]" /> Payment Method</h3>
+            <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
+              <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-[#003366]"><CreditCard className="text-[#4CAF50]" /> Payment Method</h3>
               <div className="space-y-4">
                 <div 
                   onClick={() => setPaymentMethod('UPI')}
-                  className={`p-6 border-2 rounded-2xl flex items-center justify-between cursor-pointer transition-all ${paymentMethod === 'UPI' ? 'border-[#4CAF50] bg-green-50' : 'border-slate-100 hover:border-slate-200'}`}
+                  className={`p-6 border-2 rounded-[2rem] cursor-pointer transition-all ${paymentMethod === 'UPI' ? 'border-[#4CAF50] bg-green-50 shadow-md' : 'border-slate-100 hover:border-slate-200'}`}
                 >
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 bg-[#003366] text-white rounded-lg flex items-center justify-center"><CreditCard className="w-5 h-5" /></div>
-                    <span className="font-bold text-[#003366]">Online Payment (UPI/Card)</span>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 bg-[#003366] text-white rounded-lg flex items-center justify-center shadow-lg"><CreditCard className="w-5 h-5" /></div>
+                      <div className="flex flex-col">
+                        <span className="font-bold text-[#003366]">Online Payment</span>
+                        <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">UPI / Cards / NetBanking</span>
+                      </div>
+                    </div>
+                    {paymentMethod === 'UPI' && <CheckCircle className="text-[#4CAF50] w-6 h-6" />}
                   </div>
-                  {paymentMethod === 'UPI' && <CheckCircle className="text-[#4CAF50]" />}
+
+                  <AnimatePresence>
+                    {paymentMethod === 'UPI' && (
+                      <motion.div 
+                        initial={{ opacity: 0, height: 0 }} 
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="overflow-hidden"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <div className="mt-8 pt-8 border-t border-green-100 space-y-8">
+                          <div className="space-y-4">
+                            <p className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400 ml-1">Quick Pay via Apps</p>
+                            <div className="grid grid-cols-3 gap-3">
+                              {[
+                                { name: 'PhonePe', color: '#5f259f' },
+                                { name: 'GPay', color: '#4285F4' },
+                                { name: 'Paytm', color: '#00BAF2' }
+                              ].map((app) => (
+                                <button 
+                                  key={app.name}
+                                  type="button"
+                                  onClick={() => {
+                                    setUpiId(`${app.name.toLowerCase()}@upi`);
+                                    handleUPISuccess(`${app.name.toLowerCase()}@upi`);
+                                  }}
+                                  disabled={paying}
+                                  className="flex flex-col items-center gap-3 p-4 bg-white rounded-2xl border border-slate-100 hover:border-[#4CAF50] hover:shadow-lg transition-all group active:scale-95"
+                                >
+                                  <div 
+                                    className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-black text-xl shadow-md group-hover:scale-110 transition-transform"
+                                    style={{ backgroundColor: app.color }}
+                                  >
+                                    {app.name[0]}
+                                  </div>
+                                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">{app.name}</span>
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+
+                          <div className="space-y-4">
+                            <p className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400 ml-1">Or Enter UPI ID</p>
+                            <div className="relative group">
+                              <div className="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none">
+                                <span className="text-slate-300 font-black group-focus-within:text-[#4CAF50] transition-colors">@</span>
+                              </div>
+                              <input 
+                                type="text"
+                                placeholder="username@bankid"
+                                value={upiId}
+                                onChange={(e) => setUpiId(e.target.value)}
+                                className="w-full pl-12 pr-6 py-5 bg-white rounded-2xl border-2 border-slate-100 focus:border-[#4CAF50] focus:ring-0 transition-all font-bold text-slate-700 placeholder:text-slate-300"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
 
                 <div 
                   onClick={() => setPaymentMethod('COD')}
-                  className={`p-6 border-2 rounded-2xl flex items-center justify-between cursor-pointer transition-all ${paymentMethod === 'COD' ? 'border-[#4CAF50] bg-green-50' : 'border-slate-100 hover:border-slate-200'}`}
+                  className={`p-6 border-2 rounded-[2rem] flex items-center justify-between cursor-pointer transition-all ${paymentMethod === 'COD' ? 'border-[#4CAF50] bg-green-50 shadow-md' : 'border-slate-100 hover:border-slate-200'}`}
                 >
                   <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 bg-slate-100 text-slate-600 rounded-lg flex items-center justify-center"><Truck className="w-5 h-5" /></div>
-                    <span className="font-bold text-[#003366]">Cash on Delivery (COD)</span>
+                    <div className="w-10 h-10 bg-slate-100 text-slate-500 rounded-lg flex items-center justify-center shadow-sm"><Truck className="w-5 h-5" /></div>
+                    <div className="flex flex-col">
+                      <span className="font-bold text-[#003366]">Cash on Delivery</span>
+                      <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Pay when you receive</span>
+                    </div>
                   </div>
-                  {paymentMethod === 'COD' && <CheckCircle className="text-[#4CAF50]" />}
+                  {paymentMethod === 'COD' && <CheckCircle className="text-[#4CAF50] w-6 h-6" />}
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="bg-[#003366] text-white p-10 rounded-[3rem] shadow-2xl h-fit">
-            <h3 className="text-xl font-bold mb-8">Order Summary</h3>
-            <div className="space-y-4 mb-8">
+          <div className="bg-[#003366] text-white p-10 rounded-[3rem] shadow-2xl h-fit sticky top-32">
+            <h3 className="text-xl font-bold mb-8 flex items-center gap-3"><ShieldCheck className="text-[#4CAF50]" /> Order Summary</h3>
+            <div className="space-y-4 mb-10 max-h-[40vh] overflow-y-auto pr-4 custom-scrollbar">
               {cart.map((item, i) => (
-                <div key={i} className="flex justify-between text-sm opacity-80">
+                <div key={i} className="flex justify-between items-start gap-4">
                   <div className="flex flex-col">
-                    <span>{item.name} x {item.quantity}</span>
+                    <span className="font-bold text-sm">{item.name}</span>
+                    <span className="text-[10px] opacity-60 font-bold uppercase tracking-widest">Qty: {item.quantity}</span>
                     {item.discount_active && (
-                      <span className="text-[10px] text-green-400 font-black uppercase tracking-[0.1em]">Sale Price Applied</span>
+                      <span className="text-[9px] text-green-400 font-black uppercase tracking-widest mt-1">Special Price Applied</span>
                     )}
                   </div>
-                  <span>₹{(item.price * item.quantity).toFixed(2)}</span>
+                  <span className="font-bold">₹{(item.price * item.quantity).toFixed(2)}</span>
                 </div>
               ))}
+            </div>
+            
+            <div className="space-y-4 mb-8 pt-6 border-t border-white/10">
               {cart.some(m => m.discount_active) && (
-                <div className="flex justify-between text-[11px] text-green-400 font-black uppercase tracking-widest border-t border-white/5 pt-4">
+                <div className="flex justify-between text-[11px] text-green-400 font-black uppercase tracking-[0.2em]">
                   <span>Flash Sale Savings</span>
                   <span>-₹{cart.reduce((sum, item) => sum + (item.discount_active ? (item.original_price - item.price) * item.quantity : 0), 0).toFixed(2)}</span>
                 </div>
               )}
               {usePoints && (
-                <div className="flex justify-between text-sm text-[#4CAF50] font-bold border-t border-white/10 pt-4">
-                  <span>Health Reward Discount</span>
+                <div className="flex justify-between text-sm text-[#4CAF50] font-bold">
+                  <span>Health Reward Applied</span>
                   <span>-₹{discountAmount.toFixed(2)}</span>
                 </div>
               )}
+              <div className="flex justify-between text-sm opacity-60 font-bold">
+                <span>Delivery Charge</span>
+                <span>FREE</span>
+              </div>
             </div>
-            <div className="border-t border-white/10 pt-6 space-y-4">
-              <div className="flex justify-between text-2xl font-black text-[#4CAF50]">
-                <span>Total</span>
-                <span>₹{total.toFixed(2)}</span>
+
+            <div className="border-t border-white/20 pt-8 space-y-6">
+              <div className="flex justify-between items-end">
+                <span className="text-xs font-black uppercase tracking-[0.3em] opacity-60">To Pay</span>
+                <span className="text-4xl font-black text-white">₹{total.toFixed(2)}</span>
               </div>
               <button 
                 onClick={handlePlaceOrder}
-                disabled={loading}
-                className="w-full py-5 bg-[#4CAF50] hover:bg-[#388E3C] text-white rounded-2xl font-black text-lg shadow-xl transition-all disabled:opacity-50"
+                disabled={loading || (paymentMethod === 'UPI' && !upiId && !paying)}
+                className="w-full py-6 bg-[#4CAF50] hover:bg-[#388E3C] text-white rounded-2xl font-black text-lg shadow-xl shadow-green-900/20 transition-all disabled:opacity-50 active:scale-95 flex items-center justify-center gap-3 group"
               >
-                {loading ? <Loader2 className="animate-spin mx-auto" /> : paymentMethod === 'COD' ? "CONFIRM ORDER" : "PAY & PLACE ORDER"}
+                {loading || paying ? <Loader2 className="animate-spin" /> : (
+                  <>
+                    {paymentMethod === 'COD' ? "CONFIRM ORDER" : upiId ? `PAY ₹${total.toFixed(2)}` : "ENTER UPI TO PAY"}
+                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                  </>
+                )}
               </button>
             </div>
           </div>
         </div>
       </div>
-
-      <AnimatePresence>
-        {showUPIModal && (
-          <div className="fixed inset-0 z-[1000] flex items-center justify-center p-6">
-            <motion.div 
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              onClick={() => !paying && setShowUPIModal(false)}
-              className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
-            ></motion.div>
-            
-            <motion.div 
-              initial={{ scale: 0.9, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              className="relative w-full max-w-md bg-white rounded-[3rem] shadow-2xl overflow-hidden"
-            >
-              <div className="p-10">
-                <div className="flex justify-between items-center mb-8">
-                  <h3 className="text-2xl font-black text-slate-900">UPI Payment</h3>
-                  <div className="text-green-600 font-black">₹{total.toFixed(2)}</div>
-                </div>
-
-                <div className="grid grid-cols-3 gap-4 mb-8">
-                  {['PhonePe', 'GPay', 'Paytm'].map((app) => (
-                    <button 
-                      key={app}
-                      onClick={() => handleUPISuccess(`${app.toLowerCase()}@upi`)}
-                      disabled={paying}
-                      className="flex flex-col items-center gap-2 p-4 bg-slate-50 rounded-2xl hover:bg-green-50 transition-all border border-transparent hover:border-green-200"
-                    >
-                      <div className="w-10 h-10 bg-white rounded-lg shadow-sm flex items-center justify-center text-xs font-bold">
-                        {app[0]}
-                      </div>
-                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">{app}</span>
-                    </button>
-                  ))}
-                </div>
-
-                <div className="relative mb-8">
-                  <div className="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none">
-                    <span className="text-slate-400 font-bold">@</span>
-                  </div>
-                  <input 
-                    type="text"
-                    placeholder="Enter UPI ID (e.g. user@okhdfcbank)"
-                    value={upiId}
-                    onChange={(e) => setUpiId(e.target.value)}
-                    className="w-full pl-12 pr-6 py-5 bg-slate-50 rounded-2xl border-none focus:ring-2 focus:ring-green-500/20 font-bold text-sm"
-                  />
-                </div>
-
-                <button 
-                  onClick={() => upiId && handleUPISuccess(upiId)}
-                  disabled={!upiId || paying}
-                  className="w-full py-5 bg-slate-900 text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl hover:bg-green-600 transition-all disabled:opacity-50 flex items-center justify-center gap-3"
-                >
-                  {paying ? <Loader2 className="w-5 h-5 animate-spin" /> : <>Verify & Pay ₹{total.toFixed(2)}</>}
-                </button>
-                
-                <p className="text-center mt-6 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">
-                  Secure encrypted payment by Anjaneya
-                </p>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }
