@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { 
   Upload, FileText, CheckCircle, AlertCircle, Loader2, 
-  Pill, ArrowRight, Bell, Clock, Activity, ShoppingBag, ShieldCheck
+  Pill, ArrowRight, Bell, Clock, Activity, ShoppingBag, ShieldCheck, Calendar
 } from 'lucide-react';
 import axios from 'axios';
 import { API_URL } from '@/config';
@@ -227,7 +227,11 @@ export default function PrescriptionUpload() {
                                 </div>
                                 <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-xl border border-slate-100">
                                    <Clock className="w-3.5 h-3.5 text-purple-500" />
-                                   <span className="text-xs font-bold text-slate-500">{m.duration || m.frequency}</span>
+                                   <span className="text-xs font-bold text-slate-500">{m.frequency || '1-0-1'}</span>
+                                </div>
+                                <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-xl border border-slate-100">
+                                   <Calendar className="w-3.5 h-3.5 text-green-500" />
+                                   <span className="text-xs font-bold text-slate-500">{m.duration || '3 Days'}</span>
                                 </div>
                               </div>
                            </div>

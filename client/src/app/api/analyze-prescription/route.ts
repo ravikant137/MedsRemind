@@ -27,8 +27,8 @@ export async function POST(request: NextRequest) {
     
     RULES:
     1. EXTRACT MEDICINES: Use your vast medical knowledge to correctly identify medicine names even if handwriting is messy. Cross-reference characters with known drug names.
-    2. DOSAGE & SCHEDULE: Strictly identify schedules like "1-0-1" (Morning-Afternoon-Night) or "Twice daily". 
-    3. TIMING: Note if it is "Before Food" (AC) or "After Food" (PC).
+    2. DOSAGE & SCHEDULE: Strictly identify schedules like "1-0-1" (Morning-Afternoon-Night) or "Twice daily" for EVERY medicine. If not clearly written, use your medical knowledge to suggest the most common standard schedule for that drug.
+    3. TIMING & DURATION: Note if it is "Before Food" or "After Food" AND exactly how many days it should be taken.
     
     Return a structured JSON object:
     {
@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
           "instructions": "e.g. Swallow whole"
         }
       ],
-      "advice": "General medical advice from the prescription"
+      "advice": "General medical advice"
     }
     RETURN ONLY JSON.`;
 
