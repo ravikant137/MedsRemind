@@ -330,11 +330,12 @@ export default function AdminDashboard() {
                    {orders
                      .filter((o: any) => {
                        if (!search || search === 'ALL') return true;
-                       const s = search.toLowerCase();
-                       return o.status === search || 
-                              o.id.toString() === s || 
-                              `ORD-${o.id}`.toLowerCase() === s || 
-                              o.user_name?.toLowerCase().includes(s);
+                        const s = search.toLowerCase();
+                        return o.status === search || 
+                               o.id.toString().toLowerCase() === s || 
+                               o.id.toString().toLowerCase().includes(s) ||
+                               `ORD-${o.id}`.toLowerCase() === s || 
+                               o.user_name?.toLowerCase().includes(s);
                      })
                      .map((order: any) => (
                      <div key={order.id} className={`p-6 border rounded-[2rem] flex flex-wrap items-center justify-between gap-6 hover:shadow-md transition-all ${order.is_emergency ? 'bg-red-50 border-red-200' : 'bg-white border-slate-50'}`}>
@@ -847,15 +848,18 @@ export default function AdminDashboard() {
                               key={n.id} 
                               onClick={async () => {
                                 // 1. Extract Order ID if possible
-                                const orderMatch = n.message.match(/(ORD-\d+|#ORD-\d+|\d+)/i);
+                                const orderMatch = n.message.match(/(?:ORD-|ANJ-|#)([A-Z0-9-]+)|(\d{4,})/i);
                                 if (orderMatch) {
-                                  const orderId = orderMatch[0].replace('#', '');
+                                  const orderId = (orderMatch[1] || orderMatch[2]).replace(/[()]/g, '');
                                   setActiveTab('Orders');
                                   setSearch(orderId);
                                 } else if (n.title.toLowerCase().includes('order')) {
                                   setActiveTab('Orders');
                                   setSearch(''); // Show all orders if no specific ID
                                 }
+                                
+                                // Refresh data to ensure the new order is in the list
+                                fetchData();
                                 
                                 // 2. Close dropdown
                                 setShowNotifDropdown(false);
