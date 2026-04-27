@@ -3,10 +3,10 @@ import { supabaseAdmin as supabase } from '@/lib/supabase';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
     // Clean the ID (remove #ORD- or ANJ- prefixes)
     const cleanId = String(id).replace(/#ORD-|ANJ-|ORD-/, '').trim();
 
