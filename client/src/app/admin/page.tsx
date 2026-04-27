@@ -115,9 +115,16 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (authorized) {
       fetchData();
+      
+      const handleRefresh = () => fetchData();
+      window.addEventListener('notif-refresh', handleRefresh);
+      
       // Poll for new notifications every 30 seconds
       const interval = setInterval(fetchData, 30000);
-      return () => clearInterval(interval);
+      return () => {
+        clearInterval(interval);
+        window.removeEventListener('notif-refresh', handleRefresh);
+      };
     }
   }, [authorized, fetchData]);
 
@@ -783,6 +790,7 @@ export default function AdminDashboard() {
                         headers: { Authorization: `Bearer ${token}` }
                       });
                       setNotifCount(0); // Instantly clear badge
+                      window.dispatchEvent(new Event('notif-refresh')); // Notify other components
                     }
                   } catch (e) {
                     console.error('Failed to clear notifications:', e);
