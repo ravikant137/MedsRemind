@@ -49,24 +49,26 @@ export async function GET(
       return NextResponse.json({ error: 'Order not found' }, { status: 404 });
     }
 
-    // 2. Fetch Order Items
-    const { data: items } = await supabase
-      .from('order_items')
-      .select('*')
-      .eq('order_id', order.id);
+    // The medicines are already in the order.items column as a JSON string
+    let items = [];
+    try {
+      items = typeof order.items === 'string' ? JSON.parse(order.items) : (order.items || []);
+    } catch (e) {
+      items = [];
+    }
 
-    // 3. Fetch Status History
-    const { data: history, error: historyError } = await supabase
+    // 2. Fetch Status History
+    const { data: history } = await supabase
       .from('order_status_history')
       .select('*')
       .eq('order_id', order.id)
       .order('created_at', { ascending: true });
 
-    // Format the response to match what the frontend expects
-    const response = {
+    return NextResponse.json({
       ...order,
+      items: items,
+      history: history || [],
       user_name: order.users?.name || 'Customer',
-      items: items || [],
       statusHistory: history?.map(h => ({
         status: h.status,
         timestamp: h.created_at
@@ -74,9 +76,7 @@ export async function GET(
       // Default location if missing
       delivery_lat: order.delivery_lat || 12.9716,
       delivery_lng: order.delivery_lng || 77.5946
-    };
-
-    return NextResponse.json(response);
+    });
   } catch (err: any) {
     console.error('Track API Error:', err);
     return NextResponse.json({ error: 'Failed to fetch tracking details' }, { status: 500 });
