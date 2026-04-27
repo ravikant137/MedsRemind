@@ -82,7 +82,10 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (err: any) {
-    console.error('UPI Payment Success API Error:', err);
-    return NextResponse.json({ error: 'Failed to process UPI payment order' }, { status: 500 });
+    console.error('UPI Payment Route Error:', err);
+    return NextResponse.json({ 
+      error: err.message || 'Failed to process UPI payment order',
+      details: err.details || ''
+    }, { status: 500 });
   }
 }
