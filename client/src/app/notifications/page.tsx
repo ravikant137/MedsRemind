@@ -6,7 +6,7 @@ import axios from 'axios';
 import { API_URL } from '@/config';
 import { 
   ShieldAlert, ShoppingBag, CheckCircle, Clock, ArrowLeft, 
-  Bell, Loader2, Trash2, Info 
+  Bell, Loader2, Trash2, Info, ArrowRight
 } from 'lucide-react';
 
 export default function Notifications() {
@@ -116,9 +116,10 @@ export default function Notifications() {
                      <div className="h-[1px] bg-slate-200 flex-1"></div>
                   </div>
                   {grouped[label].map((notif: any) => {
-                    const orderIdMatch = notif.message.match(/#ORD-(\d+)/);
+                    // Improved regex to catch #ORD-123, ANJ-123, or just plain numbers in context
+                    const orderIdMatch = notif.message.match(/(?:#ORD-|ANJ-)?(\d+)/);
                     const orderId = orderIdMatch ? orderIdMatch[1] : null;
-                    const isOrder = notif.type?.includes('order');
+                    const isOrder = notif.type?.toLowerCase().includes('order');
 
                     return (
                       <motion.div 
@@ -147,12 +148,12 @@ export default function Notifications() {
                             </div>
                             <p className="text-slate-500 font-bold leading-relaxed mb-6">{notif.message}</p>
                             
-                            {isOrder && orderId && (
+                            {orderId && (
                               <button 
                                 onClick={() => router.push(`/track?id=${orderId}`)}
                                 className="flex items-center gap-3 px-6 py-3 bg-slate-900 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-green-600 transition-all shadow-lg"
                               >
-                                 <ShoppingBag className="w-4 h-4" /> Track Order #{orderId}
+                                 <ShoppingBag className="w-4 h-4" /> Track Order #{orderId} <ArrowRight className="w-3 h-3" />
                               </button>
                             )}
                          </div>

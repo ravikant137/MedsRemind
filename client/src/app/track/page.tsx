@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { Truck, Package, MapPin, CheckCircle, Clock, Search, ArrowRight, ShieldCheck, Box, Loader2, Zap, Radio, Navigation, User, Map as MapIcon } from 'lucide-react';
+import { Truck, Package, MapPin, CheckCircle, Clock, Search, ArrowRight, ShieldCheck, Box, Loader2, Zap, Radio, Navigation, User, Map as MapIcon, RefreshCw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import { API_URL } from '@/config';
@@ -27,22 +27,22 @@ function OrderTrackingContent() {
 
   const fetchTrackingInfo = useCallback(async (id: string, isSilent = false) => {
     if (!isSilent) setLoading(true);
-    const cleanId = String(id).replace(/#ORD-|ANJ-/, '').trim();
+    // Remove both #ORD- and ANJ- prefixes
+    const cleanId = String(id).replace(/#ORD-|ANJ-|ORD-/, '').trim();
+    const fetchUrl = `${API_URL}/api/track/${cleanId}`;
+    
     try {
-      const res = await axios.get(`${API_URL}/api/track/${cleanId}`);
+      const res = await axios.get(fetchUrl);
       const order = res.data;
       if (!order) throw new Error('Order not found');
       
-      // Safety: Parse items if they come back as a string
       let parsedItems = [];
       try {
         parsedItems = typeof order.items === 'string' ? JSON.parse(order.items) : (order.items || []);
       } catch (e) {
-        console.error('Failed to parse items:', e);
         parsedItems = [];
       }
       
-      // Handle SQLite/Supabase date format safely
       const parseDate = (dateStr: string) => {
         if (!dateStr) return new Date();
         if (!dateStr.includes('T') && dateStr.includes(' ')) {
@@ -56,8 +56,6 @@ function OrderTrackingContent() {
       estDelivery.setHours(estDelivery.getHours() + 2);
 
       const allSteps = ['ORDER_PLACED', 'CONFIRMED', 'PACKED', 'OUT_FOR_DELIVERY', 'DELIVERED'];
-      const historyMap: Record<string, Date> = {};
-      
       let currentStatus = order.status || 'ORDER_PLACED';
       if (currentStatus === 'PENDING') currentStatus = 'ORDER_PLACED';
       
@@ -95,7 +93,10 @@ function OrderTrackingContent() {
       setIsLive(order.status !== 'DELIVERED' && order.status !== 'CANCELLED');
     } catch (err: any) {
       console.error('Tracking Error:', err);
-      if (!isSilent) alert('Order details could not be loaded. Please try again.');
+      if (!isSilent) {
+        const errorDetail = err.response?.data?.error || err.message;
+        alert(`Failed to load order ${id}.\n\nURL: ${fetchUrl}\nError: ${errorDetail}\n\nPlease ensure your Order ID is correct and the backend is running.`);
+      }
       setIsLive(false);
     } finally {
       if (!isSilent) setLoading(false);
@@ -115,7 +116,7 @@ function OrderTrackingContent() {
     if (isLive && trackingData?.rawId) {
       interval = setInterval(() => {
         fetchTrackingInfo(trackingData.rawId, true);
-      }, 5000);
+      }, 10000); // Polling every 10s
     }
     return () => clearInterval(interval);
   }, [isLive, trackingData?.rawId, fetchTrackingInfo]);
@@ -129,7 +130,6 @@ function OrderTrackingContent() {
   return (
     <div className="min-h-screen bg-slate-50 pt-6 px-6 pb-20 overflow-hidden relative">
       <div className="absolute top-0 right-0 w-96 h-96 bg-green-200/40 rounded-full blur-[100px] -z-10"></div>
-      <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-100/40 rounded-full blur-[100px] -z-10"></div>
       
       <div className="max-w-4xl mx-auto">
         <header className="text-center mb-16 space-y-6">
@@ -170,9 +170,9 @@ function OrderTrackingContent() {
              <div className="flex flex-col md:flex-row items-center justify-between gap-8 relative z-10">
                 <div>
                    <h3 className="text-xl font-black text-white flex items-center gap-3">
-                     <Radio className="w-5 h-5 text-green-500 animate-pulse" /> Admin Control Center
+                     <Radio className="w-5 h-5 text-green-500 animate-pulse" /> Admin Control
                    </h3>
-                   <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-1">Directly managing order #{trackingData.rawId}</p>
+                   <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-1">Managing Order #{trackingData.rawId}</p>
                 </div>
                 <div className="flex flex-wrap items-center gap-4">
                    <select 
@@ -181,15 +181,6 @@ function OrderTrackingContent() {
                         try {
                           const config = { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } };
                           await axios.patch(`${API_URL}/api/orders/${trackingData.rawId}/status`, { status: e.target.value }, config);
-                          
-                          // Send notification
-                          await axios.post(`${API_URL}/api/notifications`, {
-                            user_id: trackingData.rawUserId || (await axios.get(`${API_URL}/api/orders/${trackingData.rawId}`)).data.user_id,
-                            title: `Order Update: ${e.target.value.replace(/_/g, ' ')}`,
-                            message: `Your order ${trackingData.rawId} is now ${e.target.value.replace(/_/g, ' ')}.`,
-                            type: 'order'
-                          }, config);
-
                           fetchTrackingInfo(trackingData.rawId);
                         } catch (err) {
                           alert('Update failed');
@@ -204,12 +195,6 @@ function OrderTrackingContent() {
                       <option value="DELIVERED" className="text-slate-900">Delivered</option>
                       <option value="CANCELLED" className="text-slate-900">Cancelled</option>
                    </select>
-                   <button 
-                     onClick={() => router.push('/admin')}
-                     className="px-6 py-3 bg-green-600 text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-green-700 transition-all shadow-lg"
-                   >
-                      Full Registry
-                   </button>
                 </div>
              </div>
           </motion.div>
@@ -225,7 +210,7 @@ function OrderTrackingContent() {
               <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-green-600 w-6 h-6 transition-colors" />
               <input 
                 type="text" 
-                placeholder="Enter Order ID (e.g. #ORD-7)" 
+                placeholder="Enter Order ID (e.g. ANJ-9939)" 
                 value={orderId}
                 onChange={(e) => setOrderId(e.target.value)}
                 className="w-full pl-16 pr-8 py-6 rounded-[2.5rem] bg-slate-50 border-none focus:ring-4 focus:ring-green-500/10 font-bold text-lg transition-all"
@@ -242,234 +227,101 @@ function OrderTrackingContent() {
           </form>
         </motion.div>
 
-        {/* Live Visual Map */}
-        {trackingData && trackingData.status !== 'CANCELLED' && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-white p-6 rounded-[3.5rem] border border-slate-100 shadow-2xl mb-12 relative overflow-hidden"
+        {trackingData && (
+          <motion.div 
+            key={trackingData.id}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="space-y-10"
           >
-            <div className="flex justify-between items-center mb-6 px-4">
-               <div>
-                  <h3 className="text-xl font-black text-slate-900 flex items-center gap-2">
-                    <MapIcon className="w-5 h-5 text-green-600" /> Live Delivery Map
-                  </h3>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Real-time GPS Simulation</p>
-               </div>
-               <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-600 rounded-lg text-[10px] font-black uppercase tracking-wider">
-                    <Navigation className="w-3 h-3" /> {trackingData.location.lat.toFixed(4)}, {trackingData.location.lng.toFixed(4)}
+             <div className="grid md:grid-cols-3 gap-8">
+                {[
+                  { label: 'Status', value: trackingData.status, icon: Package, color: 'text-green-600', bg: 'bg-green-50', live: isLive },
+                  { label: trackingData.isDelivered ? 'Actual Arrival' : 'Estimated Arrival', value: trackingData.estimated_delivery, icon: trackingData.isDelivered ? CheckCircle : Clock, color: trackingData.isDelivered ? 'text-green-600' : 'text-blue-600', bg: trackingData.isDelivered ? 'bg-green-50' : 'bg-blue-50' },
+                  { label: 'Shipping To', value: trackingData.address, icon: MapPin, color: 'text-purple-600', bg: 'bg-purple-50' }
+                ].map((stat, i) => (
+                  <div key={i} className="bg-white p-8 rounded-[3rem] border border-slate-100 shadow-xl relative overflow-hidden group">
+                     {stat.live && (
+                       <div className="absolute top-0 right-0 p-4">
+                         <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                       </div>
+                     )}
+                     <div className={`w-12 h-12 ${stat.bg} ${stat.color} rounded-xl flex items-center justify-center mb-6 shadow-inner group-hover:scale-110 transition-transform`}>
+                        <stat.icon className="w-6 h-6" />
+                     </div>
+                     <p className="text-slate-400 text-xs font-black uppercase tracking-widest mb-1">{stat.label}</p>
+                     <p className="font-black text-slate-900 leading-tight">{stat.value}</p>
                   </div>
-               </div>
-            </div>
+                ))}
+             </div>
 
-            <div className="relative h-[400px] bg-slate-50 rounded-[2.5rem] overflow-hidden border border-slate-100">
-               {/* Decorative Map Grid */}
-               <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(#000 1px, transparent 1px)', backgroundSize: '30px 30px' }}></div>
-               
-               {/* Simulated Route Line */}
-               <svg className="absolute inset-0 w-full h-full pointer-events-none">
-                  <motion.path
-                    d="M 100 300 Q 400 200 700 100"
-                    fill="none"
-                    stroke="#e2e8f0"
-                    strokeWidth="4"
-                    strokeDasharray="10,10"
-                  />
-                  <motion.path
-                    d="M 100 300 Q 400 200 700 100"
-                    fill="none"
-                    stroke="#22c55e"
-                    strokeWidth="4"
-                    initial={{ pathLength: 0 }}
-                    animate={{ pathLength: trackingData.status === 'DELIVERED' ? 1 : 0.6 }}
-                    transition={{ duration: 2 }}
-                  />
-               </svg>
+             <div className="grid lg:grid-cols-2 gap-10">
+                <div className="bg-white p-12 rounded-[4rem] border border-slate-100 shadow-2xl relative overflow-hidden">
+                   <div className="flex justify-between items-center mb-12">
+                      <h3 className="text-2xl font-black text-slate-900">Journey Details</h3>
+                      <button onClick={() => fetchTrackingInfo(trackingData.rawId)} className="p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-all">
+                        <RefreshCw className={`w-5 h-5 text-slate-400 ${loading ? 'animate-spin' : ''}`} />
+                      </button>
+                   </div>
+                   <div className="relative space-y-12">
+                      <div className="absolute left-6 top-2 bottom-2 w-1 bg-slate-100 rounded-full"></div>
+                      {trackingData.steps.map((step: any, i: number) => (
+                        <div key={i} className="flex gap-10 relative z-10">
+                           <div className={`w-12 h-12 rounded-full flex items-center justify-center shadow-lg border-4 border-white transition-all duration-500 ${
+                             step.completed ? 'bg-green-600 text-white' : 
+                             step.isCurrent ? 'bg-green-500 text-white animate-pulse shadow-green-200' :
+                             'bg-slate-200 text-slate-400'
+                           }`}>
+                              {step.completed ? <CheckCircle className="w-6 h-6" /> : <Clock className="w-6 h-6" />}
+                           </div>
+                           <div>
+                              <h4 className={`text-xl font-black transition-colors duration-500 ${step.completed || step.isCurrent ? 'text-slate-900' : 'text-slate-400'}`}>
+                                {step.status}
+                                {step.isCurrent && <Zap className="inline-block w-4 h-4 ml-2 text-yellow-500 fill-yellow-500 animate-bounce" />}
+                              </h4>
+                              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{step.time}</p>
+                           </div>
+                        </div>
+                      ))}
+                   </div>
+                </div>
 
-               {/* Origin Marker (Pharmacy) */}
-               <div className="absolute left-[100px] top-[300px] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
-                  <div className="bg-slate-900 text-white p-3 rounded-2xl shadow-xl border-4 border-white z-10">
-                     <Package className="w-5 h-5" />
-                  </div>
-                  <p className="mt-2 text-[10px] font-black text-slate-900 bg-white/80 backdrop-blur-sm px-2 py-1 rounded-md shadow-sm uppercase tracking-tighter">Pharmacy</p>
-               </div>
-
-               {/* Destination Marker (User) */}
-               <div className="absolute right-[100px] top-[100px] translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
-                  <div className="bg-blue-600 text-white p-3 rounded-2xl shadow-xl border-4 border-white z-10">
-                     <User className="w-5 h-5" />
-                  </div>
-                  <p className="mt-2 text-[10px] font-black text-blue-600 bg-white/80 backdrop-blur-sm px-2 py-1 rounded-md shadow-sm uppercase tracking-tighter">You</p>
-               </div>
-
-               {/* Delivery Agent Marker (Live) */}
-               {trackingData.status !== 'DELIVERED' && trackingData.status !== 'ORDER_PLACED' && (
-                 <motion.div 
-                   animate={{ 
-                     left: `${100 + (600 * (trackingData.status === 'OUT_FOR_DELIVERY' ? 0.6 : 0.2))}px`,
-                     top: `${300 - (200 * (trackingData.status === 'OUT_FOR_DELIVERY' ? 0.6 : 0.2))}px`
-                   }}
-                   className="absolute -translate-x-1/2 -translate-y-1/2 z-20 flex flex-col items-center"
-                 >
-                    <div className="bg-green-600 text-white p-4 rounded-full shadow-2xl border-4 border-white relative">
-                       <Truck className="w-6 h-6" />
-                       <div className="absolute -inset-2 bg-green-500/30 rounded-full animate-ping -z-10"></div>
-                    </div>
-                    <div className="mt-3 bg-slate-900 text-white px-4 py-1.5 rounded-full text-[10px] font-black flex items-center gap-2 shadow-xl uppercase tracking-widest">
-                       <span className="relative flex h-2 w-2">
-                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                         <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-                       </span>
-                       In Transit
-                    </div>
-                 </motion.div>
-               )}
-
-               {/* Arrived Marker */}
-               {trackingData.status === 'DELIVERED' && (
-                 <motion.div 
-                   initial={{ scale: 0 }}
-                   animate={{ scale: 1 }}
-                   className="absolute right-[100px] top-[100px] translate-x-1/2 -translate-y-1/2 z-30"
-                 >
-                    <div className="bg-green-600 text-white p-6 rounded-full shadow-2xl border-4 border-white flex flex-col items-center">
-                       <CheckCircle className="w-8 h-8" />
-                       <p className="mt-2 text-[10px] font-black uppercase tracking-tighter">Delivered</p>
-                    </div>
-                 </motion.div>
-               )}
-
-               {/* Map Overlay Info */}
-               <div className="absolute bottom-8 left-8 right-8 flex justify-between items-end pointer-events-none">
-                  <div className="bg-white/90 backdrop-blur-md p-4 rounded-2xl shadow-xl border border-white/20">
-                     <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Current Delivery Speed</p>
-                     <p className="text-xl font-black text-slate-900">45 km/h <span className="text-green-600 text-xs font-bold">AVG</span></p>
-                  </div>
-                  <div className="bg-slate-900 text-white p-6 rounded-[2rem] shadow-2xl">
-                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Time Remaining</p>
-                     <p className="text-3xl font-black text-green-500">12 MINS</p>
-                  </div>
-               </div>
-            </div>
+                <div className="bg-white p-12 rounded-[4rem] border border-slate-100 shadow-2xl flex flex-col">
+                   <h3 className="text-2xl font-black text-slate-900 mb-12">Order Summary</h3>
+                   <div className="space-y-6 mb-10 flex-1 overflow-y-auto max-h-[500px] pr-2 custom-scrollbar">
+                       {trackingData.items && trackingData.items.length > 0 ? (
+                         trackingData.items.map((item: any, i: number) => (
+                           <div key={i} className="flex justify-between items-center p-6 bg-slate-50 rounded-[2.5rem]">
+                              <div className="flex items-center gap-5">
+                                 <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-3xl shadow-sm">💊</div>
+                                 <div>
+                                    <p className="font-black text-slate-900">{item.name || item.medicine_name || 'Medicine'}</p>
+                                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Qty: {item.quantity}</p>
+                                 </div>
+                              </div>
+                              <p className="font-black text-slate-900 text-lg">₹{Number(item.price || item.price_at_time || 0).toFixed(2)}</p>
+                           </div>
+                         ))
+                       ) : (
+                        <div className="flex flex-col items-center justify-center py-20 opacity-20">
+                           <Box className="w-16 h-16 mb-4 text-slate-900" />
+                           <p className="font-black text-slate-900 uppercase tracking-widest text-xs">No items found</p>
+                        </div>
+                      )}
+                   </div>
+                   <div className="p-8 bg-slate-900 text-white rounded-[3rem] shadow-2xl mt-6">
+                      <div className="flex justify-between items-end">
+                         <div>
+                            <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Grand Total</p>
+                            <p className="text-5xl font-black text-green-500">₹{Number(trackingData.total_amount).toFixed(2)}</p>
+                         </div>
+                         <ShieldCheck className="w-12 h-12 text-white/20" />
+                      </div>
+                   </div>
+                </div>
+             </div>
           </motion.div>
         )}
-
-        <AnimatePresence mode="wait">
-          {trackingData && (
-            <motion.div 
-              key={trackingData.id}
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="space-y-10"
-            >
-               <div className="grid md:grid-cols-3 gap-8">
-                  {[
-                    { label: 'Status', value: trackingData.status, icon: Package, color: 'text-green-600', bg: 'bg-green-50', live: isLive },
-                    { label: trackingData.isDelivered ? 'Actual Arrival' : 'Estimated Arrival', value: trackingData.estimated_delivery, icon: trackingData.isDelivered ? CheckCircle : Clock, color: trackingData.isDelivered ? 'text-green-600' : 'text-blue-600', bg: trackingData.isDelivered ? 'bg-green-50' : 'bg-blue-50' },
-                    { label: 'Shipping To', value: trackingData.address, icon: MapPin, color: 'text-purple-600', bg: 'bg-purple-50' }
-                  ].map((stat, i) => (
-                    <div key={i} className="bg-white p-8 rounded-[3rem] border border-slate-100 shadow-xl shadow-slate-100/50 relative overflow-hidden group">
-                       {stat.live && (
-                         <div className="absolute top-0 right-0 p-4">
-                           <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                         </div>
-                       )}
-                       <div className={`w-12 h-12 ${stat.bg} ${stat.color} rounded-xl flex items-center justify-center mb-6 shadow-inner group-hover:scale-110 transition-transform`}>
-                          <stat.icon className="w-6 h-6" />
-                       </div>
-                       <p className="text-slate-400 text-xs font-black uppercase tracking-widest mb-1">{stat.label}</p>
-                       <p className="font-black text-slate-900 leading-tight">{stat.value}</p>
-                    </div>
-                  ))}
-               </div>
-
-               <div className="grid lg:grid-cols-2 gap-10">
-                  <div className="bg-white p-12 rounded-[4rem] border border-slate-100 shadow-2xl relative overflow-hidden">
-                     <div className="flex justify-between items-center mb-12">
-                        <h3 className="text-2xl font-black text-slate-900">Journey Details</h3>
-                        <div className="flex items-center gap-4">
-                           {isLive && <span className="text-[10px] font-black text-green-600 bg-green-50 px-3 py-1 rounded-full animate-pulse">LIVE UPDATES</span>}
-                           <button 
-                             onClick={async () => {
-                               try {
-                                 await axios.get(`${API_URL}/api/simulate/${trackingData.rawId}`);
-                                 fetchTrackingInfo(trackingData.rawId, true);
-                               } catch (err) {
-                                 console.error(err);
-                               }
-                             }}
-                             className="text-[10px] font-black text-white bg-slate-900 px-4 py-2 rounded-xl hover:bg-green-600 transition-all shadow-lg"
-                           >
-                              SIMULATE
-                           </button>
-                        </div>
-                     </div>
-                     <div className="relative space-y-12">
-                        <div className="absolute left-6 top-2 bottom-2 w-1 bg-slate-100 rounded-full"></div>
-                        {trackingData.steps.map((step: any, i: number) => (
-                          <div key={i} className="flex gap-10 relative z-10">
-                             <div className={`w-12 h-12 rounded-full flex items-center justify-center shadow-lg border-4 border-white transition-all duration-500 ${
-                               step.completed ? 'bg-green-600 text-white' : 
-                               step.isCurrent ? 'bg-green-500 text-white animate-pulse shadow-green-200' :
-                               'bg-slate-200 text-slate-400'
-                             }`}>
-                                {step.completed ? <CheckCircle className="w-6 h-6" /> : <Clock className="w-6 h-6" />}
-                             </div>
-                             <div>
-                                <h4 className={`text-xl font-black transition-colors duration-500 ${step.completed || step.isCurrent ? 'text-slate-900' : 'text-slate-400'}`}>
-                                  {step.status}
-                                  {step.isCurrent && <Zap className="inline-block w-4 h-4 ml-2 text-yellow-500 fill-yellow-500 animate-bounce" />}
-                                </h4>
-                                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{step.time}</p>
-                             </div>
-                          </div>
-                        ))}
-                     </div>
-                  </div>
-
-                  <div className="bg-white p-12 rounded-[4rem] border border-slate-100 shadow-2xl flex flex-col">
-                     <h3 className="text-2xl font-black text-slate-900 mb-12">Order Summary</h3>
-                     <div className="space-y-6 mb-10 flex-1 overflow-y-auto max-h-[500px] pr-2 custom-scrollbar">
-                         {trackingData.items && trackingData.items.length > 0 ? (
-                           trackingData.items.map((item: any, i: number) => (
-                             <div key={i} className="flex justify-between items-center p-6 bg-slate-50 rounded-[2.5rem] border border-transparent">
-                                <div className="flex items-center gap-5">
-                                   <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-3xl shadow-sm">💊</div>
-                                   <div>
-                                      <p className="font-black text-slate-900">{item.name || item.medicine_name || 'Medicine'}</p>
-                                      <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
-                                        Qty: {item.quantity} × ₹{item.price || item.price_at_time || 0}
-                                      </p>
-                                   </div>
-                                </div>
-                                <p className="font-black text-slate-900 text-lg">
-                                  ₹{(item.quantity * (item.price || item.price_at_time || 0)).toFixed(2)}
-                                </p>
-                             </div>
-                           ))
-                         ) : (
-                          <div className="flex flex-col items-center justify-center py-20 opacity-20">
-                             <Box className="w-16 h-16 mb-4 text-slate-900" />
-                             <p className="font-black text-slate-900 uppercase tracking-widest text-xs">No items found</p>
-                          </div>
-                        )}
-                     </div>
-                     <div className="p-8 bg-slate-900 text-white rounded-[3rem] shadow-2xl mt-6">
-                        <div className="flex justify-between items-end">
-                           <div>
-                              <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Grand Total</p>
-                              <p className="text-5xl font-black text-green-500">₹{Number(trackingData.total_amount).toFixed(2)}</p>
-                           </div>
-                           <ShieldCheck className="w-12 h-12 text-white/20" />
-                        </div>
-                     </div>
-                  </div>
-               </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </div>
     </div>
   );
