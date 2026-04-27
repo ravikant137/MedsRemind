@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
     
     const token = authHeader.split(' ')[1];
     const decoded: any = jwt.verify(token, JWT_SECRET);
-    const userId = parseInt(decoded.id);
+    const userId = decoded.id;
     
     // Mark all unread notifications as read for this user
     const { data, error } = await supabase

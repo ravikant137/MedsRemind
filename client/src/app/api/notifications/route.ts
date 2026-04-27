@@ -50,7 +50,7 @@ export async function DELETE(request: NextRequest) {
     
     const token = authHeader.split(' ')[1];
     const decoded: any = jwt.verify(token, JWT_SECRET);
-    const userId = parseInt(decoded.id);
+    const userId = decoded.id;
 
     const { error } = await supabase
       .from('notifications')
