@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { 
   LayoutDashboard, Package, ShoppingBag, Users, TrendingUp, 
   AlertTriangle, Search, Plus, ExternalLink, Trash2, 
-  Edit3, CheckCircle, Clock, XCircle, ChevronRight, ChevronLeft, Loader2, X,
+  Edit3, CheckCircle, Clock, XCircle, ChevronRight, ChevronLeft, Loader2, X, Menu,
   BarChart3, PieChart, Activity, DollarSign, Calendar, ArrowLeft, LogOut, Camera, ShieldAlert, Bell
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -18,6 +18,7 @@ export default function AdminDashboard() {
   const [timeRange, setTimeRange] = useState('ALL');
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [stats, setStats] = useState({ 
     revenue: 0, 
     orders: 0, 
@@ -672,22 +673,51 @@ export default function AdminDashboard() {
         )}
       </AnimatePresence>
 
+      {/* Mobile Menu Toggle Button */}
+      <button 
+        onClick={() => setIsMobileMenuOpen(true)}
+        className="lg:hidden fixed bottom-8 right-8 z-[70] w-16 h-16 bg-green-600 text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-all active:scale-95"
+      >
+        <Menu className="w-8 h-8" />
+      </button>
+
+      {/* Sidebar Overlay for Mobile */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[55] lg:hidden"
+          />
+        )}
+      </AnimatePresence>
+
       <aside 
         onMouseEnter={() => isCollapsed && setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        className={`${(isCollapsed && !isHovered) ? 'w-24' : 'w-80'} bg-slate-900 text-white hidden lg:flex flex-col p-10 fixed h-full z-[60] transition-all duration-300 shadow-2xl shadow-black/50`}
+        className={`${(isCollapsed && !isHovered) ? 'w-24' : 'w-80'} bg-slate-900 text-white fixed lg:flex flex-col p-10 h-full z-[60] transition-all duration-300 shadow-2xl shadow-black/50 ${isMobileMenuOpen ? 'flex left-0' : 'hidden lg:flex -left-full lg:left-0'}`}
       >
         <div className="flex items-center justify-between mb-16">
-           <div className={`flex items-center gap-5 ${(isCollapsed && !isHovered) ? 'hidden' : 'flex'}`}>
+           <div className={`flex items-center gap-5 ${(isCollapsed && !isHovered) && !isMobileMenuOpen ? 'hidden' : 'flex'}`}>
               <Logo className="w-12 h-12" />
               <span className="text-2xl font-black tracking-tighter text-white">Admin <span className="text-green-500">Panel</span></span>
            </div>
-           <button 
-             onClick={() => { setIsCollapsed(!isCollapsed); setIsHovered(false); }}
-             className={`p-3 bg-white/5 hover:bg-green-600 rounded-xl transition-all text-white ${(isCollapsed && !isHovered) ? 'mx-auto' : ''}`}
-           >
-              {isCollapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
-           </button>
+           <div className="flex items-center gap-2">
+              <button 
+                onClick={() => { setIsCollapsed(!isCollapsed); setIsHovered(false); }}
+                className={`p-3 bg-white/5 hover:bg-green-600 rounded-xl transition-all text-white ${(isCollapsed && !isHovered) && !isMobileMenuOpen ? 'mx-auto' : ''} hidden lg:block`}
+              >
+                {isCollapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
+              </button>
+              <button 
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="p-3 bg-white/5 hover:bg-red-600 rounded-xl transition-all text-white lg:hidden"
+              >
+                <X className="w-6 h-6" />
+              </button>
+           </div>
         </div>
         
         <nav className="flex-1 space-y-4">
@@ -701,29 +731,29 @@ export default function AdminDashboard() {
           ].map((item) => (
             <button 
               key={item.name} 
-              onClick={() => setActiveTab(item.name)}
-              className={`w-full flex items-center ${(isCollapsed && !isHovered) ? 'justify-center' : 'gap-5'} px-6 py-4 rounded-2xl transition-all ${activeTab === item.name ? 'bg-green-600 text-white shadow-xl shadow-green-600/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
+              onClick={() => { setActiveTab(item.name); setIsMobileMenuOpen(false); }}
+              className={`w-full flex items-center ${(isCollapsed && !isHovered) && !isMobileMenuOpen ? 'justify-center' : 'gap-5'} px-6 py-4 rounded-2xl transition-all ${activeTab === item.name ? 'bg-green-600 text-white shadow-xl shadow-green-600/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
               title={(isCollapsed && !isHovered) ? item.name : ''}
             >
                <item.icon className="w-6 h-6 flex-shrink-0" />
-               {!(isCollapsed && !isHovered) && <span className="font-black tracking-wide">{item.name}</span>}
+               {(!((isCollapsed && !isHovered)) || isMobileMenuOpen) && <span className="font-black tracking-wide">{item.name}</span>}
             </button>
           ))}
         </nav>
 
         <div className="pt-8 border-t border-white/5 space-y-4">
-          <Link href="/" className={`w-full flex items-center ${(isCollapsed && !isHovered) ? 'justify-center' : 'gap-5'} px-6 py-4 rounded-2xl text-slate-400 hover:text-white hover:bg-white/5 transition-all`} title={(isCollapsed && !isHovered) ? 'Exit' : ''}>
+          <Link href="/" className={`w-full flex items-center ${(isCollapsed && !isHovered) && !isMobileMenuOpen ? 'justify-center' : 'gap-5'} px-6 py-4 rounded-2xl text-slate-400 hover:text-white hover:bg-white/5 transition-all`} title={(isCollapsed && !isHovered) ? 'Exit' : ''}>
              <ArrowLeft className="w-6 h-6 flex-shrink-0" />
-             {!(isCollapsed && !isHovered) && <span className="font-black tracking-wide">Exit to Site</span>}
+             {(!((isCollapsed && !isHovered)) || isMobileMenuOpen) && <span className="font-black tracking-wide">Exit to Site</span>}
           </Link>
-          <button onClick={() => { localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.href='/login'; }} className={`w-full flex items-center ${(isCollapsed && !isHovered) ? 'justify-center' : 'gap-5'} px-6 py-4 rounded-2xl text-red-400 hover:text-white hover:bg-red-600 transition-all`} title={(isCollapsed && !isHovered) ? 'Logout' : ''}>
+          <button onClick={() => { localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.href='/login'; }} className={`w-full flex items-center ${(isCollapsed && !isHovered) && !isMobileMenuOpen ? 'justify-center' : 'gap-5'} px-6 py-4 rounded-2xl text-red-400 hover:text-white hover:bg-red-600 transition-all`} title={(isCollapsed && !isHovered) ? 'Logout' : ''}>
              <LogOut className="w-6 h-6 flex-shrink-0" />
-             {!(isCollapsed && !isHovered) && <span className="font-black tracking-wide">Logout</span>}
+             {(!((isCollapsed && !isHovered)) || isMobileMenuOpen) && <span className="font-black tracking-wide">Logout</span>}
           </button>
         </div>
       </aside>
 
-      <main className={`flex-1 ${isCollapsed ? 'lg:ml-24' : 'lg:ml-80'} p-12 transition-all duration-300`}>
+      <main className={`flex-1 ${isCollapsed ? 'lg:ml-24' : 'lg:ml-80'} p-6 md:p-12 transition-all duration-300`}>
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-16 gap-8">
            <div>
               <h1 className="text-4xl font-black text-slate-900 tracking-tight">{activeTab}</h1>

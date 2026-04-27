@@ -135,7 +135,7 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 pt-6 px-6 pb-24 overflow-x-hidden">
+    <div className="min-h-screen bg-slate-50 pt-4 md:pt-6 px-4 md:px-6 pb-24 overflow-x-hidden">
       {/* Background Decor */}
       <div className="absolute top-0 right-0 w-[40rem] h-[40rem] bg-green-100/30 rounded-full blur-[120px] -z-10 animate-pulse"></div>
       <div className="absolute bottom-0 left-0 w-[30rem] h-[30rem] bg-blue-100/20 rounded-full blur-[100px] -z-10"></div>
@@ -145,16 +145,16 @@ export default function Dashboard() {
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white p-8 md:p-10 rounded-[3rem] shadow-xl shadow-slate-200/50 mb-8 relative overflow-hidden group border border-white"
+          className="bg-white p-6 md:p-10 rounded-[2rem] md:rounded-[3rem] shadow-xl shadow-slate-200/50 mb-8 relative overflow-hidden group border border-white"
         >
            <div className="absolute top-0 right-0 p-10 opacity-5 group-hover:scale-110 transition-transform duration-700">
               <Pill className="w-64 h-64 text-slate-900" />
            </div>
            <div className="relative z-10 flex flex-col md:flex-row items-center gap-10">
-              <div className="relative">
-                 <div className="w-32 h-32 md:w-40 md:h-40 bg-gradient-to-tr from-green-600 to-green-400 rounded-[3rem] flex items-center justify-center text-white text-5xl font-black shadow-2xl shadow-green-200">
+               <div className="relative">
+                  <div className="w-24 h-24 md:w-40 md:h-40 bg-gradient-to-tr from-green-600 to-green-400 rounded-[2rem] md:rounded-[3rem] flex items-center justify-center text-white text-3xl md:text-5xl font-black shadow-2xl shadow-green-200">
                     {user?.name?.[0]}
-                 </div>
+                  </div>
                  <div className="absolute -bottom-2 -right-2 w-12 h-12 bg-slate-900 text-white rounded-2xl flex items-center justify-center border-4 border-white">
                     <ShieldCheck className="w-6 h-6" />
                  </div>
@@ -191,9 +191,9 @@ export default function Dashboard() {
                initial={{ opacity: 0, y: 20 }}
                animate={{ opacity: 1, y: 0 }}
                transition={{ delay: i * 0.1 }}
-               whileHover={{ y: -5 }}
-               className="bg-white p-8 rounded-[3rem] shadow-xl shadow-slate-100/50 border border-slate-50 flex items-center gap-6"
-             >
+                whileHover={{ y: -5 }}
+                className="bg-white p-6 md:p-8 rounded-[2rem] md:rounded-[3rem] shadow-xl shadow-slate-100/50 border border-slate-50 flex items-center gap-4 md:gap-6"
+              >
                 <div className={`w-16 h-16 rounded-2xl flex items-center justify-center ${stat.color}`}>
                    <stat.icon className="w-8 h-8" />
                 </div>
@@ -207,8 +207,8 @@ export default function Dashboard() {
 
         <div className="grid lg:grid-cols-3 gap-12">
            {/* Timeline & Reminders */}
-           <div className="lg:col-span-2 space-y-10">
-              <section className="bg-white p-10 rounded-[4rem] shadow-2xl shadow-slate-100/50 border border-slate-50">
+           <div className="lg:col-span-2 space-y-6 md:space-y-10">
+              <section className="bg-white p-6 md:p-10 rounded-[2.5rem] md:rounded-[4rem] shadow-2xl shadow-slate-100/50 border border-slate-50">
                  <div className="flex justify-between items-center mb-10">
                     <h3 className="text-2xl font-black text-slate-900 flex items-center gap-3">
                        <Clock className="w-7 h-7 text-green-600" /> Today's Meds
@@ -238,7 +238,7 @@ export default function Dashboard() {
                                <h4 className="text-xl font-black text-slate-900">{rem.medicine_name}</h4>
                                <p className="text-sm text-slate-400 font-bold">{rem.dosage} • {rem.frequency}</p>
                             </div>
-                            <div className="flex items-center gap-3">
+                            <div className="flex flex-col sm:flex-row items-center gap-3">
                                <button 
                                  onClick={() => playVoiceReminder(rem)}
                                  className="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center hover:bg-blue-100"
@@ -258,7 +258,7 @@ export default function Dashboard() {
                  )}
               </section>
 
-               <section className="bg-white p-10 rounded-[4rem] shadow-2xl shadow-slate-100/50 border border-slate-50">
+               <section className="bg-white p-6 md:p-10 rounded-[2.5rem] md:rounded-[4rem] shadow-2xl shadow-slate-100/50 border border-slate-50">
                   <h3 className="text-2xl font-black text-slate-900 mb-8 flex items-center gap-3">
                      <History className="w-7 h-7 text-blue-600" /> Recent Activity
                   </h3>
