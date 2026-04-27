@@ -183,20 +183,28 @@ export default function Navbar() {
             </div>
           </div>
 
-          {/* Mobile Actions (Notifications) - Hidden on Desktop */}
-          <div className="flex xl:hidden items-center gap-4">
+          {/* Mobile Actions (Notifications & Profile) - Hidden on Desktop */}
+          <div className="flex xl:hidden items-center gap-3">
             {user && (
-              <Link 
-                href="/notifications" 
-                className="relative p-2 text-gray-400 hover:text-[#003366] transition-colors"
-              >
-                <Bell className="w-6 h-6" />
-                {notifCount > 0 && (
-                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-600 text-white text-[10px] font-black rounded-full flex items-center justify-center border-2 border-white shadow-lg">
-                    {notifCount}
-                  </span>
-                )}
-              </Link>
+              <>
+                <Link 
+                  href="/notifications" 
+                  className="relative p-2 text-gray-400 hover:text-[#003366] transition-colors"
+                >
+                  <Bell className="w-6 h-6" />
+                  {notifCount > 0 && (
+                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-600 text-white text-[10px] font-black rounded-full flex items-center justify-center border-2 border-white shadow-lg">
+                      {notifCount}
+                    </span>
+                  )}
+                </Link>
+                <Link 
+                  href="/profile" 
+                  className="w-9 h-9 bg-[#2e7d32] text-white rounded-full flex items-center justify-center font-black shadow-md border-2 border-white"
+                >
+                  {user.name?.[0] || 'A'}
+                </Link>
+              </>
             )}
           </div>
         </div>

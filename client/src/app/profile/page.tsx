@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { User, Mail, Phone, MapPin, ShieldCheck, Edit3, Save, Camera, ArrowLeft, Loader2, Heart, Activity, ShoppingBag } from 'lucide-react';
+import { User, Mail, Phone, MapPin, ShieldCheck, Edit3, Save, Camera, ArrowLeft, Loader2, Heart, Activity, ShoppingBag, LogOut, Download } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 
@@ -40,6 +40,13 @@ export default function Profile() {
     setUser(updatedUser);
     setIsEditing(false);
     alert('Profile updated successfully!');
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    router.push('/login');
+    window.location.reload();
   };
 
   if (loading) return (
@@ -105,6 +112,29 @@ export default function Profile() {
                   <span className="font-black text-lg">12 Total</span>
                 </div>
               </div>
+            </div>
+
+            <div className="space-y-4">
+              <button 
+                onClick={() => {
+                  const event = new Event('beforeinstallprompt');
+                  window.dispatchEvent(event);
+                  alert('If your browser supports it, the install prompt will appear now.');
+                }}
+                className="w-full flex items-center justify-between p-6 bg-white rounded-2xl border border-slate-100 group hover:bg-green-50 transition-all"
+              >
+                <span className="font-black text-slate-600 flex items-center gap-3 text-sm">
+                  <Download className="w-5 h-5 text-green-600" /> Install App
+                </span>
+              </button>
+              <button 
+                onClick={handleLogout}
+                className="w-full flex items-center justify-between p-6 bg-red-50 rounded-2xl border border-red-100 group hover:bg-red-100 transition-all"
+              >
+                <span className="font-black text-red-600 flex items-center gap-3 text-sm">
+                  <LogOut className="w-5 h-5" /> Logout Session
+                </span>
+              </button>
             </div>
           </div>
 
