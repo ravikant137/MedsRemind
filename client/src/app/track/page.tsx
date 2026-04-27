@@ -65,7 +65,8 @@ function OrderTrackingContent() {
       const mappedSteps = allSteps.map((step, index) => {
          const isCompleted = index <= currentStepIndex;
          const isCurrent = index === currentStepIndex && order.status !== 'DELIVERED';
-         const label = step.replace(/_/g, ' ');
+         let label = step.replace(/_/g, ' ');
+         if (step === 'CONFIRMED') label = 'PAYMENT SUCCESS';
          return { status: label, time: isCompleted ? 'Success' : 'Pending', completed: isCompleted, isCurrent };
       });
 
@@ -74,10 +75,13 @@ function OrderTrackingContent() {
         ? parseDate(order.updated_at || order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         : estDelivery.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
+      const rawStatus = order.status || 'ORDER_PLACED';
+      const displayStatus = rawStatus === 'CONFIRMED' ? 'PAYMENT SUCCESS' : rawStatus.replace(/_/g, ' ');
+
       setTrackingData({
         id: String(order.id).startsWith('ANJ-') ? order.id : `#ORD-${order.id}`,
         rawId: order.id,
-        status: (order.status || 'ORDER_PLACED').replace(/_/g, ' '),
+        status: displayStatus,
         customer: order.user_name || 'Customer',
         address: order.address || 'Delivery Address',
         total_amount: order.total_amount || 0,
