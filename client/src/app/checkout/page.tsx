@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { CreditCard, Truck, ShieldCheck, ArrowRight, Loader2, MapPin, CheckCircle } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import { API_URL } from '@/config';
 import { useRouter } from 'next/navigation';
