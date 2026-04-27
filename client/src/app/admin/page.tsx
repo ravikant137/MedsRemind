@@ -906,7 +906,7 @@ export default function AdminDashboard() {
                                     headers: { Authorization: `Bearer ${token}` }
                                   });
                                   setNotifCount(0);
-                                  setNotifications([]);
+                                  setNotifications(prev => prev.map(n => ({ ...n, read: true })));
                                 }
                               } catch (e) {
                                 console.error('Failed to clear notifications:', e);

@@ -52,15 +52,16 @@ export async function DELETE(request: NextRequest) {
     const decoded: any = jwt.verify(token, JWT_SECRET);
     const userId = decoded.id;
 
+    // Soft clear: mark all as read instead of deleting
     const { error } = await supabase
       .from('notifications')
-      .delete()
+      .update({ read: true })
       .eq('user_id', userId);
 
     if (error) throw error;
-    return NextResponse.json({ success: true, message: 'Notifications deleted' });
+    return NextResponse.json({ success: true, message: 'Notifications marked as read' });
   } catch (err: any) {
-    console.error('Delete notifications error:', err);
-    return NextResponse.json({ error: 'Failed to delete notifications' }, { status: 500 });
+    console.error('Clear notifications error:', err);
+    return NextResponse.json({ error: 'Failed to clear notifications' }, { status: 500 });
   }
 }

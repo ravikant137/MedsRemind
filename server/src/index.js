@@ -447,8 +447,8 @@ app.put('/api/notifications/read-all', auth, markNotificationsAsRead);
 app.post('/api/notifications/read', auth, markNotificationsAsRead);
 app.delete('/api/notifications', auth, async (req, res) => {
   try {
-    await db.query('DELETE FROM notifications WHERE user_id = ?', [req.user.id]);
-    res.json({ success: true, message: 'Notifications cleared' });
+    await db.query('UPDATE notifications SET read = 1 WHERE user_id = ?', [req.user.id]);
+    res.json({ success: true, message: 'Notifications cleared (marked as read)' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
