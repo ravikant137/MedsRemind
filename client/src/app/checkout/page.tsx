@@ -10,6 +10,9 @@ export default function Checkout() {
   const [address, setAddress] = useState('');
   const [loading, setLoading] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('UPI');
+  const [showUPIModal, setShowUPIModal] = useState(false);
+  const [upiId, setUpiId] = useState('');
+  const [paying, setPaying] = useState(false);
   const router = useRouter();
 
   const [points, setPoints] = useState(0);
@@ -101,11 +104,36 @@ export default function Checkout() {
     }
   };
 
+  const handleUPISuccess = async (finalUpiId: string) => {
+    const token = localStorage.getItem('token');
+    setPaying(true);
+    try {
+      const res = await axios.post(`${API_URL}/api/payments/upi-success`, {
+        items: cart,
+        total_amount: total,
+        address: address,
+        discount_amount: discountAmount,
+        upi_id: finalUpiId
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.data.success) {
+        localStorage.removeItem('meds_cart');
+        router.push(`/track?id=${res.data.orderId}`);
+      }
+    } catch (err: any) {
+      alert('Payment processing failed.');
+    } finally {
+      setPaying(false);
+      setShowUPIModal(false);
+    }
+  };
+
   const handlePlaceOrder = (e: React.FormEvent) => {
     e.preventDefault();
     if (!address) return alert('Please enter your delivery address.');
     if (paymentMethod === 'COD') handleCOD();
-    else handleRazorpayPayment();
+    else setShowUPIModal(true);
   };
 
   return (
@@ -212,6 +240,73 @@ export default function Checkout() {
           </div>
         </div>
       </div>
+
+      <AnimatePresence>
+        {showUPIModal && (
+          <div className="fixed inset-0 z-[1000] flex items-center justify-center p-6">
+            <motion.div 
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              onClick={() => !paying && setShowUPIModal(false)}
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
+            ></motion.div>
+            
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="relative w-full max-w-md bg-white rounded-[3rem] shadow-2xl overflow-hidden"
+            >
+              <div className="p-10">
+                <div className="flex justify-between items-center mb-8">
+                  <h3 className="text-2xl font-black text-slate-900">UPI Payment</h3>
+                  <div className="text-green-600 font-black">₹{total.toFixed(2)}</div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-4 mb-8">
+                  {['PhonePe', 'GPay', 'Paytm'].map((app) => (
+                    <button 
+                      key={app}
+                      onClick={() => handleUPISuccess(`${app.toLowerCase()}@upi`)}
+                      disabled={paying}
+                      className="flex flex-col items-center gap-2 p-4 bg-slate-50 rounded-2xl hover:bg-green-50 transition-all border border-transparent hover:border-green-200"
+                    >
+                      <div className="w-10 h-10 bg-white rounded-lg shadow-sm flex items-center justify-center text-xs font-bold">
+                        {app[0]}
+                      </div>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">{app}</span>
+                    </button>
+                  ))}
+                </div>
+
+                <div className="relative mb-8">
+                  <div className="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none">
+                    <span className="text-slate-400 font-bold">@</span>
+                  </div>
+                  <input 
+                    type="text"
+                    placeholder="Enter UPI ID (e.g. user@okhdfcbank)"
+                    value={upiId}
+                    onChange={(e) => setUpiId(e.target.value)}
+                    className="w-full pl-12 pr-6 py-5 bg-slate-50 rounded-2xl border-none focus:ring-2 focus:ring-green-500/20 font-bold text-sm"
+                  />
+                </div>
+
+                <button 
+                  onClick={() => upiId && handleUPISuccess(upiId)}
+                  disabled={!upiId || paying}
+                  className="w-full py-5 bg-slate-900 text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl hover:bg-green-600 transition-all disabled:opacity-50 flex items-center justify-center gap-3"
+                >
+                  {paying ? <Loader2 className="w-5 h-5 animate-spin" /> : <>Verify & Pay ₹{total.toFixed(2)}</>}
+                </button>
+                
+                <p className="text-center mt-6 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">
+                  Secure encrypted payment by Anjaneya
+                </p>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

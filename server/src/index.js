@@ -161,31 +161,6 @@ app.post('/api/payments/verify', auth, async (req, res) => {
       );
       const orderId = orderResult.lastID;
       
-      await db.query(
-        'INSERT INTO notifications (user_id, type, title, message) VALUES (?, ?, ?, ?)',
-        [req.user.id, 'order_placed', 'Order Placed Successfully', `Your order #ORD-${orderId} has been received.`]
-      );
-
-      // Notify Admins
-      const adminsRes = await db.query('SELECT id FROM users WHERE role = "ADMIN"');
-      for (let admin of adminsRes.rows) {
-        await db.query(
-          'INSERT INTO notifications (user_id, type, title, message) VALUES (?, ?, ?, ?)',
-          [admin.id, 'order', 'New Order Received', `Order #ORD-${orderId} has been placed by ${req.user.name}.`]
-        );
-        io.to(`user_${admin.id}`).emit('new_notification', {
-          title: 'New Order Received',
-          message: `Order #ORD-${orderId} has been placed by ${req.user.name}.`,
-          type: 'order'
-        });
-      }
-
-      // Real-time Notification for User
-      io.to(`user_${req.user.id}`).emit('new_notification', {
-        title: 'Order Placed Successfully',
-        message: `Your order #ORD-${orderId} has been received.`
-      });
-
       await db.query('INSERT INTO order_status_history (order_id, status) VALUES (?, ?)', [orderId, 'ORDER_PLACED']);
       for (let item of items) {
         await db.query(
@@ -194,12 +169,66 @@ app.post('/api/payments/verify', auth, async (req, res) => {
         );
         await db.query('UPDATE medicines SET stock = stock - ? WHERE id = ?', [item.quantity, item.id]);
       }
+
+      await db.query(
+        'INSERT INTO notifications (user_id, type, title, message) VALUES (?, ?, ?, ?)',
+        [req.user.id, 'order_placed', 'Order Placed Successfully', `Your order #ORD-${orderId} has been received.`]
+      );
+
+      // Notify Admins
+      const adminsRes = await db.query('SELECT id FROM users WHERE role = "ADMIN"');
+      for (let admin of adminsRes.rows) {
+        io.to(`user_${admin.id}`).emit('new_notification', { 
+          title: 'New Order Received!', 
+          message: `Order #ORD-${orderId} has been placed and paid.` 
+        });
+      }
+
       res.json({ success: true, orderId });
     } catch (err) {
       res.status(500).json({ error: err.message });
     }
   } else {
     res.status(400).json({ success: false, message: 'Invalid signature' });
+  }
+});
+
+// --- CUSTOM UPI PAYMENT ---
+app.post('/api/payments/upi-success', auth, async (req, res) => {
+  const { items, total_amount, address, discount_amount, upi_id } = req.body;
+  try {
+    const orderResult = await db.query(
+      'INSERT INTO orders (user_id, total_amount, address, payment_id, payment_status, status, discount_amount) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [req.user.id, total_amount, address, upi_id, 'PAID', 'ORDER_PLACED', discount_amount || 0]
+    );
+    const orderId = orderResult.lastID;
+
+    await db.query('INSERT INTO order_status_history (order_id, status) VALUES (?, ?)', [orderId, 'ORDER_PLACED']);
+    for (let item of items) {
+      await db.query(
+        'INSERT INTO order_items (order_id, medicine_id, medicine_name, quantity, price_at_time) VALUES (?, ?, ?, ?, ?)',
+        [orderId, item.id, item.name, item.quantity, item.price]
+      );
+      await db.query('UPDATE medicines SET stock = stock - ? WHERE id = ?', [item.quantity, item.id]);
+    }
+    
+    await db.query(
+      'INSERT INTO notifications (user_id, type, title, message) VALUES (?, ?, ?, ?)',
+      [req.user.id, 'order_placed', 'Order Placed Successfully', `Your order #ORD-${orderId} has been received via UPI.`]
+    );
+
+    // Notify Admins
+    const adminsRes = await db.query('SELECT id FROM users WHERE role = "ADMIN"');
+    for (let admin of adminsRes.rows) {
+      io.to(`user_${admin.id}`).emit('new_notification', { 
+        title: 'New UPI Order!', 
+        message: `Order #ORD-${orderId} paid via UPI (${upi_id}).` 
+      });
+    }
+
+    res.json({ success: true, orderId });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
 
@@ -510,9 +539,24 @@ app.get('/api/simulate/:id', async (req, res) => {
     let lat = 12.9716;
     let lng = 77.5946;
     
-    // Update status to OUT_FOR_DELIVERY if not already
+    // 1. Fetch User ID to notify
+    const orderRes = await db.query('SELECT user_id FROM orders WHERE id = ?', [orderId]);
+    const userId = orderRes.rows[0].user_id;
+
+    // 2. Update status to OUT_FOR_DELIVERY
     await db.query('UPDATE orders SET status = "OUT_FOR_DELIVERY" WHERE id = ?', [orderId]);
     await db.query('INSERT INTO order_status_history (order_id, status) VALUES (?, "OUT_FOR_DELIVERY")', [orderId]);
+    
+    // 3. Notify User (DB + Socket)
+    await db.query(
+      'INSERT INTO notifications (user_id, type, title, message) VALUES (?, ?, ?, ?)',
+      [userId, 'order_update', 'Order Out for Delivery', `Your order #ORD-${orderId} is now out for delivery!`]
+    );
+    io.to(`user_${userId}`).emit('new_notification', {
+      title: 'Order Out for Delivery',
+      message: `Your order #ORD-${orderId} is now out for delivery!`,
+      type: 'order'
+    });
     io.to(`order_${orderId}`).emit('status_updated', { status: 'OUT_FOR_DELIVERY' });
 
     let steps = 0;
@@ -528,6 +572,17 @@ app.get('/api/simulate/:id', async (req, res) => {
         clearInterval(interval);
         await db.query('UPDATE orders SET status = "DELIVERED" WHERE id = ?', [orderId]);
         await db.query('INSERT INTO order_status_history (order_id, status) VALUES (?, "DELIVERED")', [orderId]);
+        
+        // Final Notification
+        await db.query(
+          'INSERT INTO notifications (user_id, type, title, message) VALUES (?, ?, ?, ?)',
+          [userId, 'order_update', 'Order Delivered', `Your order #ORD-${orderId} has been successfully delivered.`]
+        );
+        io.to(`user_${userId}`).emit('new_notification', {
+          title: 'Order Delivered',
+          message: `Your order #ORD-${orderId} has been successfully delivered.`,
+          type: 'order'
+        });
         io.to(`order_${orderId}`).emit('status_updated', { status: 'DELIVERED' });
         console.log(`Simulation finished for order ${orderId}`);
       }
