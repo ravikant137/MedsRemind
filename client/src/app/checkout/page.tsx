@@ -99,6 +99,24 @@ export default function Checkout() {
     else alert('Please enter or select a UPI ID');
   };
 
+  const triggerMobileUPI = (app: string) => {
+    const merchantUpiId = 'ravikant@upi'; // Replace with your actual merchant UPI ID
+    const name = 'Anjaneya Pharmacy';
+    const amount = total;
+    const note = 'Order from MedsRemind';
+    
+    // Standard UPI Link
+    const upiLink = `upi://pay?pa=${merchantUpiId}&pn=${encodeURIComponent(name)}&am=${amount}&cu=INR&tn=${encodeURIComponent(note)}`;
+    
+    // App specific intents if needed, but standard upi:// works for most
+    window.location.href = upiLink;
+    
+    // Automatically trigger success after a short delay for testing (or wait for user to click done)
+    setTimeout(() => {
+      handleUPISuccess(merchantUpiId);
+    }, 2000);
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 pt-32 px-6 pb-20">
       <div className="max-w-6xl mx-auto">
