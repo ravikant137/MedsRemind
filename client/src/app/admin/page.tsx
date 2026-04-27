@@ -42,6 +42,8 @@ export default function AdminDashboard() {
   });
   const [mounted, setMounted] = useState(false);
   const [authorized, setAuthorized] = useState(false);
+  const [showNotifDropdown, setShowNotifDropdown] = useState(false);
+  const [notifications, setNotifications] = useState<any[]>([]);
   const router = useRouter();
 
   useEffect(() => {
@@ -79,9 +81,10 @@ export default function AdminDashboard() {
       if (!token) return;
       const config = { headers: { Authorization: `Bearer ${token}` } };
       
-      // Fetch notifications unread count
+      // Fetch notifications
       const notifRes = await axios.get(`${API_URL}/api/notifications`, config);
       if (Array.isArray(notifRes.data)) {
+        setNotifications(notifRes.data);
         const unread = notifRes.data.filter((n: any) => !n.read).length;
         setNotifCount(unread);
       }
@@ -781,31 +784,93 @@ export default function AdminDashboard() {
                  />
               </div>
 
-              <Link 
-                href="/notifications" 
-                className="relative w-16 h-16 bg-white rounded-2xl flex items-center justify-center border border-slate-100 shadow-xl shadow-slate-100/50 hover:bg-slate-50 transition-all group"
-                onClick={async () => {
-                  try {
-                    const token = localStorage.getItem('token');
-                    if (token) {
-                      await axios.post(`${API_URL}/api/notifications/read`, {}, {
-                        headers: { Authorization: `Bearer ${token}` }
-                      });
-                      setNotifCount(0); // Instantly clear badge
-                      window.dispatchEvent(new Event('notif-refresh')); // Notify other components
-                    }
-                  } catch (e) {
-                    console.error('Failed to clear notifications:', e);
-                  }
-                }}
-              >
-                 <Bell className="w-6 h-6 text-slate-400 group-hover:text-green-600" />
-                 {notifCount > 0 && (
-                   <span className="absolute -top-2 -right-2 w-7 h-7 bg-red-600 text-white text-[10px] font-black rounded-full flex items-center justify-center border-4 border-slate-50 shadow-lg animate-bounce">
-                     {notifCount}
-                   </span>
-                 )}
-              </Link>
+              <div className="relative">
+                <button 
+                  onClick={() => setShowNotifDropdown(!showNotifDropdown)}
+                  className="relative w-16 h-16 bg-white rounded-2xl flex items-center justify-center border border-slate-100 shadow-xl shadow-slate-100/50 hover:bg-slate-50 transition-all group"
+                >
+                   <Bell className="w-6 h-6 text-slate-400 group-hover:text-green-600" />
+                   {notifCount > 0 && (
+                     <span className="absolute -top-2 -right-2 w-7 h-7 bg-red-600 text-white text-[10px] font-black rounded-full flex items-center justify-center border-4 border-slate-50 shadow-lg animate-bounce">
+                       {notifCount}
+                     </span>
+                   )}
+                </button>
+
+                <AnimatePresence>
+                  {showNotifDropdown && (
+                    <motion.div 
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                      className="absolute right-0 mt-4 w-[400px] bg-white rounded-[2rem] shadow-2xl border border-slate-100 z-[110] overflow-hidden"
+                    >
+                      <div className="p-6 border-b border-slate-50 flex items-center justify-between bg-slate-50/50">
+                        <h3 className="font-black text-slate-900 uppercase tracking-widest text-[10px]">Recent Alerts</h3>
+                        {notifCount > 0 && (
+                          <button 
+                            onClick={async () => {
+                              try {
+                                const token = localStorage.getItem('token');
+                                if (token) {
+                                  await axios.post(`${API_URL}/api/notifications/read`, {}, {
+                                    headers: { Authorization: `Bearer ${token}` }
+                                  });
+                                  setNotifCount(0);
+                                  setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+                                  window.dispatchEvent(new Event('notif-refresh'));
+                                }
+                              } catch (e) {
+                                console.error('Failed to clear notifications:', e);
+                              }
+                            }}
+                            className="text-[10px] font-black text-green-600 hover:underline uppercase tracking-widest"
+                          >
+                            Clear All
+                          </button>
+                        )}
+                      </div>
+                      <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
+                        {notifications.length > 0 ? (
+                          notifications.slice(0, 10).map((n) => (
+                            <div key={n.id} className={`p-5 border-b border-slate-50 hover:bg-slate-50 transition-colors relative ${!n.read ? 'bg-green-50/30' : ''}`}>
+                              {!n.read && <div className="absolute left-0 top-0 bottom-0 w-1 bg-green-600"></div>}
+                              <div className="flex items-start gap-4">
+                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                                  n.type === 'order' ? 'bg-blue-50 text-blue-600' : 
+                                  n.type === 'alert' ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600'
+                                }`}>
+                                  {n.type === 'order' ? <ShoppingBag className="w-5 h-5" /> : 
+                                   n.type === 'alert' ? <ShieldAlert className="w-5 h-5" /> : <Bell className="w-5 h-5" />}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="font-black text-slate-900 text-sm truncate">{n.title}</p>
+                                  <p className="text-xs text-slate-500 font-medium line-clamp-2 mt-0.5">{n.message}</p>
+                                  <p className="text-[10px] text-slate-400 font-bold mt-2 uppercase tracking-tight">
+                                    {new Date(n.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • {new Date(n.created_at).toLocaleDateString()}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="p-10 text-center text-slate-400">
+                            <Bell className="w-12 h-12 mx-auto mb-4 opacity-20" />
+                            <p className="font-bold text-xs uppercase tracking-widest">No new alerts</p>
+                          </div>
+                        )}
+                      </div>
+                      <Link 
+                        href="/notifications" 
+                        onClick={() => setShowNotifDropdown(false)}
+                        className="p-4 w-full bg-slate-900 text-white text-center font-black text-[10px] uppercase tracking-[0.2rem] hover:bg-green-600 transition-all block"
+                      >
+                        View Full History
+                      </Link>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
            </div>
         </header>
 

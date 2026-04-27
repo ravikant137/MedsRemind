@@ -8,6 +8,8 @@ import {
 import Link from 'next/link';
 import axios from 'axios';
 import { API_URL } from '@/config';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext';
 
 axios.defaults.headers.common['bypass-tunnel-reminder'] = 'true';
 
@@ -34,6 +36,15 @@ export default function Home() {
   const [medicines, setMedicines] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+
+  const { user } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (user?.role === 'ADMIN') {
+      router.push('/admin');
+    }
+  }, [user, router]);
 
   useEffect(() => {
     const fetchMedicines = async () => {
