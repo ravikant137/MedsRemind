@@ -109,7 +109,7 @@ export default function AdminDashboard() {
     } finally {
       setLoading(false);
     }
-  }, [activeTab]);
+  }, [activeTab, timeRange]);
 
   useEffect(() => {
     if (authorized) {
