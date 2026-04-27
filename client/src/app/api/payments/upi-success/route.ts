@@ -31,11 +31,7 @@ export async function POST(request: NextRequest) {
         user_name: decoded.name,
         total_amount,
         address,
-        status: 'CONFIRMED', // UPI payments are confirmed immediately
-        payment_method: 'UPI',
-        upi_id: upi_id,
-        discount_applied: discount_amount || 0,
-        payment_status: 'PAID',
+        status: 'CONFIRMED',
         items: JSON.stringify(items)
       })
       .select()
