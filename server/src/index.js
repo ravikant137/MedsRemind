@@ -434,8 +434,25 @@ const markNotificationsAsRead = async (req, res) => {
   }
 };
 
+app.patch('/api/notifications/:id/read', auth, async (req, res) => {
+  try {
+    await db.query('UPDATE notifications SET read = 1 WHERE id = ? AND user_id = ?', [req.params.id, req.user.id]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.put('/api/notifications/read-all', auth, markNotificationsAsRead);
 app.post('/api/notifications/read', auth, markNotificationsAsRead);
+app.delete('/api/notifications', auth, async (req, res) => {
+  try {
+    await db.query('DELETE FROM notifications WHERE user_id = ?', [req.user.id]);
+    res.json({ success: true, message: 'Notifications cleared' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 // --- USER ORDERS ---
 app.get('/api/orders', auth, async (req, res) => {

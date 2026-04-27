@@ -881,12 +881,11 @@ export default function AdminDashboard() {
                               try {
                                 const token = localStorage.getItem('token');
                                 if (token) {
-                                  await axios.post(`${API_URL}/api/notifications/read`, {}, {
+                                  await axios.delete(`${API_URL}/api/notifications`, {
                                     headers: { Authorization: `Bearer ${token}` }
                                   });
                                   setNotifCount(0);
-                                  setNotifications(prev => prev.map(n => ({ ...n, read: true })));
-                                  window.dispatchEvent(new Event('notif-refresh'));
+                                  setNotifications([]);
                                 }
                               } catch (e) {
                                 console.error('Failed to clear notifications:', e);
@@ -921,15 +920,20 @@ export default function AdminDashboard() {
                                 // 2. Close dropdown
                                 setShowNotifDropdown(false);
 
-                                // 3. Mark this specific one as read (optional logic but good to have)
+                                // 3. Mark this specific one as read
                                 if (!n.read) {
                                   try {
                                     const token = localStorage.getItem('token');
-                                    await axios.post(`${API_URL}/api/notifications/read`, {}, {
+                                    await axios.patch(`${API_URL}/api/notifications/${n.id}/read`, {}, {
                                       headers: { Authorization: `Bearer ${token}` }
                                     });
-                                    setNotifCount(0); // For now just clear badge
-                                  } catch (e) {}
+                                    setNotifications(prev => prev.map(notif => 
+                                      notif.id === n.id ? { ...notif, read: true } : notif
+                                    ));
+                                    setNotifCount(prev => Math.max(0, prev - 1));
+                                  } catch (e) {
+                                    console.error('Failed to mark as read:', e);
+                                  }
                                 }
                               }}
                               className={`p-5 border-b border-slate-50 hover:bg-slate-50 transition-colors relative cursor-pointer ${!n.read ? 'bg-green-50/30' : ''}`}

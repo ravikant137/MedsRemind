@@ -42,3 +42,25 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to create notification' }, { status: 500 });
   }
 }
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const authHeader = request.headers.get('Authorization');
+    if (!authHeader) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    
+    const token = authHeader.split(' ')[1];
+    const decoded: any = jwt.verify(token, JWT_SECRET);
+    const userId = parseInt(decoded.id);
+
+    const { error } = await supabase
+      .from('notifications')
+      .delete()
+      .eq('user_id', userId);
+
+    if (error) throw error;
+    return NextResponse.json({ success: true, message: 'Notifications deleted' });
+  } catch (err: any) {
+    console.error('Delete notifications error:', err);
+    return NextResponse.json({ error: 'Failed to delete notifications' }, { status: 500 });
+  }
+}
