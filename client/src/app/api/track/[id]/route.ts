@@ -50,16 +50,16 @@ export async function GET(
     }
 
     // 2. Fetch Order Items
-    const { data: items, error: itemsError } = await supabase
+    const { data: items } = await supabase
       .from('order_items')
       .select('*')
-      .eq('order_id', cleanId);
+      .eq('order_id', order.id);
 
     // 3. Fetch Status History
     const { data: history, error: historyError } = await supabase
       .from('order_status_history')
-      .select('status, created_at')
-      .eq('order_id', cleanId)
+      .select('*')
+      .eq('order_id', order.id)
       .order('created_at', { ascending: true });
 
     // Format the response to match what the frontend expects
