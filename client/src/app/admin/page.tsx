@@ -921,8 +921,8 @@ export default function AdminDashboard() {
                         )}
                       </div>
                       <div className="max-h-[450px] overflow-y-auto custom-scrollbar no-scrollbar">
-                        {notifications.length > 0 ? (
-                          notifications.slice(0, 10).map((n) => (
+                        {notifications.filter(n => !n.read).length > 0 ? (
+                          notifications.filter(n => !n.read).slice(0, 10).map((n) => (
                             <div 
                               key={n.id} 
                               onClick={async () => {
