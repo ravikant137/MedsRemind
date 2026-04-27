@@ -9,6 +9,12 @@ export async function POST(request: Request) {
   try {
     const { email, password } = await request.json();
     
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+      return NextResponse.json({ 
+        error: 'Database connection failed: Missing Supabase Environment Variables in Vercel settings.' 
+      }, { status: 500 });
+    }
+
     const { data: user, error } = await supabase
       .from('users')
       .select('*')
@@ -37,6 +43,8 @@ export async function POST(request: Request) {
     });
   } catch (err: any) {
     console.error('Login error:', err);
-    return NextResponse.json({ error: 'Login failed' }, { status: 500 });
+    return NextResponse.json({ 
+      error: `Connection error: ${err.message || 'Login failed'}` 
+    }, { status: 500 });
   }
 }
