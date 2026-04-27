@@ -47,9 +47,15 @@ const auth = (req, res, next) => {
 io.on('connection', (socket) => {
   socket.on('join_order', (orderId) => {
     socket.join(`order_${orderId}`);
+    console.log(`Socket joined order_${orderId}`);
   });
   socket.on('join_user', (userId) => {
     socket.join(`user_${userId}`);
+  });
+  socket.on('update_location', async (data) => {
+    const { orderId, lat, lng } = data;
+    await db.query('UPDATE orders SET delivery_lat = ?, delivery_lng = ? WHERE id = ?', [lat, lng, orderId]);
+    io.to(`order_${orderId}`).emit('location_updated', { lat, lng });
   });
 });
 
@@ -211,6 +217,13 @@ app.get('/api/track/:id', async (req, res) => {
     const historyResult = await db.query('SELECT status, created_at AS timestamp FROM order_status_history WHERE order_id = ? ORDER BY created_at ASC', [orderId]);
     order.items = itemsResult.rows;
     order.statusHistory = historyResult.rows;
+    
+    // Add default location if missing
+    if (!order.delivery_lat) {
+      order.delivery_lat = 12.9716; // Default Bangalore Lat
+      order.delivery_lng = 77.5946; // Default Bangalore Lng
+    }
+    
     res.json(order);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -270,7 +283,7 @@ app.get('/api/admin/orders', auth, async (req, res) => {
   if (req.user.role !== 'ADMIN') return res.status(403).json({ error: 'Unauthorized' });
   console.log('[ADMIN] Fetching orders...');
   try {
-    const result = await db.query('SELECT o.*, u.name as user_name FROM orders o LEFT JOIN users u ON o.user_id = u.id ORDER BY created_at DESC');
+    const result = await db.query('SELECT o.*, u.name as user_name FROM orders o LEFT JOIN users u ON o.user_id = u.id ORDER BY o.created_at DESC');
     console.log(`[ADMIN] Found ${result.rows.length} orders`);
     res.json(result.rows);
   } catch (err) {
@@ -287,13 +300,13 @@ app.get('/api/admin/stats', auth, async (req, res) => {
   try {
     let dateFilter = '';
     // Use local time start of day for 'DAY'
-    if (range === 'DAY') dateFilter = "AND date(created_at, 'localtime') = date('now', 'localtime')";
-    else if (range === 'WEEK') dateFilter = "AND created_at >= date('now', '-7 days')";
-    else if (range === 'MONTH') dateFilter = "AND created_at >= date('now', '-30 days')";
-    else if (range === 'QUARTER') dateFilter = "AND created_at >= date('now', '-90 days')";
-    else if (range === 'YEAR') dateFilter = "AND created_at >= date('now', '-365 days')";
+    if (range === 'DAY') dateFilter = "AND date(o.created_at, 'localtime') = date('now', 'localtime')";
+    else if (range === 'WEEK') dateFilter = "AND o.created_at >= date('now', '-7 days')";
+    else if (range === 'MONTH') dateFilter = "AND o.created_at >= date('now', '-30 days')";
+    else if (range === 'QUARTER') dateFilter = "AND o.created_at >= date('now', '-90 days')";
+    else if (range === 'YEAR') dateFilter = "AND o.created_at >= date('now', '-365 days')";
 
-    const ordersRes = await db.query(`SELECT total_amount, discount_amount, id, user_id FROM orders WHERE 1=1 ${dateFilter}`);
+    const ordersRes = await db.query(`SELECT total_amount, discount_amount, id, user_id FROM orders o WHERE 1=1 ${dateFilter}`);
     const usersRes = await db.query('SELECT COUNT(*) as count FROM users');
     const medsRes = await db.query('SELECT COUNT(*) as count FROM medicines');
     
@@ -470,6 +483,57 @@ app.get('/api/orders', auth, async (req, res) => {
     }
     
     res.json(orders);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// --- LIVE TRACKING & SIMULATION ---
+app.patch('/api/orders/:id/location', async (req, res) => {
+  const { lat, lng } = req.body;
+  const orderId = req.params.id;
+  try {
+    await db.query('UPDATE orders SET delivery_lat = ?, delivery_lng = ? WHERE id = ?', [lat, lng, orderId]);
+    io.to(`order_${orderId}`).emit('location_updated', { lat, lng });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/simulate/:id', async (req, res) => {
+  const orderId = req.params.id;
+  console.log(`Starting simulation for order ${orderId}`);
+  
+  try {
+    // Initial position
+    let lat = 12.9716;
+    let lng = 77.5946;
+    
+    // Update status to OUT_FOR_DELIVERY if not already
+    await db.query('UPDATE orders SET status = "OUT_FOR_DELIVERY" WHERE id = ?', [orderId]);
+    await db.query('INSERT INTO order_status_history (order_id, status) VALUES (?, "OUT_FOR_DELIVERY")', [orderId]);
+    io.to(`order_${orderId}`).emit('status_updated', { status: 'OUT_FOR_DELIVERY' });
+
+    let steps = 0;
+    const interval = setInterval(async () => {
+      lat += (Math.random() - 0.5) * 0.001;
+      lng += (Math.random() - 0.5) * 0.001;
+      steps++;
+
+      await db.query('UPDATE orders SET delivery_lat = ?, delivery_lng = ? WHERE id = ?', [lat, lng, orderId]);
+      io.to(`order_${orderId}`).emit('location_updated', { lat, lng });
+
+      if (steps >= 20) {
+        clearInterval(interval);
+        await db.query('UPDATE orders SET status = "DELIVERED" WHERE id = ?', [orderId]);
+        await db.query('INSERT INTO order_status_history (order_id, status) VALUES (?, "DELIVERED")', [orderId]);
+        io.to(`order_${orderId}`).emit('status_updated', { status: 'DELIVERED' });
+        console.log(`Simulation finished for order ${orderId}`);
+      }
+    }, 3000);
+
+    res.json({ success: true, message: 'Simulation started' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

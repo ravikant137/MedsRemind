@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { Truck, Package, MapPin, CheckCircle, Clock, Search, ArrowRight, ShieldCheck, Box, Loader2, Zap, Radio } from 'lucide-react';
+import { Truck, Package, MapPin, CheckCircle, Clock, Search, ArrowRight, ShieldCheck, Box, Loader2, Zap, Radio, Navigation, User, Map as MapIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import { API_URL } from '@/config';
@@ -27,8 +27,9 @@ function OrderTrackingContent() {
 
   const fetchTrackingInfo = useCallback(async (id: string, isSilent = false) => {
     if (!isSilent) setLoading(true);
+    const cleanId = String(id).replace(/#ORD-|ANJ-/, '').trim();
     try {
-      const res = await axios.get(`${API_URL}/api/orders/${id}`);
+      const res = await axios.get(`${API_URL}/api/track/${cleanId}`);
       const order = res.data;
       if (!order) throw new Error('Order not found');
       
@@ -76,7 +77,7 @@ function OrderTrackingContent() {
         : estDelivery.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
       setTrackingData({
-        id: order.id.startsWith('ANJ-') ? order.id : `#ORD-${order.id}`,
+        id: String(order.id).startsWith('ANJ-') ? order.id : `#ORD-${order.id}`,
         rawId: order.id,
         status: (order.status || 'ORDER_PLACED').replace(/_/g, ' '),
         customer: order.user_name || 'Customer',
@@ -85,7 +86,11 @@ function OrderTrackingContent() {
         items: Array.isArray(parsedItems) ? parsedItems : [],
         estimated_delivery: deliveryTime,
         isDelivered: isReallyDelivered,
-        steps: mappedSteps
+        steps: mappedSteps,
+        location: {
+          lat: order.delivery_lat || 12.9716,
+          lng: order.delivery_lng || 77.5946
+        }
       });
       setIsLive(order.status !== 'DELIVERED' && order.status !== 'CANCELLED');
     } catch (err: any) {
@@ -236,6 +241,119 @@ function OrderTrackingContent() {
             </button>
           </form>
         </motion.div>
+
+        {/* Live Visual Map */}
+        {trackingData && trackingData.status !== 'CANCELLED' && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white p-6 rounded-[3.5rem] border border-slate-100 shadow-2xl mb-12 relative overflow-hidden"
+          >
+            <div className="flex justify-between items-center mb-6 px-4">
+               <div>
+                  <h3 className="text-xl font-black text-slate-900 flex items-center gap-2">
+                    <MapIcon className="w-5 h-5 text-green-600" /> Live Delivery Map
+                  </h3>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Real-time GPS Simulation</p>
+               </div>
+               <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-600 rounded-lg text-[10px] font-black uppercase tracking-wider">
+                    <Navigation className="w-3 h-3" /> {trackingData.location.lat.toFixed(4)}, {trackingData.location.lng.toFixed(4)}
+                  </div>
+               </div>
+            </div>
+
+            <div className="relative h-[400px] bg-slate-50 rounded-[2.5rem] overflow-hidden border border-slate-100">
+               {/* Decorative Map Grid */}
+               <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(#000 1px, transparent 1px)', backgroundSize: '30px 30px' }}></div>
+               
+               {/* Simulated Route Line */}
+               <svg className="absolute inset-0 w-full h-full pointer-events-none">
+                  <motion.path
+                    d="M 100 300 Q 400 200 700 100"
+                    fill="none"
+                    stroke="#e2e8f0"
+                    strokeWidth="4"
+                    strokeDasharray="10,10"
+                  />
+                  <motion.path
+                    d="M 100 300 Q 400 200 700 100"
+                    fill="none"
+                    stroke="#22c55e"
+                    strokeWidth="4"
+                    initial={{ pathLength: 0 }}
+                    animate={{ pathLength: trackingData.status === 'DELIVERED' ? 1 : 0.6 }}
+                    transition={{ duration: 2 }}
+                  />
+               </svg>
+
+               {/* Origin Marker (Pharmacy) */}
+               <div className="absolute left-[100px] top-[300px] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
+                  <div className="bg-slate-900 text-white p-3 rounded-2xl shadow-xl border-4 border-white z-10">
+                     <Package className="w-5 h-5" />
+                  </div>
+                  <p className="mt-2 text-[10px] font-black text-slate-900 bg-white/80 backdrop-blur-sm px-2 py-1 rounded-md shadow-sm uppercase tracking-tighter">Pharmacy</p>
+               </div>
+
+               {/* Destination Marker (User) */}
+               <div className="absolute right-[100px] top-[100px] translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
+                  <div className="bg-blue-600 text-white p-3 rounded-2xl shadow-xl border-4 border-white z-10">
+                     <User className="w-5 h-5" />
+                  </div>
+                  <p className="mt-2 text-[10px] font-black text-blue-600 bg-white/80 backdrop-blur-sm px-2 py-1 rounded-md shadow-sm uppercase tracking-tighter">You</p>
+               </div>
+
+               {/* Delivery Agent Marker (Live) */}
+               {trackingData.status !== 'DELIVERED' && trackingData.status !== 'ORDER_PLACED' && (
+                 <motion.div 
+                   animate={{ 
+                     left: `${100 + (600 * (trackingData.status === 'OUT_FOR_DELIVERY' ? 0.6 : 0.2))}px`,
+                     top: `${300 - (200 * (trackingData.status === 'OUT_FOR_DELIVERY' ? 0.6 : 0.2))}px`
+                   }}
+                   className="absolute -translate-x-1/2 -translate-y-1/2 z-20 flex flex-col items-center"
+                 >
+                    <div className="bg-green-600 text-white p-4 rounded-full shadow-2xl border-4 border-white relative">
+                       <Truck className="w-6 h-6" />
+                       <div className="absolute -inset-2 bg-green-500/30 rounded-full animate-ping -z-10"></div>
+                    </div>
+                    <div className="mt-3 bg-slate-900 text-white px-4 py-1.5 rounded-full text-[10px] font-black flex items-center gap-2 shadow-xl uppercase tracking-widest">
+                       <span className="relative flex h-2 w-2">
+                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                         <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                       </span>
+                       In Transit
+                    </div>
+                 </motion.div>
+               )}
+
+               {/* Arrived Marker */}
+               {trackingData.status === 'DELIVERED' && (
+                 <motion.div 
+                   initial={{ scale: 0 }}
+                   animate={{ scale: 1 }}
+                   className="absolute right-[100px] top-[100px] translate-x-1/2 -translate-y-1/2 z-30"
+                 >
+                    <div className="bg-green-600 text-white p-6 rounded-full shadow-2xl border-4 border-white flex flex-col items-center">
+                       <CheckCircle className="w-8 h-8" />
+                       <p className="mt-2 text-[10px] font-black uppercase tracking-tighter">Delivered</p>
+                    </div>
+                 </motion.div>
+               )}
+
+               {/* Map Overlay Info */}
+               <div className="absolute bottom-8 left-8 right-8 flex justify-between items-end pointer-events-none">
+                  <div className="bg-white/90 backdrop-blur-md p-4 rounded-2xl shadow-xl border border-white/20">
+                     <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Current Delivery Speed</p>
+                     <p className="text-xl font-black text-slate-900">45 km/h <span className="text-green-600 text-xs font-bold">AVG</span></p>
+                  </div>
+                  <div className="bg-slate-900 text-white p-6 rounded-[2rem] shadow-2xl">
+                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Time Remaining</p>
+                     <p className="text-3xl font-black text-green-500">12 MINS</p>
+                  </div>
+               </div>
+            </div>
+          </motion.div>
+        )}
 
         <AnimatePresence mode="wait">
           {trackingData && (

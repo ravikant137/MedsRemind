@@ -36,6 +36,8 @@ async function init() {
       address TEXT,
       is_emergency BOOLEAN DEFAULT 0,
       deliveryLocation TEXT,
+      delivery_lat REAL,
+      delivery_lng REAL,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (user_id) REFERENCES users(id)
     )`,
