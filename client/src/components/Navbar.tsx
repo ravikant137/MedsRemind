@@ -57,6 +57,13 @@ export default function Navbar() {
       });
       if (Array.isArray(res.data)) {
         const unread = res.data.filter((n: any) => !n.read).length;
+        
+        // Play sound if count increased
+        if (unread > notifCount && notifCount !== 0) {
+          const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+          audio.play().catch(e => console.log('Audio play blocked by browser policy'));
+        }
+        
         setNotifCount(unread);
       }
     } catch (err) {
