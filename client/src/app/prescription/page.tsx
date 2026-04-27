@@ -220,18 +220,18 @@ export default function PrescriptionUpload() {
                            </div>
                            <div className="flex-1">
                               <h4 className="font-black text-slate-900 text-lg mb-2">{m.name}</h4>
-                              <div className="flex flex-wrap gap-2">
-                                <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-xl border border-slate-100">
-                                   <Activity className="w-3.5 h-3.5 text-blue-500" />
-                                   <span className="text-xs font-bold text-slate-500">{m.dosage}</span>
+                              <div className="flex flex-wrap items-center gap-2 mt-3">
+                                <div className="flex items-center gap-2 bg-white px-2.5 py-1.5 rounded-xl border border-slate-100 shadow-sm">
+                                   <Activity className="w-3 h-3 text-blue-500" />
+                                   <span className="text-[10px] font-bold text-slate-600 truncate max-w-[80px]">{m.dosage}</span>
                                 </div>
-                                <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-xl border border-slate-100">
-                                   <Clock className="w-3.5 h-3.5 text-purple-500" />
-                                   <span className="text-xs font-bold text-slate-500">{m.frequency || '1-0-1'}</span>
+                                <div className="flex items-center gap-2 bg-white px-2.5 py-1.5 rounded-xl border border-slate-100 shadow-sm">
+                                   <Clock className="w-3 h-3 text-purple-500" />
+                                   <span className="text-[10px] font-bold text-slate-600">{m.frequency || '1-0-1'}</span>
                                 </div>
-                                <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-xl border border-slate-100">
-                                   <Calendar className="w-3.5 h-3.5 text-green-500" />
-                                   <span className="text-xs font-bold text-slate-500">{m.duration || '3 Days'}</span>
+                                <div className="flex items-center gap-2 bg-white px-2.5 py-1.5 rounded-xl border border-slate-100 shadow-sm">
+                                   <Calendar className="w-3 h-3 text-green-500" />
+                                   <span className="text-[10px] font-bold text-slate-600">{m.duration || '3 Days'}</span>
                                 </div>
                               </div>
                            </div>
