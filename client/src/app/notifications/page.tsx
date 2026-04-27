@@ -56,6 +56,9 @@ export default function Notifications() {
       const token = localStorage.getItem('token');
       await axios.post(`${API_URL}/api/notifications/read`, {}, { headers: { Authorization: `Bearer ${token}` } });
       setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+      
+      // Notify Navbar to update count immediately
+      window.dispatchEvent(new Event('notif-refresh'));
     } catch (err) {
       console.error(err);
     }

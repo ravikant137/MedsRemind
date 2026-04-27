@@ -20,6 +20,14 @@ export default function Navbar() {
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 10);
+    const handleRefresh = () => {
+      const token = localStorage.getItem('token');
+      if (token) fetchNotifCount(token);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('notif-refresh', handleRefresh);
+    
     let interval: NodeJS.Timeout;
     try {
       const userData = localStorage.getItem('user');
@@ -36,6 +44,7 @@ export default function Navbar() {
     }
     return () => {
       window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('notif-refresh', handleRefresh);
       if (interval) clearInterval(interval);
     };
   }, [pathname]);
