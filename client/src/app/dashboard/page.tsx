@@ -135,7 +135,7 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 pt-4 md:pt-6 px-4 md:px-6 pb-24 overflow-x-hidden">
+    <div className="min-h-screen bg-slate-50 pt-4 md:pt-6 px-4 md:px-6 pb-24 overflow-x-hidden relative w-full">
       {/* Background Decor */}
       <div className="absolute top-0 right-0 w-[40rem] h-[40rem] bg-green-100/30 rounded-full blur-[120px] -z-10 animate-pulse"></div>
       <div className="absolute bottom-0 left-0 w-[30rem] h-[30rem] bg-blue-100/20 rounded-full blur-[100px] -z-10"></div>

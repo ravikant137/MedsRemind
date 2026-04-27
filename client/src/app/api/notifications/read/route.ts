@@ -11,21 +11,25 @@ export async function POST(request: NextRequest) {
     
     const token = authHeader.split(' ')[1];
     const decoded: any = jwt.verify(token, JWT_SECRET);
+    const userId = parseInt(decoded.id);
     
     // Mark all unread notifications as read for this user
-    // We use a broad update to ensure everything is cleared
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('notifications')
       .update({ read: true })
-      .match({ user_id: decoded.id, read: false });
+      .eq('user_id', userId)
+      .eq('read', false)
+      .select();
+
+    console.log(`Marked ${data?.length || 0} notifications as read for user ${userId}`);
 
     if (error) {
       console.error('Supabase Update Error:', error);
-      // Fallback: try update without the read:false filter in case of state mismatch
+      // Fallback
       await supabase
         .from('notifications')
         .update({ read: true })
-        .eq('user_id', decoded.id);
+        .eq('user_id', userId);
     }
     
     return NextResponse.json({ success: true, message: 'All notifications cleared' });
