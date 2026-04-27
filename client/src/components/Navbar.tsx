@@ -49,8 +49,13 @@ export default function Navbar() {
     };
   }, [pathname]);
 
+  const [notifCount, setNotifCount] = useState(0);
+  const [lastClearTime, setLastClearTime] = useState(0);
+
   const fetchNotifCount = async (token: string | null) => {
-    if (!token) return;
+    // Don't fetch if we just cleared in the last 30 seconds
+    if (!token || Date.now() - lastClearTime < 30000) return;
+
     try {
       const res = await axios.get(`${API_URL}/api/notifications`, {
         headers: { Authorization: `Bearer ${token}` }
