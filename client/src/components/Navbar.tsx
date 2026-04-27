@@ -14,7 +14,6 @@ export default function Navbar() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [user, setUser] = useState<any>(null);
-  const [notifCount, setNotifCount] = useState(0);
   const router = useRouter();
   const pathname = usePathname();
 
