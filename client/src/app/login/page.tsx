@@ -163,6 +163,7 @@ export default function Login() {
           <div className="flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-300">
             <ShieldCheck className="w-4 h-4" /> Secure SSL Encryption
           </div>
+          <p className="text-[8px] text-slate-200 font-bold uppercase tracking-[0.2em] mt-4">Version 1.0.1 - Supabase Sync</p>
         </div>
       </motion.div>
     </div>
