@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
+import { supabaseAdmin as supabase } from '@/lib/supabase';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || '' });
 
@@ -68,6 +69,26 @@ export async function POST(request: NextRequest) {
 
     const result = response.choices[0].message.content;
     const data = JSON.parse(result || '{}');
+    
+    // --- VALIDATION LAYER ---
+    // Cross-reference extracted medicines with our real inventory
+    const { data: dbMeds } = await supabase.from('medicines').select('name, id, price');
+    
+    if (data.medicines && dbMeds) {
+      data.medicines = data.medicines.map((m: any) => {
+        const match = dbMeds.find((dbM: any) => 
+          dbM.name.toLowerCase().includes(m.name.toLowerCase()) || 
+          m.name.toLowerCase().includes(dbM.name.toLowerCase())
+        );
+        return {
+          ...m,
+          validated: !!match,
+          inventory_id: match ? match.id : null,
+          price: match ? match.price : null,
+          confidence_score: match ? 98 : 75 // Rule-based confidence simulation
+        };
+      });
+    }
     
     return NextResponse.json(data);
   } catch (error: any) {
