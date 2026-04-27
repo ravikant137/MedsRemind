@@ -7,31 +7,45 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    // Clean the ID (remove #ORD- or ANJ- prefixes)
-    const cleanId = String(id).replace(/#ORD-|ANJ-|ORD-/, '').trim();
+    // Smart Search: Try 3 different variants to ensure we find the order
+    let order = null;
+    let orderError = null;
 
-    // 1. Fetch Order Details
-    // Smart Search: Try the ID as-is, and also try with the 'ANJ-' prefix if it's missing
-    let { data: order, error: orderError } = await supabase
+    // 1. Try exact match (e.g., "ANJ-9939")
+    const { data: exactOrder } = await supabase
       .from('orders')
       .select('*, users(name)')
       .eq('id', id)
       .single();
-
-    if ((orderError || !order) && !id.startsWith('ANJ-')) {
-      const { data: altOrder, error: altError } = await supabase
+    
+    if (exactOrder) {
+      order = exactOrder;
+    } else {
+      // 2. Try with prefix (if it's just the number)
+      const { data: prefixedOrder } = await supabase
         .from('orders')
         .select('*, users(name)')
-        .eq('id', `ANJ-${id}`)
+        .eq('id', id.startsWith('ANJ-') ? id : `ANJ-${id}`)
         .single();
       
-      if (altOrder) {
-        order = altOrder;
-        orderError = null;
+      if (prefixedOrder) {
+        order = prefixedOrder;
+      } else {
+        // 3. Try without prefix (just in case the DB has plain IDs)
+        const cleanId = id.replace('ANJ-', '');
+        const { data: cleanOrder } = await supabase
+          .from('orders')
+          .select('*, users(name)')
+          .eq('id', cleanId)
+          .single();
+        
+        if (cleanOrder) {
+          order = cleanOrder;
+        }
       }
     }
 
-    if (orderError || !order) {
+    if (!order) {
       return NextResponse.json({ error: 'Order not found' }, { status: 404 });
     }
 
