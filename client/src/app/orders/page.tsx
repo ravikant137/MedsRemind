@@ -120,13 +120,17 @@ export default function MyOrders() {
                          </span>
                        </div>
                        <p className="text-4xl font-black text-slate-900 tracking-tight">₹{order.total_amount.toFixed(2)}</p>
-                       <div className="flex items-center gap-4 mt-3">
-                         <span className="flex items-center gap-1.5 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                           <Clock className="w-3.5 h-3.5" /> {new Date(order.created_at + ' UTC').toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
-                         </span>
-                         <span className="w-1 h-1 bg-slate-200 rounded-full"></span>
-                         <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{order.items?.length || 0} {order.items?.length === 1 ? 'Item' : 'Items'}</span>
-                       </div>
+                        <div className="flex flex-wrap items-center gap-4 mt-3">
+                          <span className="flex items-center gap-1.5 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                            <Clock className="w-3.5 h-3.5" /> {new Date(order.created_at + ' UTC').toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                          </span>
+                          <span className="w-1 h-1 bg-slate-200 rounded-full"></span>
+                          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{order.items?.length || 0} {order.items?.length === 1 ? 'Item' : 'Items'}</span>
+                          <span className="w-1 h-1 bg-slate-200 rounded-full"></span>
+                          <span className={`text-[10px] font-black uppercase tracking-widest ${order.status === 'CONFIRMED' ? 'text-green-600' : 'text-slate-500'}`}>
+                            {order.status === 'CONFIRMED' ? '✓ Paid via UPI' : '• Cash on Delivery'}
+                          </span>
+                        </div>
                      </div>
                   </div>
                   

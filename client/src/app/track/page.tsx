@@ -380,8 +380,11 @@ function OrderTrackingContent() {
                    <div className="p-8 bg-slate-900 text-white rounded-[3rem] shadow-2xl mt-6">
                       <div className="flex justify-between items-end">
                          <div>
-                            <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Grand Total</p>
+                            <p className="text-xs font-black text-white/50 uppercase tracking-widest mb-2">Grand Total</p>
                             <p className="text-5xl font-black text-green-500">₹{Number(trackingData.total_amount).toFixed(2)}</p>
+                            <p className={`text-[10px] font-black uppercase tracking-widest mt-2 ${trackingData.status === 'PAYMENT SUCCESS' ? 'text-green-400' : 'text-slate-400'}`}>
+                               {trackingData.status === 'PAYMENT SUCCESS' ? '✓ Paid via UPI' : '• Cash on Delivery (COD)'}
+                            </p>
                          </div>
                          <ShieldCheck className="w-12 h-12 text-white/20" />
                       </div>
