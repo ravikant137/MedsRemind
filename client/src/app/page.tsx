@@ -41,7 +41,10 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    if (user?.role === 'ADMIN') {
+    // Check if user is admin AND they didn't just click "Exit to Site"
+    const isExiting = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('exit') === 'true';
+    
+    if (user?.role === 'ADMIN' && !isExiting) {
       router.push('/admin');
     }
   }, [user, router]);

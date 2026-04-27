@@ -16,7 +16,7 @@ import Logo from '@/components/Logo';
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('Dashboard');
   const [timeRange, setTimeRange] = useState('ALL');
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(true);
   const [isHovered, setIsHovered] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [stats, setStats] = useState({ 
@@ -755,7 +755,7 @@ export default function AdminDashboard() {
         </nav>
 
         <div className="pt-8 border-t border-white/5 space-y-4">
-          <Link href="/" className={`w-full flex items-center ${(isCollapsed && !isHovered) && !isMobileMenuOpen ? 'justify-center' : 'gap-5'} px-6 py-4 rounded-2xl text-slate-400 hover:text-white hover:bg-white/5 transition-all`} title={(isCollapsed && !isHovered) ? 'Exit' : ''}>
+          <Link href="/?exit=true" className={`w-full flex items-center ${(isCollapsed && !isHovered) && !isMobileMenuOpen ? 'justify-center' : 'gap-5'} px-6 py-4 rounded-2xl text-slate-400 hover:text-white hover:bg-white/5 transition-all`} title={(isCollapsed && !isHovered) ? 'Exit' : ''}>
              <ArrowLeft className="w-6 h-6 flex-shrink-0" />
              {(!((isCollapsed && !isHovered)) || isMobileMenuOpen) && <span className="font-black tracking-wide">Exit to Site</span>}
           </Link>
