@@ -1,13 +1,17 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { Download, X, Share } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const InstallPrompt = () => {
+  const pathname = usePathname();
   const [show, setShow] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [isIOS, setIsIOS] = useState(false);
+
+  if (pathname?.startsWith('/admin')) return null;
 
   useEffect(() => {
     // Detect iOS

@@ -19,16 +19,11 @@ export const metadata: Metadata = {
   description: "Order genuine medicines online from Anjaneya Pharmacy. Fast delivery within 60 minutes.",
 };
 
-import { usePathname } from "next/navigation";
-
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const pathname = usePathname();
-  const isAdminPage = pathname?.startsWith('/admin');
-
   return (
     <html lang="en" className={`${inter.variable} h-full antialiased scroll-smooth`}>
       <head>
@@ -43,13 +38,13 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col bg-[#f5f7fa] overscroll-none overflow-x-hidden selection:bg-green-100" style={{ fontFamily: "'Inter', sans-serif", touchAction: 'pan-y' }}>
         <AuthProvider>
-          {!isAdminPage && <Navbar />}
-          <main className={`flex-1 ${isAdminPage ? 'pb-0' : 'pb-20 md:pb-0'}`}>
+          <Navbar />
+          <main className="flex-1 pb-20 md:pb-0">
             {children}
           </main>
-          {!isAdminPage && <BottomNav />}
-          {!isAdminPage && <InstallPrompt />}
-          {!isAdminPage && <Footer />}
+          <BottomNav />
+          <InstallPrompt />
+          <Footer />
         </AuthProvider>
       </body>
     </html>

@@ -10,7 +10,7 @@ const BottomNav = () => {
   const pathname = usePathname();
   const { user } = useAuth();
 
-  if (!user) return null;
+  if (!user || pathname?.startsWith('/admin')) return null;
 
   const navItems = [
     { name: "Home", href: "/dashboard", icon: Home },

@@ -79,7 +79,7 @@ export default function Navbar() {
     { name: 'Contact Us', href: '/contact' },
   ];
 
-  if (pathname === '/login' || pathname === '/signup') return null;
+  if (pathname === '/login' || pathname === '/signup' || pathname?.startsWith('/admin')) return null;
 
   return (
     <header className="w-full sticky top-0 z-50 bg-white">
