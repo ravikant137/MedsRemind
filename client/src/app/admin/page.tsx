@@ -85,11 +85,12 @@ export default function AdminDashboard() {
       setNotifCount(unread);
 
       if (activeTab === 'Dashboard' || activeTab === 'Analytics') {
+        const statsRange = activeTab === 'Dashboard' ? 'ALL' : timeRange;
         const [statsRes, ordersRes] = await Promise.all([
-          axios.get(`${API_URL}/api/admin/stats?range=${timeRange}`, config),
+          axios.get(`${API_URL}/api/admin/stats?range=${statsRange}`, config),
           axios.get(`${API_URL}/api/admin/orders`, config)
         ]);
-        setStats(statsRes.data || { revenue: 0, orders: 0, users: 0, medicines: 0, categoryDistribution: {} });
+        setStats(statsRes.data || { revenue: 0, orders: 0, users: 0, medicines: 0, categoryDistribution: {}, totalDiscounts: 0 });
         setOrders(ordersRes.data || []);
       } else if (activeTab === 'Inventory') {
         const res = await axios.get(`${API_URL}/api/medicines`);
