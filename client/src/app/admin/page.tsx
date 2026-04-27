@@ -34,6 +34,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [clearingNotifs, setClearingNotifs] = useState(false);
   const [discountConfig, setDiscountConfig] = useState({ enabled: false, percentage: 0, message: '' });
   const [savingDiscount, setSavingDiscount] = useState(false);
   const [search, setSearch] = useState('');
@@ -873,12 +874,14 @@ export default function AdminDashboard() {
                       exit={{ opacity: 0, y: 10, scale: 0.95 }}
                       className="absolute right-0 mt-4 w-[400px] bg-white rounded-[2rem] shadow-2xl border border-slate-100 z-[110] overflow-hidden"
                     >
-                      <div className="p-6 border-b border-slate-50 flex items-center justify-between bg-slate-50/50">
+                      <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                         <h3 className="font-black text-slate-900 uppercase tracking-widest text-[10px]">Recent Alerts</h3>
                         {notifCount > 0 && (
                           <button 
+                            disabled={clearingNotifs}
                             onClick={async () => {
                               try {
+                                setClearingNotifs(true);
                                 const token = localStorage.getItem('token');
                                 if (token) {
                                   await axios.delete(`${API_URL}/api/notifications`, {
@@ -889,15 +892,17 @@ export default function AdminDashboard() {
                                 }
                               } catch (e) {
                                 console.error('Failed to clear notifications:', e);
+                              } finally {
+                                setClearingNotifs(false);
                               }
                             }}
-                            className="text-[10px] font-black text-green-600 hover:underline uppercase tracking-widest"
+                            className="text-[10px] font-black text-green-600 hover:text-green-700 uppercase tracking-widest flex items-center gap-2 disabled:opacity-50"
                           >
-                            Clear All
+                            {clearingNotifs ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Clear All'}
                           </button>
                         )}
                       </div>
-                      <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
+                      <div className="max-h-[450px] overflow-y-auto custom-scrollbar no-scrollbar">
                         {notifications.length > 0 ? (
                           notifications.slice(0, 10).map((n) => (
                             <div 
