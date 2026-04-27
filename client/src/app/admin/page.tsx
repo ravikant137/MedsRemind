@@ -350,11 +350,11 @@ export default function AdminDashboard() {
                          {/* Order Identifier */}
                          <div className="flex items-center gap-6 w-full md:w-auto">
                             <div className="relative">
-                               <div className={`w-20 h-20 rounded-[1.8rem] flex flex-col items-center justify-center shadow-lg transition-transform group-hover:scale-105 duration-300 ${
-                                 order.is_emergency ? 'bg-red-600 text-white shadow-red-200' : 'bg-slate-900 text-white shadow-slate-200'
+                               <div className={`px-5 py-3 rounded-2xl flex items-center gap-3 shadow-sm transition-transform group-hover:scale-105 duration-300 ${
+                                 order.is_emergency ? 'bg-red-600 text-white shadow-red-100' : 'bg-slate-900 text-white shadow-slate-200'
                                }`}>
-                                  <span className="text-[10px] font-black opacity-60 uppercase tracking-tighter">Order</span>
-                                  <span className="text-xl font-black">#{order.id.toString().replace('ANJ-', '')}</span>
+                                  <span className="text-[9px] font-black opacity-60 uppercase tracking-widest border-r border-white/20 pr-3">Order</span>
+                                  <span className="text-sm font-black tracking-tight">#{order.id.toString().replace('ANJ-', '')}</span>
                                </div>
                                {order.is_emergency === 1 && (
                                  <div className="absolute -top-3 -right-3 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-md">
@@ -454,23 +454,41 @@ export default function AdminDashboard() {
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
              <div className="bg-white rounded-[3rem] p-10 border border-slate-100 shadow-xl overflow-hidden">
                 <h3 className="text-2xl font-black mb-10">User Directory</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                   {customers.map((user: any) => (
-                     <div key={user.id} className="p-6 bg-slate-50 rounded-3xl flex items-center justify-between border border-transparent hover:border-green-200 transition-all">
-                        <div className="flex items-center gap-5">
-                           <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-sm text-2xl">👤</div>
-                           <div>
-                              <p className="font-black text-slate-900">{user.name}</p>
-                              <p className="text-xs text-slate-500 font-medium">{user.email}</p>
-                              <p className="text-[10px] text-green-600 font-black uppercase tracking-widest mt-1">{user.role}</p>
-                           </div>
-                        </div>
-                        <div className="text-right">
-                           <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Joined</p>
-                           <p className="font-bold text-slate-600">{new Date(user.created_at).toLocaleDateString()}</p>
-                        </div>
-                     </div>
-                   ))}
+                <div className="grid grid-cols-1 gap-6">
+                    {customers.map((user: any) => (
+                      <div key={user.id} className="group p-6 bg-white rounded-[2rem] border border-slate-100 hover:border-green-200 hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300">
+                         <div className="flex flex-col sm:flex-row items-center sm:items-start justify-between gap-6">
+                            <div className="flex flex-col sm:flex-row items-center gap-6">
+                               <div className="w-20 h-20 bg-slate-50 rounded-[1.5rem] flex items-center justify-center shadow-inner relative group-hover:bg-green-50 transition-colors">
+                                  <span className="text-3xl">👤</span>
+                                  <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-md">
+                                     <div className={`w-3 h-3 rounded-full ${user.role === 'ADMIN' ? 'bg-blue-500' : 'bg-green-500'}`}></div>
+                                  </div>
+                               </div>
+                               <div className="text-center sm:text-left">
+                                  <p className="font-black text-xl text-slate-900 leading-tight mb-1">{user.name}</p>
+                                  <p className="text-xs text-slate-400 font-bold mb-3">{user.email}</p>
+                                  <div className="flex flex-wrap justify-center sm:justify-start gap-2">
+                                     <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${
+                                       user.role === 'ADMIN' ? 'bg-blue-100 text-blue-600' : 'bg-green-100 text-green-600'
+                                     }`}>
+                                       {user.role}
+                                     </span>
+                                     <span className="px-3 py-1 bg-slate-100 text-slate-500 rounded-full text-[9px] font-black uppercase tracking-widest">
+                                       Verified ✓
+                                     </span>
+                                  </div>
+                               </div>
+                            </div>
+                            <div className="flex flex-col items-center sm:items-end justify-center pt-4 sm:pt-0 border-t sm:border-t-0 border-slate-50 w-full sm:w-auto">
+                               <p className="text-[10px] text-slate-300 font-black uppercase tracking-[0.2em] mb-1">Joined Ecosystem</p>
+                               <p className="text-sm font-black text-slate-700 bg-slate-50 px-4 py-2 rounded-xl">
+                                 {new Date(user.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                               </p>
+                            </div>
+                         </div>
+                      </div>
+                    ))}
                 </div>
              </div>
           </motion.div>
@@ -834,7 +852,7 @@ export default function AdminDashboard() {
          </div>
        </aside>
 
-      <main className={`flex-1 ${isCollapsed ? 'lg:ml-24' : 'lg:ml-80'} p-6 md:p-12 transition-all duration-300 safe-area-pt`}>
+      <main className={`flex-1 ${isCollapsed ? 'lg:ml-24' : 'lg:ml-80'} p-6 md:p-12 pt-24 md:pt-12 transition-all duration-300 safe-area-pt`}>
         <header className="sticky top-0 z-[40] bg-slate-50/80 backdrop-blur-md -mx-6 md:-mx-12 px-6 md:px-12 py-6 mb-12 flex flex-col md:flex-row justify-between items-start md:items-center gap-8 border-b border-slate-100">
            <div>
               <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight">{activeTab}</h1>
