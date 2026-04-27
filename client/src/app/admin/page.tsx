@@ -833,7 +833,35 @@ export default function AdminDashboard() {
                       <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
                         {notifications.length > 0 ? (
                           notifications.slice(0, 10).map((n) => (
-                            <div key={n.id} className={`p-5 border-b border-slate-50 hover:bg-slate-50 transition-colors relative ${!n.read ? 'bg-green-50/30' : ''}`}>
+                            <div 
+                              key={n.id} 
+                              onClick={async () => {
+                                // 1. Extract Order ID if possible
+                                const orderMatch = n.message.match(/(ANJ-\d+|ORD-\d+|#ORD-\d+)/i);
+                                if (orderMatch) {
+                                  const orderId = orderMatch[0].replace('#', '');
+                                  setActiveTab('Orders');
+                                  setSearch(orderId);
+                                } else if (n.title.toLowerCase().includes('order')) {
+                                  setActiveTab('Orders');
+                                }
+                                
+                                // 2. Close dropdown
+                                setShowNotifDropdown(false);
+
+                                // 3. Mark this specific one as read (optional logic but good to have)
+                                if (!n.read) {
+                                  try {
+                                    const token = localStorage.getItem('token');
+                                    await axios.post(`${API_URL}/api/notifications/read`, {}, {
+                                      headers: { Authorization: `Bearer ${token}` }
+                                    });
+                                    setNotifCount(0); // For now just clear badge
+                                  } catch (e) {}
+                                }
+                              }}
+                              className={`p-5 border-b border-slate-50 hover:bg-slate-50 transition-colors relative cursor-pointer ${!n.read ? 'bg-green-50/30' : ''}`}
+                            >
                               {!n.read && <div className="absolute left-0 top-0 bottom-0 w-1 bg-green-600"></div>}
                               <div className="flex items-start gap-4">
                                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
